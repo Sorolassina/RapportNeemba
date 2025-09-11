@@ -38,8 +38,15 @@ def cleanup_expired_sessions():
         del _active_sessions[sid]
         print(f"DEBUG - Session expirée nettoyée: {sid}")
 
+# ------------------ Health Check ------------------
+@app.get("/health")
+@app.head("/health")
+async def health_check():
+    return {"status": "ok", "service": "nemba-report"}
+
 # ------------------ Web UI ------------------
 @app.get("/", response_class=HTMLResponse)
+@app.head("/")
 async def wizard(request: Request):
     # Nettoyer les sessions expirées
     cleanup_expired_sessions()
@@ -109,6 +116,7 @@ async def preview_excel_route(payload: dict = Body(...)):
 @app.post("/generate-reportlab")
 async def generate_reportlab_pdf(request: Request):
     sid = request.cookies.get("sid")
+    print(f"DEBUG - generate_reportlab_pdf appelée avec sid: {sid}")
     
     # Récupérer les données JSON du body de la requête
     try:

@@ -1,0 +1,355 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="wizard accordion" style="position: fixed; top: 70px; bottom: 50px; left: 20px; right: 20px; overflow-y: auto;">
+  
+  <div class="accordion-header-home" style="position: sticky; top: 0; z-index: 200;background: #f7f8fb;">
+    <h1>Configuration du Rapport de Formation</h1>
+    <p>Remplissez les informations ci-dessous pour générer votre rapport</p>
+  </div>
+  <!-- Step 1: Client -->
+  <div class="accordion-item">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+      <h2>1. Informations Client</h2>
+      <span class="accordion-icon">+</span>
+    </div>
+    <div class="accordion-content active">
+      <section class="card step" data-step="1">
+    <div class="grid-2">
+      <div class="field">
+        <label>Logo</label>
+        <input type="file" id="client_logo" accept="image/*">
+        <img id="client_logo_preview" class="preview" />
+      </div>
+      <div>
+        <div class="field"><label>Nom</label><input id="client_name" placeholder="Nom de l'entreprise"></div>
+        <div class="field"><label>Téléphone</label><input id="client_phone" placeholder="+225 ..."></div>
+        <div class="field"><label>Pays</label><input id="client_country" placeholder="Côte d'Ivoire"></div>
+        <div class="field"><label>Adresse</label><input id="client_address" placeholder="Adresse complète"></div>
+      </div>
+    </div>
+  </section>
+    </div>
+  </div>
+
+  <!-- Step 2: Machine -->
+  <div class="accordion-item">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+      <h2>2. Informations Machine</h2>
+      <span class="accordion-icon">+</span>
+    </div>
+    <div class="accordion-content">
+      <section class="card step" data-step="2">
+        <div class="grid-2">
+          <div class="field">
+            <label>Photo de la machine</label>
+            <input type="file" id="machine_photo" accept="image/*">
+            <img id="machine_photo_preview" class="preview" />
+          </div>
+          <div>
+            <div class="field"><label>Nom</label><input id="machine_name" placeholder="Nom de la machine"></div>
+            <div class="field"><label>Modèle</label><input id="machine_model" placeholder="Modèle de la machine"></div>
+            <div class="field"><label>Type</label><input id="machine_type" placeholder="Type de machine"></div>
+            <div class="field"><label>Numéro de série</label><input id="machine_serial" placeholder="Numéro de série"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Step 3: Formateur -->
+  <div class="accordion-item">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+      <h2>3. Informations Formateur</h2>
+      <span class="accordion-icon">+</span>
+    </div>
+    <div class="accordion-content">
+  <section class="card step" data-step="3">
+    <div class="grid-2">
+      <div class="field">
+        <label>Photo</label>
+        <input type="file" id="trainer_photo" accept="image/*">
+        <img id="trainer_photo_preview" class="preview" />
+      </div>
+      <div>
+        <div class="field"><label>Nom & Prénoms</label><input id="trainer_fullname" placeholder="Nom Prénom"></div>
+        <div class="field"><label>Contacts</label><input id="trainer_contacts" placeholder="Téléphone / Email"></div>
+        <div class="field"><label>Lieu</label><input id="trainer_place" placeholder="Lieu de la formation"></div>
+        <div class="field"><label>Nombre de participants</label><input id="participants_count" type="number" min="1" value="1"></div>
+        <div class="field">
+          <label>Période</label>
+          <div class="grid-2">
+            <input id="start_date" type="date">
+            <input id="end_date" type="date">
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+    </div>
+  </div>
+
+  <!-- Step 4: Sommaire -->
+  <div class="accordion-item">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+      <h2>4. Sommaire</h2>
+      <span class="accordion-icon">+</span>
+    </div>
+    <div class="accordion-content">
+  <section class="card step" data-step="4">
+      <div class="list-editor">
+          <label>Points du sommaire</label>
+          <div class="adder"><input id="summary_input" placeholder="Ajouter un point du sommaire"><button id="summary_add" class="btn small">+</button></div>
+        <ol id="summary_list"></ol>
+      </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Step 5: Objectifs -->
+  <div class="accordion-item">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+      <h2>5. Objectifs</h2>
+      <span class="accordion-icon">+</span>
+    </div>
+    <div class="accordion-content">
+      <section class="card step" data-step="5">
+      <div class="list-editor">
+          <label>Objectifs de la formation</label>
+        <div class="adder"><input id="objectives_input" placeholder="Ajouter un objectif"><button id="objectives_add" class="btn small">+</button></div>
+        <ul id="objectives_list"></ul>
+      </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Step 6: Planning -->
+  <div class="accordion-item">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+      <h2>6. Contenu & Planning</h2>
+      <span class="accordion-icon">+</span>
+    </div>
+    <div class="accordion-content">
+      <section class="card step" data-step="6">
+    
+    
+    <div class="adder stack" style="text-align: left;">
+      <label for="plan_task" style="width: 100%;">Tâche</label>
+      <textarea id="plan_task" rows="2" placeholder="Décrire la tâche..." style=" width: 100%;"></textarea>
+    
+      <div class="grid-2" style="width: 100%;">
+        <div class="field">
+          <label for="plan_start">Début</label>
+          <input id="plan_start" type="date">
+        </div>
+        <div class="field">
+          <label for="plan_end">Fin</label>
+          <input id="plan_end" type="date">
+        </div>
+      </div>
+    
+      <label for="plan_notes" style="width: 100%;">Notes</label>
+      <textarea id="plan_notes" rows="2" placeholder="Notes complémentaires" style="width: 100%;"></textarea>
+      <div>
+        <button id="plan_add" class="btn medium" >Ajouter</button>
+      </div>
+    </div>
+    <span>Apperçu</span>
+    <table class="plan" id="planning_table">
+      <thead><tr><th>Tâche</th><th>Début</th><th>Fin</th><th>Notes</th><th></th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </section>
+    </div>
+  </div>
+
+  <!-- Step 7: Évaluation -->
+  <div class="accordion-item">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+      <h2>7. Évaluation & Analyse</h2>
+      <span class="accordion-icon">+</span>
+    </div>
+    <div class="accordion-content">
+      <section class="card step" data-step="7">
+    <div class="field">
+      <label>Fichier Excel (ou CSV) des tests In/Out</label>
+      <input type="file" id="excel_file" accept=".xlsx,.xls,.csv">
+      <p class="hint">Colonnes attendues (souples) : Stagiaire | Test_In | Test_Out</p>
+      <div id="excel_preview" class="table-preview hidden">
+        <!-- Aperçu (10 premières lignes) inséré en JS -->
+      </div>
+    </div>
+    <div id="kpi_box" class="kpi-box hidden">
+      <div><strong>Moy. In</strong> <span id="kpi_in">—</span></div>
+      <div><strong>Moy. Out</strong> <span id="kpi_out">—</span></div>
+      <div><strong>Évolution</strong> <span id="kpi_evo">—</span></div>
+      <div><strong>Interprétation</strong> <span id="kpi_interp">—</span></div>
+    </div>
+    <div class="actions">
+      <button id="btn_analyze" class="btn">Analyser</button>
+    </div>
+  </section>
+    </div>
+  </div>
+
+  <!-- Step 8: Médiathèque -->
+  <div class="accordion-item">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+      <h2>8. Médiathèque</h2>
+      <span class="accordion-icon">+</span>
+    </div>
+    <div class="accordion-content">
+      <section class="card step" data-step="8">
+      <div class="field">
+          <label>Photos de la formation (multi)</label>
+        <input type="file" id="media_files" accept="image/*" multiple>
+          <p class="hint">Glissez-déposez les images pour les réorganiser</p>
+          <div id="media_gallery" class="gallery sortable"></div>
+        </div>
+        <div class="actions">
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Step 9: Appréciation Formateur -->
+  <div class="accordion-item">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+      <h2>9. Appréciation Formateur</h2>
+      <span class="accordion-icon">+</span>
+    </div>
+    <div class="accordion-content">
+      <section class="card step" data-step="9">
+        <div class="evaluation-sections">
+          <div class="evaluation-section">
+            <h3>Accueil</h3>
+            <div class="rating-selector">
+              <label>Note :</label>
+              <select id="app_accueil_rating" class="rating-select">
+                <option value="">Sélectionner une note</option>
+                <option value="passable">Passable</option>
+                <option value="bien">Bien</option>
+                <option value="assez-bien">Assez bien</option>
+                <option value="tres-bien">Très bien</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="evaluation-section">
+            <h3>Logement</h3>
+            <div class="rating-selector">
+              <label>Note :</label>
+              <select id="app_logement_rating" class="rating-select">
+                <option value="">Sélectionner une note</option>
+                <option value="passable">Passable</option>
+                <option value="bien">Bien</option>
+                <option value="assez-bien">Assez bien</option>
+                <option value="tres-bien">Très bien</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="evaluation-section">
+            <h3>Moyens mis à disposition</h3>
+            <div class="rating-selector">
+              <label>Note :</label>
+              <select id="app_moyens_rating" class="rating-select">
+                <option value="">Sélectionner une note</option>
+                <option value="passable">Passable</option>
+                <option value="bien">Bien</option>
+                <option value="assez-bien">Assez bien</option>
+                <option value="tres-bien">Très bien</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="evaluation-section">
+            <h3>Logistique & Transport</h3>
+            <div class="rating-selector">
+              <label>Note :</label>
+              <select id="app_logistique_rating" class="rating-select">
+                <option value="">Sélectionner une note</option>
+                <option value="passable">Passable</option>
+                <option value="bien">Bien</option>
+                <option value="assez-bien">Assez bien</option>
+                <option value="tres-bien">Très bien</option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="evaluation-section">
+            <h3>Déroulement général de la formation</h3>
+            <div class="rating-selector">
+              <label>Note :</label>
+              <select id="app_deroulement_rating" class="rating-select">
+                <option value="">Sélectionner une note</option>
+                <option value="passable">Passable</option>
+                <option value="bien">Bien</option>
+                <option value="assez-bien">Assez bien</option>
+                <option value="tres-bien">Très bien</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="actions">
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Step 10: Conclusion -->
+  <div class="accordion-item">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+      <h2>10. Conclusion</h2>
+      <span class="accordion-icon">+</span>
+      </div>
+    <div class="accordion-content">
+      <section class="card step" data-step="10">
+        <div class="conclusion-editor">
+          <label for="conclusion_text">Conclusion de la formation</label>
+          <textarea id="conclusion_text" rows="8" placeholder="Rédigez ici la conclusion générale de la formation, les points clés, les recommandations et les perspectives d'avenir..."></textarea>
+        </div>
+        <div class="actions">
+        </div>
+      </section>
+    </div>
+  </div>
+
+  <!-- Step 11: Émargements -->
+  <div class="accordion-item">
+    <div class="accordion-header" onclick="toggleAccordion(this)">
+      <h2>11. Émargements</h2>
+      <span class="accordion-icon">+</span>
+    </div>
+    <div class="accordion-content">
+      <section class="card step" data-step="11">
+        <div class="field">
+          <label>Images des émargements (multi)</label>
+          <input type="file" id="attendance_files" accept="image/*" multiple>
+          <p class="hint">Sélectionnez plusieurs images d'émargements</p>
+          <div id="attendance_gallery" class="gallery sortable"></div>
+        </div>
+    <div class="actions">
+      <button id="btn_generate" class="btn primary">Exporter PDF</button>
+    </div>
+  </section>
+</div>
+  </div>
+</div>
+
+<script>
+function toggleAccordion(header) {
+  const content = header.nextElementSibling;
+  const icon = header.querySelector('.accordion-icon');
+  
+  if (content.classList.contains('active')) {
+    content.classList.remove('active');
+    icon.textContent = '+';
+  } else {
+    content.classList.add('active');
+    icon.textContent = '-';
+  }
+}
+</script>
+
+{% endblock %}

@@ -1,0 +1,175 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- COUVERTURE -->
+<section class="page cover centered">
+  {% if client and client.logo_path %}<img class="logo" src="{{ client.logo_path }}">{% endif %}
+  <h1 class="title">RAPPORT DE FORMATION</h1>
+  <h2 class="subtitle">{{ trainer.fullname }} — {{ trainer.place }}</h2>
+  <p class="meta">Période : {{ trainer.start_date }} → {{ trainer.end_date }} | Participants : {{ trainer.participants_count }}</p>
+  {% if trainer and trainer.photo_path %}<img class="trainer-photo" src="{{ trainer.photo_path }}">{% endif %}
+</section>
+
+<!-- CLIENT -->
+<section class="page section">
+  <h2>Client</h2>
+  <div class="client-block">
+    <h3 class="client-name">{{ client.name }}</h3>
+    <p>
+      <strong>Téléphone :</strong> {{ client.phone }}<br>
+      <strong>Pays :</strong> {{ client.country }}<br>
+      <strong>Adresse :</strong> {{ client.address }}
+    </p>
+  </div>
+</section>
+
+<!-- SOMMAIRE -->
+<section class="page section">
+  <h2>Sommaire</h2>
+  <ol class="list-num">
+    {% for item in summary %}
+      <li>{{ item }}</li>
+    {% endfor %}
+  </ol>
+</section>
+
+<!-- OBJECTIFS -->
+<section class="page section">
+  <h2>Objectifs</h2>
+  <ul class="list-bullet">
+    {% for obj in objectives %}
+      <li>{{ obj }}</li>
+    {% endfor %}
+  </ul>
+</section>
+
+<!-- 1. CONTENU & PLANNING -->
+<section class="page section">
+  <h2>1. Contenu & Planning</h2>
+  <table class="plan tight">
+    <thead>
+      <tr><th>Tâche</th><th>Début</th><th>Fin</th><th>Notes</th></tr>
+    </thead>
+    <tbody>
+      {% for p in planning %}
+      <tr>
+        <td class="pre">{{ p.task }}</td>
+        <td>{{ p.start|default(p.when, true) }}</td>
+        <td>{{ p.end|default('', true) }}</td>
+        <td class="pre">{{ p.notes }}</td>
+      </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</section>
+
+<!-- 2. ÉVALUATION & ANALYSES -->
+<section class="page section">
+  <h2>2. Évaluation & Analyses</h2>
+
+  {% if charts and charts.bars %}<img class="chart" src="{{ charts.bars }}">{% endif %}
+  <p class="kpis">
+    Moyenne In : <strong>{{ kpi.moy_in }}</strong> — 
+    Moyenne Out : <strong>{{ kpi.moy_out }}</strong> — 
+    Évolution : <strong>{{ kpi.evolution }}</strong> pts ({{ '%+.1f'|format(kpi.evolution_pct) }}%) – {{ kpi.interpretation }}
+  </p>
+
+  <div class="grid-2 cols">
+    <div>
+      <h3>Top progressions</h3>
+      <ul class="list-compact">
+        {% for r in top_plus %}
+          <li>{{ r.stagiaire }} — {{ '%+.0f'|format(r.delta) }} ({{ r['in'] }} → {{ r['out'] }})</li>
+        {% endfor %}
+      </ul>
+    </div>
+    <div>
+      <h3>Cas à surveiller</h3>
+      <ul class="list-compact">
+        {% for r in top_moins %}
+          <li>{{ r.stagiaire }} — {{ '%+.0f'|format(r.delta) }} ({{ r['in'] }} → {{ r['out'] }})</li>
+        {% endfor %}
+      </ul>
+    </div>
+  </div>
+
+  {% if charts and charts.deltas %}<img class="chart" src="{{ charts.deltas }}">{% endif %}
+</section>
+
+<!-- 3. MÉDIATHÈQUE -->
+<section class="page section">
+  <h2>3. Médiathèque</h2>
+  <div class="gallery">
+    {% for m in media_paths %}<img src="{{ m }}"/>{% endfor %}
+  </div>
+</section>
+
+<!-- 4. APPRÉCIATION FORMATEUR -->
+<section class="page section">
+  <h2>4. Appréciation Formateur</h2>
+  
+  {% if appreciation.accueil %}
+  <div class="evaluation-item">
+    <h3>Accueil</h3>
+    <p><strong>{{ appreciation.accueil|title }}</strong></p>
+  </div>
+  {% endif %}
+  
+  {% if appreciation.logement %}
+  <div class="evaluation-item">
+    <h3>Logement</h3>
+    <p><strong>{{ appreciation.logement|title }}</strong></p>
+  </div>
+  {% endif %}
+  
+  {% if appreciation.moyens %}
+  <div class="evaluation-item">
+    <h3>Moyens mis à disposition</h3>
+    <p><strong>{{ appreciation.moyens|title }}</strong></p>
+  </div>
+  {% endif %}
+  
+  {% if appreciation.logistique %}
+  <div class="evaluation-item">
+    <h3>Logistique & Transport</h3>
+    <p><strong>{{ appreciation.logistique|title }}</strong></p>
+  </div>
+  {% endif %}
+  
+  {% if appreciation.deroulement %}
+  <div class="evaluation-item">
+    <h3>Déroulement général de la formation</h3>
+    <p><strong>{{ appreciation.deroulement|title }}</strong></p>
+  </div>
+  {% endif %}
+</section>
+
+<!-- CONCLUSION -->
+<section class="page section">
+  <h2>Conclusion</h2>
+  {% if conclusion %}
+    <div class="conclusion-text">
+      {{ conclusion|replace('\n', '<br>')|safe }}
+    </div>
+  {% endif %}
+</section>
+
+<!-- ÉMARGEMENTS -->
+<section class="page section">
+  <h2>Émargements</h2>
+  {% if attendance_images %}
+    <div class="gallery">
+      {% for img in attendance_images %}
+        <img class="attendance" src="{{ img }}"/>
+      {% endfor %}
+    </div>
+  {% endif %}
+</section>
+
+<!-- MERCI -->
+<section class="page section centered">
+  <h2>Merci</h2>
+  <p>Nous vous remercions pour votre confiance. NEMBA GROUP – Côte d'Ivoire.</p>
+</section>
+
+{% endblock %}

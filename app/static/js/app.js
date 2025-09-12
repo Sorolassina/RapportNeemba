@@ -645,11 +645,30 @@ async function generatePdf(){
     }
     
     console.log('DEBUG - PDF généré avec succès');
+    
+    // Récupérer le nom du fichier depuis les headers de la réponse
+    const contentDisposition = res.headers.get('content-disposition');
+    let filename = 'rapport_nemba.pdf'; // nom par défaut
+    console.log('DEBUG - Content-Disposition header:', contentDisposition);
+    
+    if (contentDisposition) {
+      const filenameMatch = contentDisposition.match(/filename="?([^"]+)"?/);
+      console.log('DEBUG - Regex match result:', filenameMatch);
+      if (filenameMatch) {
+        filename = filenameMatch[1];
+        console.log('DEBUG - Nom du fichier récupéré:', filename);
+      } else {
+        console.log('DEBUG - Aucun nom de fichier trouvé dans le header');
+      }
+    } else {
+      console.log('DEBUG - Pas de header Content-Disposition trouvé');
+    }
+    
     const blob = await res.blob();
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a'); 
     a.href = url; 
-    a.download = 'rapport_nemba.pdf';
+    a.download = filename;
     document.body.appendChild(a); 
     a.click(); 
     a.remove();
@@ -700,6 +719,9 @@ function wireBasics(){
   
   const btnDeployment = q('#btn-deployment');
   if (btnDeployment) btnDeployment.addEventListener('click', openDeployment);
+  
+  const btnReset = q('#btn-reset');
+  if (btnReset) btnReset.addEventListener('click', openReset);
 }
 
 function openHelp(){
@@ -710,6 +732,14 @@ function openHelp(){
 function openDeployment(){
   // Ouvrir le guide de déploiement dans un nouvel onglet
   window.open('/deployment', '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+}
+
+function openReset(){
+  // Demander confirmation avant de réinitialiser
+  if (confirm('Êtes-vous sûr de vouloir réinitialiser la page ? Cela va recharger complètement l\'application et effacer toutes les données saisies.')) {
+    // Forcer un rechargement complet sans cache
+    window.location.reload(true);
+  }
 }
 
 function renderExcelPreview(containerSel, columns, rows, mapping, warning){

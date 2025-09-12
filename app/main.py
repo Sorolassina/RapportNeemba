@@ -100,11 +100,11 @@ async def deployment_page(request: Request):
     return templates.TemplateResponse("deployment.html", {"request": request})
 
 # ------------------ Génération PDF ------------------
-@app.post("/generate")
+"""@app.post("/generate")
 async def generate(request: Request):
     sid = request.cookies.get("sid")
     pdf_path = render_pdf("report.html", sid)
-    return FileResponse(pdf_path, media_type="application/pdf", filename="rapport_nemba.pdf")
+    return FileResponse(pdf_path, media_type="application/pdf", filename="rapport_nemba.pdf")"""
 
 from fastapi.responses import JSONResponse
 from fastapi import Body
@@ -157,7 +157,12 @@ async def generate_reportlab_pdf(request: Request):
             
         # Extraire le nom du fichier du chemin complet
         filename = os.path.basename(out)
-        return FileResponse(out, media_type="application/pdf", filename=filename)
+        print(f"DEBUG - Nom du fichier généré: {filename}")
+        
+        # Créer la réponse avec le bon header Content-Disposition
+        response = FileResponse(out, media_type="application/pdf", filename=filename)
+        response.headers["Content-Disposition"] = f'attachment; filename="{filename}"'
+        return response
         
     except Exception as e:
         print(f"DEBUG - ERREUR dans main.py: {e}")

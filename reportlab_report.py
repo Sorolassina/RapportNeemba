@@ -326,7 +326,7 @@ def _draw_header_footer_text(c: canvas.Canvas, page_num=None, text_top="Rapport 
 def _brand_header(c: canvas.Canvas, ctx: dict, metrics: dict, brand_size=22,label="Neemba Academy"):
     """Dessine logos gauche/droite + 'Neemba Academy' + 3 pastilles (paysage)."""
     W, H = c._pagesize
-    left_src  = ctx.get("cover", {}).get("logo_left_path") or "/static/img/branding/nemba_logo.jpg"
+    left_src  = ctx.get("cover", {}).get("logo_left_path") or "/static/img/branding/nemba_logo.png"
     right_src = ctx.get("cover", {}).get("logo_right_path") or ctx.get("client", {}).get("logo_path") or "/static/img/branding/nemba_logo.jpg"
     session_dir = os.path.join(ROOT, ctx.get("_sid","_"))
     left_logo  = _resolve_image_for_reportlab(left_src,  session_dir)

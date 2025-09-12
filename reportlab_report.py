@@ -2589,5 +2589,41 @@ def generate_reportlab(sid: str) -> str:
     out_pdf = os.path.join(session_dir, filename)
     print(f"DEBUG - Nom du fichier généré: {filename}")
     print(f"DEBUG - Chemin complet: {out_pdf}")
-    NembaReportLab(sid, out_pdf).build()
+    
+    try:
+        print(f"DEBUG - Début de la génération du PDF...")
+        
+        # Vérifier que les fichiers d'images existent
+        print(f"DEBUG - Vérification des fichiers d'images...")
+        logo_path = ctx.get("client", {}).get("logo_path")
+        if logo_path:
+            disk_path = _web_to_disk(logo_path)
+            print(f"DEBUG - Logo path: {logo_path} -> {disk_path}, existe: {os.path.exists(disk_path)}")
+        
+        machine_photo = ctx.get("machine", {}).get("photo_path")
+        if machine_photo:
+            disk_path = _web_to_disk(machine_photo)
+            print(f"DEBUG - Machine photo: {machine_photo} -> {disk_path}, existe: {os.path.exists(disk_path)}")
+        
+        trainer_photo = ctx.get("trainer", {}).get("photo_path")
+        if trainer_photo:
+            disk_path = _web_to_disk(trainer_photo)
+            print(f"DEBUG - Trainer photo: {trainer_photo} -> {disk_path}, existe: {os.path.exists(disk_path)}")
+        
+        NembaReportLab(sid, out_pdf).build()
+        print(f"DEBUG - PDF généré avec succès!")
+        
+        # Vérifier que le fichier existe
+        if os.path.exists(out_pdf):
+            file_size = os.path.getsize(out_pdf)
+            print(f"DEBUG - Fichier PDF créé: {out_pdf}, taille: {file_size} bytes")
+        else:
+            print(f"DEBUG - ERREUR: Fichier PDF non créé!")
+            
+    except Exception as e:
+        print(f"DEBUG - ERREUR lors de la génération du PDF: {e}")
+        import traceback
+        traceback.print_exc()
+        raise e
+    
     return out_pdf

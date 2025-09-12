@@ -137,10 +137,23 @@ async def generate_reportlab_pdf(request: Request):
     except Exception as e:
         print(f"Erreur lors de la récupération des données: {e}")
     
-    out = generate_reportlab(sid)
-    # Extraire le nom du fichier du chemin complet
-    filename = os.path.basename(out)
-    return FileResponse(out, media_type="application/pdf", filename=filename)
+    try:
+        print(f"DEBUG - Début génération PDF dans main.py...")
+        out = generate_reportlab(sid)
+        print(f"DEBUG - PDF généré avec succès dans main.py: {out}")
+        
+        if not out:
+            return JSONResponse({"error": "Erreur lors de la génération du PDF"}, status_code=500)
+            
+        # Extraire le nom du fichier du chemin complet
+        filename = os.path.basename(out)
+        return FileResponse(out, media_type="application/pdf", filename=filename)
+        
+    except Exception as e:
+        print(f"DEBUG - ERREUR dans main.py: {e}")
+        import traceback
+        traceback.print_exc()
+        return JSONResponse({"error": f"Erreur lors de la génération du PDF: {str(e)}"}, status_code=500)
 
 
 if __name__ == "__main__":

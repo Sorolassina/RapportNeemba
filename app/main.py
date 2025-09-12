@@ -89,6 +89,11 @@ async def preview(request: Request):
     ctx = with_defaults(ctx)  # <-- important
     return templates.TemplateResponse("report.html", {"request": request, **ctx})
 
+# ------------------ Mode d'emploi ------------------
+@app.get("/help", response_class=HTMLResponse)
+async def help_page(request: Request):
+    return templates.TemplateResponse("help.html", {"request": request})
+
 # ------------------ Génération PDF ------------------
 @app.post("/generate")
 async def generate(request: Request):

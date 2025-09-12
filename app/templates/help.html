@@ -1,0 +1,495 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="help-container">
+    <div class="help-header">
+        <h1>📋 Mode d'emploi - NEMBA Report Generator</h1>
+        <div class="help-nav">
+            <a href="/" class="btn secondary">← Retour au wizard</a>
+            <button onclick="window.print()" class="btn secondary">🖨️ Imprimer</button>
+        </div>
+    </div>
+    
+    <div class="help-content">
+        <div class="info-box">
+            <strong>🎯 Objectif :</strong> Ce guide vous accompagne dans l'utilisation du générateur de rapports de formation NEMBA. Vous apprendrez à créer des rapports PDF professionnels étape par étape.
+        </div>
+
+        <h2>🚀 Démarrage rapide</h2>
+        
+        <div class="step-box">
+            <span class="step-number">1</span>
+            <div class="step-content">
+                <strong>Accédez à l'application</strong><br>
+                Ouvrez votre navigateur et connectez-vous à l'URL fournie par votre administrateur système.
+            </div>
+        </div>
+
+        <div class="step-box">
+            <span class="step-number">2</span>
+            <div class="step-content">
+                <strong>Saisissez l'intitulé de la formation</strong><br>
+                En haut de la page, renseignez le titre de votre formation (ex: "Formation sur l'utilisation de la machine XYZ").
+            </div>
+        </div>
+
+        <div class="step-box">
+            <span class="step-number">3</span>
+            <div class="step-content">
+                <strong>Remplissez les informations</strong><br>
+                Suivez les étapes dans l'ordre en cliquant sur chaque accordéon pour déplier les sections.
+            </div>
+        </div>
+
+        <div class="step-box">
+            <span class="step-number">4</span>
+            <div class="step-content">
+                <strong>Générez votre rapport</strong><br>
+                Cliquez sur le bouton "Générer le Rapport PDF" en bas de page pour télécharger votre rapport.
+            </div>
+        </div>
+
+        <h2>📝 Guide détaillé par section</h2>
+
+        <div class="section-group">
+            <h3>1. Informations Client</h3>
+            <div class="step-box">
+                <div class="step-content">
+                    <strong>Logo :</strong> Uploadez le logo de l'entreprise cliente (formats acceptés : JPG, PNG, SVG)<br>
+                    <strong>Nom :</strong> Nom de l'entreprise<br>
+                    <strong>Téléphone :</strong> Numéro de contact<br>
+                    <strong>Pays :</strong> Pays de l'entreprise<br>
+                    <strong>Adresse :</strong> Adresse complète
+                </div>
+            </div>
+        </div>
+
+        <div class="section-group">
+            <h3>2. Informations Machine</h3>
+            <div class="step-box">
+                <div class="step-content">
+                    <strong>Photo de la machine :</strong> Image de l'équipement formé<br>
+                    <strong>Nom :</strong> Désignation de la machine<br>
+                    <strong>Modèle :</strong> Référence du modèle<br>
+                    <strong>Type :</strong> Type d'équipement<br>
+                    <strong>Numéro de série :</strong> Série de la machine
+                </div>
+            </div>
+        </div>
+
+        <div class="section-group">
+            <h3>3. Informations Formateur</h3>
+            <div class="step-box">
+                <div class="step-content">
+                    <strong>Photo :</strong> Photo du formateur<br>
+                    <strong>Nom & Prénoms :</strong> Identité complète du formateur<br>
+                    <strong>Contacts :</strong> Téléphone et/ou email<br>
+                    <strong>Lieu :</strong> Lieu de la formation<br>
+                    <strong>Nombre de participants :</strong> Nombre de stagiaires<br>
+                    <strong>Période :</strong> Dates de début et fin de formation
+                </div>
+            </div>
+        </div>
+
+        <div class="section-group">
+            <h3>4. Sommaire</h3>
+            <div class="step-box">
+                <div class="step-content">
+                    <strong>Points du sommaire :</strong> Ajoutez les différents chapitres de votre rapport<br>
+                    <em>Astuce :</em> Cliquez sur "+" après avoir saisi chaque point
+                </div>
+            </div>
+        </div>
+
+        <div class="section-group">
+            <h3>5. Objectifs</h3>
+            <div class="step-box">
+                <div class="step-content">
+                    <strong>Objectifs de la formation :</strong> Définissez les objectifs pédagogiques<br>
+                    <em>Format :</em> Utilisez des phrases courtes et précises
+                </div>
+            </div>
+        </div>
+
+        <div class="section-group">
+            <h3>6. Contenu & Planning</h3>
+            <div class="step-box">
+                <div class="step-content">
+                    <strong>Tâche :</strong> Description de l'activité<br>
+                    <strong>Début/Fin :</strong> Dates de réalisation<br>
+                    <strong>Notes :</strong> Commentaires complémentaires<br>
+                    <em>Astuce :</em> Ajoutez autant de tâches que nécessaire
+                </div>
+            </div>
+        </div>
+
+        <div class="section-group">
+            <h3>7. Évaluation & Analyse</h3>
+            <div class="step-box">
+                <div class="step-content">
+                    <strong>Fichier Excel/CSV :</strong> Uploadez vos données de tests<br>
+                    <strong>Colonnes attendues :</strong> Stagiaire | Test_In | Test_Out<br>
+                    <em>Important :</em> Le système analysera automatiquement les performances
+                </div>
+            </div>
+        </div>
+
+        <div class="warning-box">
+            <strong>⚠️ Attention :</strong> Si les colonnes de votre fichier Excel ne correspondent pas aux noms attendus, un message d'avertissement apparaîtra. Cela peut affecter la qualité des analyses.
+        </div>
+
+        <div class="section-group">
+            <h3>8. Médiathèque</h3>
+            <div class="step-box">
+                <div class="step-content">
+                    <strong>Photos de la formation :</strong> Uploadez plusieurs images<br>
+                    <em>Astuce :</em> Vous pouvez glisser-déposer les images pour les réorganiser
+                </div>
+            </div>
+        </div>
+
+        <div class="section-group">
+            <h3>9. Appréciation Formateur</h3>
+            <div class="step-box">
+                <div class="step-content">
+                    Évaluez différents aspects de la formation :<br>
+                    • Accueil<br>
+                    • Logement<br>
+                    • Moyens mis à disposition<br>
+                    • Logistique & Transport<br>
+                    • Déroulement général de la formation
+                </div>
+            </div>
+        </div>
+
+        <div class="section-group">
+            <h3>10. Conclusion</h3>
+            <div class="step-box">
+                <div class="step-content">
+                    <strong>Conclusion de la formation :</strong> Rédigez un bilan complet<br>
+                    <em>Conseil :</em> Incluez les points clés, recommandations et perspectives d'avenir
+                </div>
+            </div>
+        </div>
+
+        <div class="section-group">
+            <h3>11. Émargements</h3>
+            <div class="step-box">
+                <div class="step-content">
+                    <strong>Images des émargements :</strong> Uploadez les feuilles d'émargement<br>
+                    <em>Format :</em> Images claires et lisibles
+                </div>
+            </div>
+        </div>
+
+        <h2>📁 Formats de fichiers supportés</h2>
+        
+        <div class="file-types-grid">
+            <div class="file-type-card supported">
+                <strong>Images</strong><br>
+                JPG, PNG, SVG<br>
+                <em>Max: 10MB</em>
+            </div>
+            <div class="file-type-card supported">
+                <strong>Excel</strong><br>
+                .xlsx, .xls<br>
+                <em>Max: 50MB</em>
+            </div>
+            <div class="file-type-card supported">
+                <strong>CSV</strong><br>
+                .csv<br>
+                <em>Séparateur: ; ou ,</em>
+            </div>
+        </div>
+
+        <h2>💡 Conseils et bonnes pratiques</h2>
+
+        <div class="tip-box">
+            <strong>✅ Bonnes pratiques :</strong>
+            <ul>
+                <li>Préparez tous vos fichiers avant de commencer</li>
+                <li>Utilisez des images de bonne qualité (minimum 800x600px)</li>
+                <li>Nommez vos fichiers de manière claire</li>
+                <li>Sauvegardez régulièrement votre travail</li>
+                <li>Vérifiez l'aperçu avant de générer le PDF</li>
+            </ul>
+        </div>
+
+        <div class="warning-box">
+            <strong>❌ À éviter :</strong>
+            <ul>
+                <li>Fichiers corrompus ou trop volumineux</li>
+                <li>Images floues ou de mauvaise qualité</li>
+                <li>Données Excel avec des colonnes mal nommées</li>
+                <li>Oublier de remplir les champs obligatoires</li>
+            </ul>
+        </div>
+
+        <h2>🔧 Résolution de problèmes</h2>
+
+        <div class="troubleshooting-box">
+            <h3>Problèmes courants et solutions :</h3>
+            
+            <div class="problem-section">
+                <strong>🚫 Erreur d'upload :</strong>
+                <ul>
+                    <li>Vérifiez la taille du fichier (max 50MB)</li>
+                    <li>Assurez-vous que le format est supporté</li>
+                    <li>Vérifiez votre connexion internet</li>
+                </ul>
+            </div>
+
+            <div class="problem-section">
+                <strong>📊 Analyse Excel échouée :</strong>
+                <ul>
+                    <li>Vérifiez les noms des colonnes</li>
+                    <li>Assurez-vous que les données numériques sont bien formatées</li>
+                    <li>Évitez les cellules vides dans les colonnes importantes</li>
+                </ul>
+            </div>
+
+            <div class="problem-section">
+                <strong>🖼️ Images non affichées :</strong>
+                <ul>
+                    <li>Vérifiez le format (JPG, PNG, SVG uniquement)</li>
+                    <li>Assurez-vous que l'image n'est pas corrompue</li>
+                    <li>Réduisez la taille si nécessaire</li>
+                </ul>
+            </div>
+
+            <div class="problem-section">
+                <strong>📄 PDF non généré :</strong>
+                <ul>
+                    <li>Vérifiez que tous les champs obligatoires sont remplis</li>
+                    <li>Attendez la fin du processus (peut prendre quelques minutes)</li>
+                    <li>Vérifiez que votre navigateur autorise les téléchargements</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>📞 Support et contact</h2>
+
+        <div class="contact-box">
+            <strong>🆘 Besoin d'aide ?</strong><br><br>
+            Si vous rencontrez des difficultés ou avez des questions :<br><br>
+            <strong>📧 Email :</strong> support@nemba-group.com<br>
+            <strong>📞 Téléphone :</strong> +225 XX XX XX XX<br>
+            <strong>🕒 Horaires :</strong> Lundi - Vendredi, 8h00 - 17h00<br><br>
+            <em>N'oubliez pas de mentionner votre nom, votre entreprise et une description précise du problème rencontré.</em>
+        </div>
+
+        <div class="info-box">
+            <strong>📚 Ressources supplémentaires :</strong><br>
+            • Guide d'administration système<br>
+            • Modèles de fichiers Excel<br>
+            • Exemples de rapports générés<br>
+            • FAQ technique
+        </div>
+    </div>
+</div>
+
+<style>
+/* Styles spécifiques au mode d'emploi */
+.help-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.help-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 3px solid var(--brand);
+}
+
+.help-header h1 {
+    color: var(--brand);
+    margin: 0;
+    font-size: 2.2em;
+}
+
+.help-nav {
+    display: flex;
+    gap: 10px;
+}
+
+.help-content h2 {
+    color: var(--accent);
+    margin-top: 40px;
+    border-left: 4px solid var(--accent);
+    padding-left: 15px;
+    font-size: 1.5em;
+}
+
+.help-content h3 {
+    color: var(--ink);
+    margin-top: 30px;
+    font-size: 1.3em;
+}
+
+.step-box {
+    background: var(--bg);
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 8px;
+    border-left: 4px solid var(--brand);
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.step-number {
+    background: var(--brand);
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.step-content {
+    flex: 1;
+}
+
+.section-group {
+    margin: 25px 0;
+}
+
+.info-box {
+    background: #eef2ff;
+    border: 1px solid #3b82f6;
+    color: #1e40af;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.warning-box {
+    background: #fef2f2;
+    border: 1px solid #dc2626;
+    color: #dc2626;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.tip-box {
+    background: #f0fdf4;
+    border: 1px solid #22c55e;
+    color: #166534;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.troubleshooting-box {
+    background: #fef3cd;
+    border: 1px solid #f6d55c;
+    padding: 25px;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.problem-section {
+    margin: 20px 0;
+}
+
+.problem-section strong {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+.contact-box {
+    background: #e0f2fe;
+    border: 1px solid #0ea5e9;
+    padding: 25px;
+    border-radius: 8px;
+    margin: 20px 0;
+    text-align: center;
+}
+
+.file-types-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin: 25px 0;
+}
+
+.file-type-card {
+    background: var(--bg);
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    border: 2px solid var(--border);
+}
+
+.file-type-card.supported {
+    border-color: #22c55e;
+    background: #f0fdf4;
+}
+
+.file-type-card strong {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+.file-type-card em {
+    color: var(--muted);
+    font-size: 0.9em;
+}
+
+ul, ol {
+    padding-left: 25px;
+}
+
+li {
+    margin: 8px 0;
+}
+
+/* Styles d'impression */
+@media print {
+    .help-nav {
+        display: none;
+    }
+    
+    .help-container {
+        box-shadow: none;
+        padding: 0;
+    }
+    
+    .help-header {
+        border-bottom: 2px solid var(--brand);
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .help-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .help-nav {
+        justify-content: center;
+    }
+    
+    .file-types-grid {
+        grid-template-columns: 1fr;
+    }
+}
+</style>
+
+{% endblock %}

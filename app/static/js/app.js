@@ -694,6 +694,14 @@ function wireBasics(){
   
   const btnGenerate = q('#btn_generate');
   if (btnGenerate) btnGenerate.addEventListener('click', generatePdf);
+  
+  const btnHelp = q('#btn-help');
+  if (btnHelp) btnHelp.addEventListener('click', openHelp);
+}
+
+function openHelp(){
+  // Ouvrir le mode d'emploi dans un nouvel onglet
+  window.open('/help', '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
 }
 
 function renderExcelPreview(containerSel, columns, rows, mapping, warning){

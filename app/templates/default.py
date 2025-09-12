@@ -1,5 +1,6 @@
 from copy import deepcopy
 DEFAULT_CTX = {
+  "training_title": "",
   "client":{"logo_path":None,"name":"","phone":"","country":"","address":""},
   "machine":{"photo_path":None,"name":"","model":"","type":"","serial":""},
   "trainer":{"fullname":"","contacts":"","place":"","participants_count":0,"photo_path":None,"start_date":"","end_date":""},

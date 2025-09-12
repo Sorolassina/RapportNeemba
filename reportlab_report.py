@@ -537,11 +537,47 @@ class NembaReportLab:
         machine = self.ctx.get("machine", {})
         c, W, H = self.c, self.W, self.H
         title = self.ctx.get("cover",{}).get("title") or "Rapport  de  Formation"
-        subtitle = self.ctx.get("cover",{}).get("subtitle") or machine.get("model", "")or machine.get("name", "")
-        _draw_text(c, W/2.0, H - _pt(LND["title_y_mm"]), title,
-                   size=72, color="#3b424c", font=FONT_TITLE, center=True)
-        _draw_text(c, W/2.0, H - _pt(LND["subtitle_y_mm"]), subtitle,
-                   size=36, color="#000", font=FONT_TITLE, center=True)
+        training_title = self.ctx.get("training_title", "")
+        
+        # Titre principal
+        _draw_text(c, W/2.0, H - _pt(LND["title_y_mm"] -35), title,
+                       size=35, color="#3b424c",  font=FONT_TITLE, center=True)
+
+       
+        # Titre de la formation (si fourni)
+        if training_title:
+            # Ajustement de la taille de police selon la longueur du texte
+            text_length = len(training_title)
+            if text_length > 20:
+                # Texte long : retour à la ligne avec police dynamique
+                if text_length > 60:
+                    font_size = 40
+                elif text_length > 40:
+                    font_size = 45
+                elif text_length > 30:
+                    font_size = 50
+                else:
+                    font_size = 55
+                
+                # Diviser le texte en deux lignes approximativement égales
+                words = training_title.split()
+                mid_point = len(words) // 2
+                line1 = " ".join(words[:mid_point])
+                line2 = " ".join(words[mid_point:])
+                
+                # Dessiner les deux lignes
+                _draw_text(c, W/2.0, H - _pt(LND["title_y_mm"] - 10), line1,
+                    size=font_size, color="#fdcb18", font=FONT_TITLE, center=True)
+                _draw_text(c, W/2.0, H - _pt(LND["title_y_mm"] + 15), line2,
+                    size=font_size, color="#fdcb18", font=FONT_TITLE, center=True)
+            else:
+                # Texte court : une seule ligne avec taille maximale
+                font_size = 72
+                _draw_text(c, W/2.0, H - _pt(LND["title_y_mm"]), training_title,
+                    size=font_size, color="#fdcb18", font=FONT_TITLE, center=True)
+        
+            
+        
         c.showPage()
 
     # ------------- PAGES DE CONTENU (paysage) -------------
@@ -786,12 +822,37 @@ class NembaReportLab:
                     center_y = img_y - (img_h / 2)   # Centre vertical de l'image
                     
                     # Texte à afficher au centre de l'image
-                    machine = self.ctx.get("machine", {})
-                    text_to_display = machine.get("model", "") or machine.get("name", "")
+                    training_title = self.ctx.get("training_title", "")
+                    text_to_display = training_title
                     
-                    # Dessin du texte centré sur l'image
-                    _draw_text(c, center_x, center_y, text_to_display, 
-                             size=16, color="#0a0a0a", font=FONT_TITLE, center=True)
+                    # Ajustement de la taille de police selon la longueur du texte
+                    if text_to_display:
+                        text_length = len(text_to_display)
+                        if text_length > 20:
+                            # Texte long : retour à la ligne avec police dynamique
+                            if text_length > 50:
+                                font_size = 10
+                            elif text_length > 35:
+                                font_size = 11
+                            else:
+                                font_size = 12
+                            
+                            # Diviser le texte en deux lignes approximativement égales
+                            words = text_to_display.split()
+                            mid_point = len(words) // 2
+                            line1 = " ".join(words[:mid_point])
+                            line2 = " ".join(words[mid_point:])
+                            
+                            # Dessiner les deux lignes
+                            _draw_text(c, center_x, center_y + 5, line1,
+                                     size=font_size, color="#0a0a0a", font=FONT_TITLE, center=True)
+                            _draw_text(c, center_x, center_y - 8, line2,
+                                     size=font_size, color="#0a0a0a", font=FONT_TITLE, center=True)
+                        else:
+                            # Texte court : une seule ligne
+                            font_size = 16
+                            _draw_text(c, center_x, center_y, text_to_display, 
+                                     size=font_size, color="#0a0a0a", font=FONT_TITLE, center=True)
                     
                 except Exception as e:
                     print(f"Erreur lors du chargement de l'image IMG-Objectif: {e}")

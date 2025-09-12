@@ -5,6 +5,7 @@
 <section class="page cover centered">
   {% if client and client.logo_path %}<img class="logo" src="{{ client.logo_path }}">{% endif %}
   <h1 class="title">RAPPORT DE FORMATION</h1>
+  {% if training_title %}<h2 class="training-title">{{ training_title }}</h2>{% endif %}
   <h2 class="subtitle">{{ trainer.fullname }} — {{ trainer.place }}</h2>
   <p class="meta">Période : {{ trainer.start_date }} → {{ trainer.end_date }} | Participants : {{ trainer.participants_count }}</p>
   {% if trainer and trainer.photo_path %}<img class="trainer-photo" src="{{ trainer.photo_path }}">{% endif %}

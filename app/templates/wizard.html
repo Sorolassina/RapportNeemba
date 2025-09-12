@@ -4,11 +4,16 @@
 <div class="wizard accordion" style="position: fixed; top: 70px; bottom: 50px; left: 20px; right: 20px; overflow-y: auto;">
   
   <div class="accordion-header-home" style="position: sticky; top: 0; z-index: 200;background: #f7f8fb;">
-    <h1>Configuration du Rapport de Formation</h1>
+    <!-- <h1>Configuration du Rapport de Formation</h1> -->
     <p>Remplissez les informations ci-dessous pour générer votre rapport</p>
   </div>
   <!-- Step 1: Client -->
   <div class="accordion-item">
+    <!-- Intitulé de la formation -->
+    <div class="field" style="margin-top: 20px;">
+      <label for="training_title" style="font-weight: bold; font-size: 1.1em;">Intitulé de la formation</label>
+      <input id="training_title" placeholder="Ex: Formation sur l'utilisation de la machine XYZ" style="width: 100%; padding: 12px; font-size: 1.1em; border: 2px solid #ddd; border-radius: 8px;">
+    </div>
     <div class="accordion-header" onclick="toggleAccordion(this)">
       <h2>1. Informations Client</h2>
       <span class="accordion-icon">+</span>
@@ -329,11 +334,17 @@
           <p class="hint">Sélectionnez plusieurs images d'émargements</p>
           <div id="attendance_gallery" class="gallery sortable"></div>
         </div>
-    <div class="actions">
-      <button id="btn_generate" class="btn primary">Exporter PDF</button>
+        <div class="actions">
     </div>
   </section>
 </div>
+  </div>
+
+  <!-- Bouton de génération du rapport -->
+  <div class="generate-section" style="position: sticky; bottom: 0; background: #f7f8fb; padding: 10px; border-top: 2px solid #ddd; z-index: 100;">
+    <div class="actions" style="text-align: center;">
+      <button id="btn_generate" class="btn primary" style="font-size: 1em; padding: 10px 20px;">Générer le Rapport PDF</button>
+    </div>
   </div>
 </div>
 

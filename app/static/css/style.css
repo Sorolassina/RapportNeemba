@@ -379,6 +379,7 @@ textarea{
 
 /* --- Style "exact modèle" --- */
 .title{ text-transform: uppercase; letter-spacing:.06em; font-size: 28px; margin: 10px 0 6px; color: var(--ink); }
+.training-title{ font-size: 20px; color: var(--brand); margin: 8px 0 12px; font-weight: 600; font-style: italic; }
 .subtitle{ font-size: 18px; color: var(--ink); margin: 4px 0 6px; }
 .meta{ color: var(--muted); font-size: 14px; }
 

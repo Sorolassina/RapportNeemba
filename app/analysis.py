@@ -104,9 +104,24 @@ def preview_excel(excel_web_path: str, limit: int = 10) -> dict:
     df = _read_any(disk_path)
     df.columns = [c.strip() for c in df.columns]
     mapping = _detect_mapping(list(df.columns))
+    
+    # Vérifier si toutes les colonnes attendues sont trouvées
+    missing_columns = []
+    if not mapping.get("name"):
+        missing_columns.append("nom du stagiaire")
+    if not mapping.get("in"):
+        missing_columns.append("test d'entrée")
+    if not mapping.get("out"):
+        missing_columns.append("test de sortie")
+    
+    warning_message = None
+    if missing_columns:
+        warning_message = f"⚠️ Colonnes manquantes détectées : {', '.join(missing_columns)}. Cela peut affecter la qualité des analyses."
+    
     sample = df.head(limit).fillna("").astype(str)
     return {
         "columns": list(sample.columns),
         "rows": sample.to_dict(orient="records"),
-        "mapping": mapping
+        "mapping": mapping,
+        "warning": warning_message
     }

@@ -1,5 +1,6 @@
 /* State kept in memory for the current session (sid via cookie set by server). */
 const state = {
+  training_title: "",
   client: { name:"", phone:"", country:"", address:"", logo_path:null },
   machine: { name:"", model:"", type:"", serial:"", photo_path:null },
   trainer: { fullname:"", contacts:"", place:"", participants_count:1, photo_path:null, start_date:"", end_date:"" },
@@ -86,6 +87,12 @@ function wireLists(){
 
 /* --- Wire text inputs for real-time sync --- */
 function wireTextInputs(){
+  // Training title field
+  const trainingTitle = q('#training_title');
+  if (trainingTitle) trainingTitle.addEventListener('input', ()=> {
+    state.training_title = trainingTitle.value.trim();
+  });
+  
   // Client fields
   const clientName = q('#client_name');
   if (clientName) clientName.addEventListener('input', ()=> {
@@ -473,14 +480,14 @@ function wireUploads(){
         
         if(data.ok){
           console.log('DEBUG - Affichage prévisualisation avec', data.columns.length, 'colonnes et', data.rows.length, 'lignes');
-          renderExcelPreview('#excel_preview', data.columns, data.rows, data.mapping);
+          renderExcelPreview('#excel_preview', data.columns, data.rows, data.mapping, data.warning);
         }else{
           console.log('DEBUG - Erreur prévisualisation:', data.error);
-          renderExcelPreview('#excel_preview', [], [], null);
+          renderExcelPreview('#excel_preview', [], [], null, null);
         }
       }catch(err){
         console.error('DEBUG - Erreur lors de la prévisualisation:', err);
-        renderExcelPreview('#excel_preview', [], [], null);
+        renderExcelPreview('#excel_preview', [], [], null, null);
       }
     });
   }
@@ -489,6 +496,11 @@ function wireUploads(){
 /* --- Collect text inputs into state before analyze --- */
 function syncBasics(){
   console.log('DEBUG - Début syncBasics()');
+  
+  // Training title field
+  const trainingTitleEl = q('#training_title');
+  console.log('DEBUG - Élément training_title:', trainingTitleEl, 'Valeur:', trainingTitleEl?.value);
+  state.training_title = trainingTitleEl?.value?.trim() || '';
   
   // Client fields
   const clientNameEl = q('#client_name');
@@ -684,8 +696,8 @@ function wireBasics(){
   if (btnGenerate) btnGenerate.addEventListener('click', generatePdf);
 }
 
-function renderExcelPreview(containerSel, columns, rows, mapping){
-  console.log('DEBUG - renderExcelPreview appelée avec:', { containerSel, columns: columns?.length, rows: rows?.length, mapping });
+function renderExcelPreview(containerSel, columns, rows, mapping, warning){
+  console.log('DEBUG - renderExcelPreview appelée avec:', { containerSel, columns: columns?.length, rows: rows?.length, mapping, warning });
   
   const box = q(containerSel);
   if(!columns || columns.length === 0){
@@ -708,8 +720,16 @@ function renderExcelPreview(containerSel, columns, rows, mapping){
     if(parts.length) hint = `<div class="hint">Détection colonnes : ${parts.join(' • ')}</div>`;
   }
 
+  // Ajouter le message d'avertissement si présent
+  let warningHtml = '';
+  if(warning){
+    warningHtml = `<div class="warning-message" style="background: #fef2f2; border: 2px solid #dc2626; border-radius: 8px; padding: 12px; margin-bottom: 12px; color: #dc2626; font-weight: 600;">
+      <strong>⚠️ Attention :</strong> ${warning}
+    </div>`;
+  }
+
   console.log('DEBUG - Génération HTML prévisualisation avec', columns.length, 'colonnes et', rows.length, 'lignes');
-  box.innerHTML = hint + `<table>${thead}${tbody}</table>`;
+  box.innerHTML = warningHtml + hint + `<table>${thead}${tbody}</table>`;
   box.classList.remove('hidden');
   console.log('DEBUG - Prévisualisation affichée, classe hidden supprimée');
 }

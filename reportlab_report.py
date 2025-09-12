@@ -2593,6 +2593,12 @@ def generate_reportlab(sid: str) -> str:
     try:
         print(f"DEBUG - Début de la génération du PDF...")
         
+        # Vérifier la mémoire disponible
+        import psutil
+        memory_info = psutil.virtual_memory()
+        print(f"DEBUG - Mémoire disponible: {memory_info.available / 1024 / 1024:.1f} MB")
+        print(f"DEBUG - Mémoire utilisée: {memory_info.percent}%")
+        
         # Vérifier que les fichiers d'images existent
         print(f"DEBUG - Vérification des fichiers d'images...")
         logo_path = ctx.get("client", {}).get("logo_path")
@@ -2609,6 +2615,11 @@ def generate_reportlab(sid: str) -> str:
         if trainer_photo:
             disk_path = _web_to_disk(trainer_photo)
             print(f"DEBUG - Trainer photo: {trainer_photo} -> {disk_path}, existe: {os.path.exists(disk_path)}")
+        
+        # Forcer le garbage collection avant la génération
+        import gc
+        gc.collect()
+        print(f"DEBUG - Garbage collection effectué")
         
         NembaReportLab(sid, out_pdf).build()
         print(f"DEBUG - PDF généré avec succès!")

@@ -1,0 +1,579 @@
+{% extends "base.html" %}
+{% block content %}
+
+<div class="deployment-container">
+    <div class="deployment-header">
+        <h1>🚀 Guide de Déploiement - NEMBA Report Generator</h1>
+        <div class="deployment-nav">
+            <a href="/" class="btn secondary">← Retour au wizard</a>
+            <button onclick="window.print()" class="btn secondary">🖨️ Imprimer</button>
+        </div>
+    </div>
+    
+    <div class="deployment-content">
+        <div class="info-box">
+            <strong>🎯 Objectif :</strong> Ce guide vous accompagne dans le déploiement de l'application NEMBA Report Generator, que ce soit sur un serveur interne ou sur une plateforme cloud comme Render.
+        </div>
+
+        <h2>📋 Prérequis</h2>
+        
+        <div class="prerequisites-grid">
+            <div class="prereq-card">
+                <h3>💻 Serveur Interne</h3>
+                <ul>
+                    <li>Ubuntu 20.04+ / CentOS 8+ / Debian 11+</li>
+                    <li>Python 3.9+ (recommandé 3.11)</li>
+                    <li>RAM : 2GB minimum, 4GB recommandé</li>
+                    <li>CPU : 2 cœurs minimum</li>
+                    <li>Stockage : 10GB d'espace libre</li>
+                </ul>
+            </div>
+            
+            <div class="prereq-card">
+                <h3>☁️ Render (Cloud)</h3>
+                <ul>
+                    <li>Compte Render gratuit ou payant</li>
+                    <li>Repository Git (GitHub/GitLab)</li>
+                    <li>Domaine personnalisé (optionnel)</li>
+                    <li>Variables d'environnement</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>🏠 Déploiement Serveur Interne</h2>
+
+        <div class="deployment-section">
+            <h3>1. Installation des dépendances système</h3>
+            <div class="code-block">
+                <h4>Ubuntu/Debian :</h4>
+                <pre><code>sudo apt update
+sudo apt install python3.11 python3.11-venv python3.11-dev build-essential
+sudo apt install nginx apache2-utils</code></pre>
+                
+                <h4>CentOS/RHEL :</h4>
+                <pre><code>sudo yum install python311 python311-devel gcc gcc-c++ make
+sudo yum install nginx httpd-tools</code></pre>
+            </div>
+        </div>
+
+        <div class="deployment-section">
+            <h3>2. Configuration de l'application</h3>
+            <div class="step-box">
+                <span class="step-number">1</span>
+                <div class="step-content">
+                    <strong>Cloner le projet</strong><br>
+                    <code>cd /opt && sudo git clone [URL_REPO] nemba-report</code>
+                </div>
+            </div>
+            
+            <div class="step-box">
+                <span class="step-number">2</span>
+                <div class="step-content">
+                    <strong>Créer l'environnement virtuel</strong><br>
+                    <code>cd nemba-report && python3.11 -m venv venv</code>
+                </div>
+            </div>
+            
+            <div class="step-box">
+                <span class="step-number">3</span>
+                <div class="step-content">
+                    <strong>Installer les dépendances</strong><br>
+                    <code>source venv/bin/activate && pip install -r requirements.txt</code>
+                </div>
+            </div>
+        </div>
+
+        <div class="deployment-section">
+            <h3>3. Configuration Nginx + Gunicorn</h3>
+            <div class="code-block">
+                <h4>Service systemd :</h4>
+                <pre><code>sudo nano /etc/systemd/system/nemba-report.service</code></pre>
+                <pre><code>[Unit]
+Description=NEMBA Report Generator
+After=network.target
+
+[Service]
+Type=notify
+User=www-data
+Group=www-data
+WorkingDirectory=/opt/nemba-report
+Environment=PATH=/opt/nemba-report/venv/bin
+ExecStart=/opt/nemba-report/venv/bin/gunicorn --bind unix:/run/nemba-report.sock --workers 3 --worker-class uvicorn.workers.UvicornWorker app.main:app
+ExecReload=/bin/kill -s HUP $MAINPID
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target</code></pre>
+            </div>
+            
+            <div class="code-block">
+                <h4>Configuration Nginx :</h4>
+                <pre><code>sudo nano /etc/nginx/sites-available/nemba-report</code></pre>
+                <pre><code>server {
+    listen 80;
+    server_name votre-domaine.com;
+    
+    client_max_body_size 50M;
+    
+    location /static/ {
+        alias /opt/nemba-report/app/static/;
+        expires 1y;
+    }
+    
+    location / {
+        proxy_pass http://unix:/run/nemba-report.sock;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+    }
+}</code></pre>
+            </div>
+        </div>
+
+        <div class="deployment-section">
+            <h3>4. Activation et démarrage</h3>
+            <div class="code-block">
+                <pre><code># Activer le site Nginx
+sudo ln -s /etc/nginx/sites-available/nemba-report /etc/nginx/sites-enabled/
+sudo nginx -t
+sudo systemctl reload nginx
+
+# Démarrer le service
+sudo systemctl enable nemba-report
+sudo systemctl start nemba-report
+sudo systemctl status nemba-report</code></pre>
+            </div>
+        </div>
+
+        <h2>☁️ Déploiement sur Render</h2>
+
+        <div class="deployment-section">
+            <h3>1. Préparation du repository</h3>
+            <div class="step-box">
+                <span class="step-number">1</span>
+                <div class="step-content">
+                    <strong>Créer un fichier render.yaml</strong><br>
+                    Ajoutez ce fichier à la racine de votre projet :
+                </div>
+            </div>
+            
+            <div class="code-block">
+                <pre><code># render.yaml
+services:
+  - type: web
+    name: nemba-report
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0</code></pre>
+            </div>
+        </div>
+
+        <div class="deployment-section">
+            <h3>2. Configuration sur Render</h3>
+            <div class="step-box">
+                <span class="step-number">1</span>
+                <div class="step-content">
+                    <strong>Connecter votre repository</strong><br>
+                    • Allez sur <a href="https://render.com" target="_blank">render.com</a><br>
+                    • Cliquez sur "New +" → "Web Service"<br>
+                    • Connectez votre compte GitHub/GitLab
+                </div>
+            </div>
+            
+            <div class="step-box">
+                <span class="step-number">2</span>
+                <div class="step-content">
+                    <strong>Configurer le service</strong><br>
+                    • Repository : Sélectionnez votre repo<br>
+                    • Branch : main<br>
+                    • Root Directory : laissez vide<br>
+                    • Environment : Python 3
+                </div>
+            </div>
+            
+            <div class="step-box">
+                <span class="step-number">3</span>
+                <div class="step-content">
+                    <strong>Variables d'environnement</strong><br>
+                    • PORT : 10000 (automatique)<br>
+                    • PYTHON_VERSION : 3.11.0<br>
+                    • HOST : 0.0.0.0
+                </div>
+            </div>
+        </div>
+
+        <div class="deployment-section">
+            <h3>3. Commandes de build et démarrage</h3>
+            <div class="code-block">
+                <h4>Build Command :</h4>
+                <pre><code>pip install -r requirements.txt</code></pre>
+                
+                <h4>Start Command :</h4>
+                <pre><code>uvicorn app.main:app --host 0.0.0.0 --port $PORT</code></pre>
+            </div>
+        </div>
+
+        <h2>🔒 Configuration SSL/HTTPS</h2>
+
+        <div class="deployment-section">
+            <h3>Serveur Interne - Let's Encrypt</h3>
+            <div class="code-block">
+                <pre><code># Installation Certbot
+sudo apt install certbot python3-certbot-nginx
+
+# Génération du certificat
+sudo certbot --nginx -d votre-domaine.com
+
+# Renouvellement automatique
+sudo crontab -e
+# Ajouter : 0 12 * * * /usr/bin/certbot renew --quiet</code></pre>
+            </div>
+        </div>
+
+        <div class="deployment-section">
+            <h3>Render - SSL automatique</h3>
+            <div class="info-box">
+                <strong>✅ Avantage Render :</strong> Le SSL est automatiquement configuré pour tous les services web. Aucune configuration supplémentaire nécessaire !
+            </div>
+        </div>
+
+        <h2>📊 Monitoring et Maintenance</h2>
+
+        <div class="deployment-section">
+            <h3>Serveur Interne</h3>
+            <div class="code-block">
+                <h4>Vérifier le statut :</h4>
+                <pre><code>sudo systemctl status nemba-report
+sudo journalctl -u nemba-report -f</code></pre>
+                
+                <h4>Logs Nginx :</h4>
+                <pre><code>sudo tail -f /var/log/nginx/nemba-report_error.log
+sudo tail -f /var/log/nginx/nemba-report_access.log</code></pre>
+            </div>
+        </div>
+
+        <div class="deployment-section">
+            <h3>Render</h3>
+            <div class="info-box">
+                <strong>📈 Monitoring :</strong> Render fournit des métriques automatiques : CPU, RAM, requêtes, temps de réponse. Accessibles dans le dashboard.
+            </div>
+        </div>
+
+        <h2>🔧 Résolution de problèmes</h2>
+
+        <div class="troubleshooting-box">
+            <h3>Problèmes courants :</h3>
+            
+            <div class="problem-section">
+                <strong>🚫 Erreur 502 Bad Gateway :</strong>
+                <ul>
+                    <li>Vérifiez que le service nemba-report est démarré</li>
+                    <li>Contrôlez les permissions du socket Unix</li>
+                    <li>Vérifiez les logs : <code>sudo journalctl -u nemba-report</code></li>
+                </ul>
+            </div>
+
+            <div class="problem-section">
+                <strong>📁 Erreur d'upload :</strong>
+                <ul>
+                    <li>Vérifiez <code>client_max_body_size</code> dans Nginx</li>
+                    <li>Contrôlez les permissions du dossier uploads</li>
+                    <li>Serveur interne : <code>sudo chown -R www-data:www-data /var/lib/nemba-report</code></li>
+                </ul>
+            </div>
+
+            <div class="problem-section">
+                <strong>🐍 Erreur Python :</strong>
+                <ul>
+                    <li>Vérifiez la version Python (3.9+ requis)</li>
+                    <li>Réinstallez les dépendances : <code>pip install -r requirements.txt</code></li>
+                    <li>Vérifiez les variables d'environnement</li>
+                </ul>
+            </div>
+
+            <div class="problem-section">
+                <strong>☁️ Problèmes Render :</strong>
+                <ul>
+                    <li>Vérifiez les logs dans le dashboard Render</li>
+                    <li>Contrôlez les variables d'environnement</li>
+                    <li>Redéployez le service si nécessaire</li>
+                </ul>
+            </div>
+        </div>
+
+        <h2>📞 Support technique</h2>
+
+        <div class="contact-box">
+            <strong>🆘 Besoin d'aide pour le déploiement ?</strong><br><br>
+            <strong>📧 Email :</strong> admin@nemba-group.com<br>
+            <strong>📞 Téléphone :</strong> +225 XX XX XX XX<br>
+            <strong>🕒 Horaires :</strong> Lundi - Vendredi, 8h00 - 17h00<br><br>
+            <em>Préparez : logs d'erreur, configuration serveur, et description précise du problème.</em>
+        </div>
+
+        <div class="info-box">
+            <strong>📚 Ressources supplémentaires :</strong><br>
+            • <a href="https://docs.render.com" target="_blank">Documentation Render</a><br>
+            • <a href="https://nginx.org/en/docs/" target="_blank">Documentation Nginx</a><br>
+            • <a href="https://fastapi.tiangolo.com/deployment/" target="_blank">Déploiement FastAPI</a><br>
+            • Guide d'administration système complet
+        </div>
+    </div>
+</div>
+
+<style>
+/* Styles spécifiques au guide de déploiement */
+.deployment-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    background: white;
+    padding: 30px;
+    border-radius: 10px;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+}
+
+.deployment-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 30px;
+    padding-bottom: 20px;
+    border-bottom: 3px solid var(--brand);
+}
+
+.deployment-header h1 {
+    color: var(--brand);
+    margin: 0;
+    font-size: 2.2em;
+}
+
+.deployment-nav {
+    display: flex;
+    gap: 10px;
+}
+
+.deployment-content h2 {
+    color: var(--accent);
+    margin-top: 40px;
+    border-left: 4px solid var(--accent);
+    padding-left: 15px;
+    font-size: 1.5em;
+}
+
+.deployment-content h3 {
+    color: var(--ink);
+    margin-top: 30px;
+    font-size: 1.3em;
+}
+
+.deployment-content h4 {
+    color: var(--muted);
+    margin-top: 20px;
+    font-size: 1.1em;
+}
+
+.prerequisites-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 20px;
+    margin: 25px 0;
+}
+
+.prereq-card {
+    background: var(--bg);
+    padding: 20px;
+    border-radius: 8px;
+    border: 2px solid var(--border);
+}
+
+.prereq-card h3 {
+    margin-top: 0;
+    color: var(--brand);
+}
+
+.deployment-section {
+    margin: 30px 0;
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 8px;
+    border-left: 4px solid var(--accent);
+}
+
+.step-box {
+    background: var(--bg);
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 8px;
+    border-left: 4px solid var(--brand);
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+}
+
+.step-number {
+    background: var(--brand);
+    color: white;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    flex-shrink: 0;
+}
+
+.step-content {
+    flex: 1;
+}
+
+.code-block {
+    background: #2d3748;
+    color: #e2e8f0;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+    overflow-x: auto;
+}
+
+.code-block h4 {
+    color: #fdcb18;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.code-block pre {
+    margin: 0;
+    font-family: 'Courier New', monospace;
+    font-size: 14px;
+    line-height: 1.4;
+}
+
+.code-block code {
+    background: none;
+    padding: 0;
+    color: inherit;
+}
+
+.info-box {
+    background: #eef2ff;
+    border: 1px solid #3b82f6;
+    color: #1e40af;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.warning-box {
+    background: #fef2f2;
+    border: 1px solid #dc2626;
+    color: #dc2626;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.tip-box {
+    background: #f0fdf4;
+    border: 1px solid #22c55e;
+    color: #166534;
+    padding: 20px;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.troubleshooting-box {
+    background: #fef3cd;
+    border: 1px solid #f6d55c;
+    padding: 25px;
+    border-radius: 8px;
+    margin: 20px 0;
+}
+
+.problem-section {
+    margin: 20px 0;
+}
+
+.problem-section strong {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 1.1em;
+}
+
+.contact-box {
+    background: #e0f2fe;
+    border: 1px solid #0ea5e9;
+    padding: 25px;
+    border-radius: 8px;
+    margin: 20px 0;
+    text-align: center;
+}
+
+ul, ol {
+    padding-left: 25px;
+}
+
+li {
+    margin: 8px 0;
+}
+
+a {
+    color: var(--brand);
+    text-decoration: none;
+}
+
+a:hover {
+    text-decoration: underline;
+}
+
+/* Styles d'impression */
+@media print {
+    .deployment-nav {
+        display: none;
+    }
+    
+    .deployment-container {
+        box-shadow: none;
+        padding: 0;
+    }
+    
+    .deployment-header {
+        border-bottom: 2px solid var(--brand);
+    }
+    
+    .code-block {
+        background: #f5f5f5;
+        color: #333;
+        border: 1px solid #ddd;
+    }
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+    .deployment-header {
+        flex-direction: column;
+        gap: 15px;
+        text-align: center;
+    }
+    
+    .deployment-nav {
+        justify-content: center;
+    }
+    
+    .prerequisites-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .code-block {
+        font-size: 12px;
+    }
+}
+</style>
+
+{% endblock %}

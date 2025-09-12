@@ -697,11 +697,19 @@ function wireBasics(){
   
   const btnHelp = q('#btn-help');
   if (btnHelp) btnHelp.addEventListener('click', openHelp);
+  
+  const btnDeployment = q('#btn-deployment');
+  if (btnDeployment) btnDeployment.addEventListener('click', openDeployment);
 }
 
 function openHelp(){
   // Ouvrir le mode d'emploi dans un nouvel onglet
   window.open('/help', '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
+}
+
+function openDeployment(){
+  // Ouvrir le guide de déploiement dans un nouvel onglet
+  window.open('/deployment', '_blank', 'width=1200,height=800,scrollbars=yes,resizable=yes');
 }
 
 function renderExcelPreview(containerSel, columns, rows, mapping, warning){

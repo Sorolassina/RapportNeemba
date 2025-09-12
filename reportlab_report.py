@@ -2593,11 +2593,14 @@ def generate_reportlab(sid: str) -> str:
     try:
         print(f"DEBUG - Début de la génération du PDF...")
         
-        # Vérifier la mémoire disponible
-        import psutil
-        memory_info = psutil.virtual_memory()
-        print(f"DEBUG - Mémoire disponible: {memory_info.available / 1024 / 1024:.1f} MB")
-        print(f"DEBUG - Mémoire utilisée: {memory_info.percent}%")
+        # Vérifier la mémoire disponible (temporairement désactivé)
+        try:
+            import psutil
+            memory_info = psutil.virtual_memory()
+            print(f"DEBUG - Mémoire disponible: {memory_info.available / 1024 / 1024:.1f} MB")
+            print(f"DEBUG - Mémoire utilisée: {memory_info.percent}%")
+        except ImportError:
+            print(f"DEBUG - psutil non disponible, vérification mémoire ignorée")
         
         # Vérifier que les fichiers d'images existent
         print(f"DEBUG - Vérification des fichiers d'images...")

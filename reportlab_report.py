@@ -6,6 +6,8 @@ from reportlab.lib.units import mm
 from reportlab.lib.colors import Color, HexColor
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
+import sys
+sys.stdout.reconfigure(encoding='utf-8')
 
 # --- Conversion SVG -> PNG (si dispo) ---
 try:
@@ -388,7 +390,7 @@ def _draw_kv(c, x, y, w, label, value, lab_w_mm=28, gap_mm=2, line_h_mm=7, size=
         actual_label_width = c.stringWidth(lab, FONT_TEXT, size)
         print(f"Label '{lab}': réservé={lab_w:.1f}pt, réel={actual_label_width:.1f}pt")
         if actual_label_width > lab_w:
-            print(f"  ⚠️  Label déborde de {actual_label_width - lab_w:.1f}pt !")
+            print(f"ATTENTION: Label déborde de {actual_label_width - lab_w:.1f}pt !")
 
     if lab:
         _draw_text(c, x, y, lab, size=size, color="#6B7280", font=FONT_TEXT)

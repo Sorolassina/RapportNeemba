@@ -1,25 +1,32 @@
 from fastapi import FastAPI, Request, UploadFile, Form
-from fastapi.responses import HTMLResponse, FileResponse, JSONResponse
+from fastapi.responses import HTMLResponse, FileResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 import uuid, json, os, time
 
-from .storage import get_session_dir, save_upload, load_context, save_context
-from .analysis import analyze_excel
-from .pdf import render_pdf
-from .templates.default import with_defaults
+from app.storage import get_session_dir, save_upload, load_context, save_context
+from app.analysis import analyze_excel
+from app.pdf import render_pdf
+from app.templates.default import with_defaults
 from reportlab_report import generate_reportlab
+from app.versionning import get_app_version
 
-
-app = FastAPI(title="NEMBA GROUP – Générateur de rapports de formation")
-
+app = FastAPI(root_path="/neembacoaching",title="NEMBA GROUP – Générateur de rapports de formation")
+APP_VERSION = get_app_version()
+print(f"DEBUG - Démarrage nemba-report version {APP_VERSION}")
+# Assure que ROOT_PATH est défini pour les templates et les URLs statiques
+os.environ["ROOT_PATH"] = app.root_path or ""
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
-
+templates.env.globals["asset_version"] = APP_VERSION  # usage direct: {{ asset_version }}
 # Cache des sessions actives pour éviter les conflits
 _active_sessions = {}
 _session_timeout = 3600  # 1 heure
+
+@app.get("/version", response_class=PlainTextResponse)
+def version():
+    return APP_VERSION
 
 def generate_secure_session():
     """Génère une session sécurisée avec timestamp."""
@@ -39,13 +46,15 @@ def cleanup_expired_sessions():
         print(f"DEBUG - Session expirée nettoyée: {sid}")
 
 # ------------------ Health Check ------------------
+
 @app.get("/health")
 @app.head("/health")
 async def health_check():
     return {"status": "ok", "service": "nemba-report"}
 
 # ------------------ Web UI ------------------
-@app.get("/", response_class=HTMLResponse)
+@app.get("/home", response_class=HTMLResponse)
+@app.get("/")
 @app.head("/")
 async def wizard(request: Request):
     # Nettoyer les sessions expirées
@@ -54,7 +63,13 @@ async def wizard(request: Request):
     # Générer une session sécurisée
     sid = request.cookies.get("sid") or generate_secure_session()
     resp = templates.TemplateResponse("wizard.html", {"request": request})
-    resp.set_cookie("sid", sid, httponly=True, samesite="Lax")
+    #resp.set_cookie("sid", sid, httponly=True, samesite="Lax")
+    resp.set_cookie(
+    "sid", sid,
+    httponly=True,
+    samesite="Lax",
+    path=app.root_path or "/"   # <- clé !
+)
     return resp
 
 # ------------------ Uploads ------------------

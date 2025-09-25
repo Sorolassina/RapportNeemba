@@ -1,0 +1,20 @@
+Metadata-Version: 2.4
+Name: nemba-report
+Version: 0.1.0
+Summary: NEMBA GROUP – Générateur de rapports de formation (FastAPI + HTML/CSS/JS)
+Requires-Python: >=3.9
+Requires-Dist: fastapi
+Requires-Dist: uvicorn[standard]
+Requires-Dist: jinja2
+Requires-Dist: python-multipart
+Requires-Dist: pydantic
+Requires-Dist: pandas
+Requires-Dist: matplotlib
+Requires-Dist: openpyxl
+Requires-Dist: weasyprint; platform_system != "Windows"
+Requires-Dist: pdfkit
+Requires-Dist: weasyprint>=66.0
+Requires-Dist: reportlab>=4.4.3
+Requires-Dist: cairosvg>=2.8.2
+Requires-Dist: seaborn>=0.13.2
+Requires-Dist: psutil>=5.9.6

@@ -19,7 +19,57 @@ dependencies = [
   "cairosvg>=2.8.2",
   "seaborn>=0.13.2",
   "psutil>=5.9.6",
+  "pytest>=8.4.2",
 ]
 
 [tool.uv]
 package = false
+
+# 🔍 Ruff (lint + format)
+[tool.ruff]
+line-length = 100
+target-version = "py311"  # Ajuste si tu utilises Python 3.13
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "SIM"]
+ignore = ["E501"]  # line-length déjà géré par le formatter
+
+[tool.ruff.lint.isort]
+known-first-party = ["app", "nemba_report"]
+combine-as-imports = true
+
+# 🧪 Pytest (équivalent pytest.ini)
+[tool.pytest.ini_options]
+minversion = "8.0"
+addopts = "--cov=app --cov-report=term-missing -q"
+testpaths = ["tests"]
+python_files = ["test_*.py", "*_test.py"]
+python_functions = ["test_*"]
+python_classes = ["Test*", "*Tests"]
+asyncio_mode = "auto"
+log_cli = true
+log_cli_level = "INFO"
+markers = [
+  "slow: tests lents",
+  "integration: tests d'intégration",
+  "api: tests d'API",
+]
+
+# 🔧 Ty (task runner)
+[tool.ty.tasks]
+# Lint & format
+lint = "ruff check ."
+fmt = "ruff format ."
+fix = "ruff check . --fix && ruff format ."
+
+# Tests
+test = "uv run pytest -q"
+cov = "uv run pytest --cov=app --cov-report=term-missing"
+covhtml = "uv run pytest --cov=app --cov-report=html"
+
+# Dev server
+dev = "uv run uvicorn app.main:app --reload --host 127.0.0.1 --port 8000"
+
+# Dépendances
+freeze = "uv pip freeze > requirements.txt"
+update = "uv pip install -U -e ."

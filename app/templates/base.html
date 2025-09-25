@@ -2,27 +2,37 @@
 <html lang="fr">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>NEEMBA GROUP – Générateur de rapports</title>
-  <link rel="stylesheet" href="/static/css/style.css">
-  <link rel="icon" href="/static/img/branding/nemba_logo.svg">
+  <meta name="app-root" content="{{ request.scope.get('root_path','') }}">
+  <!--<meta name="viewport" content="width=device-width, initial-scale=1">-->
+  <title>{{ title or "NEEMBA GROUP – Générateur de rapports" }}</title>
+
+  {# ✅ CSS avec url_for pour respecter root_path #}
+  <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}?v={{ asset_version }}">
+
+  {# ✅ Favicon dynamique avec url_for #}
+  <link rel="icon" href="{{ url_for('static', path='img/branding/nemba_logo.svg') }}">
 </head>
 <body>
   <header class="site-header">
     <div class="brand">
-      <img src="/static/img/branding/nemba_logo.png" alt="NEEMBA" />
+      {# ✅ Logo via url_for #}
+      <img src="{{ url_for('static', path='img/branding/nemba_logo.png') }}" alt="NEEMBA" />
       <div class="brand-text">
         <strong>NEEMBA GROUP</strong>
         <span>Générateur de rapports de formation</span>
       </div>
     </div>
   </header>
+
   <main class="container">
     {% block content %}{% endblock %}
   </main>
+
   <footer class="site-footer">
-    <span>© {{ 2025 }} NEEMBA GROUP – Côte d'Ivoire (Traoré Ibrahim P.)</span>
+    <span>© {{ current_year or 2025 }} NEEMBA GROUP – Côte d'Ivoire (Traoré Ibrahim P.)</span>
   </footer>
-  <script src="/static/js/app.js?v=20241215"></script>
+
+  {# ✅ JS avec url_for et versioning (paramètre dynamique possible) #}
+  <script src="{{ url_for('static', path='js/app.js') }}?v={{ asset_version }}"></script>
 </body>
 </html>

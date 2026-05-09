@@ -145,6 +145,9 @@ function wireLists(){
 
 /* ===== Text inputs binding ===== */
 function wireTextInputs(){
+  const trainingType = q('#training_type');
+  if (trainingType) trainingType.addEventListener('input', ()=> { state.training_type = trainingType.value.trim(); });
+
   const trainingTitle = q('#training_title');
   if (trainingTitle) trainingTitle.addEventListener('input', ()=> { state.training_title = trainingTitle.value.trim(); });
 

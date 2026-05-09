@@ -1,3 +1,21 @@
+
+import os
+import logging
+LOG_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..','..', 'logs', 'log-sderr.log'))
+PYTHON_LOG_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..','..', 'logs', 'log-python.log'))
+
+os.makedirs(os.path.dirname(LOG_PATH), exist_ok=True)
+os.makedirs(os.path.dirname(PYTHON_LOG_PATH), exist_ok=True)
+logging.basicConfig(
+    level=logging.DEBUG,
+    format='%(asctime)s %(levelname)s %(message)s',
+    encoding='utf-8',
+    handlers=[
+        logging.FileHandler(LOG_PATH, encoding='utf-8'),
+        logging.FileHandler(PYTHON_LOG_PATH, encoding='utf-8'),
+        logging.StreamHandler()
+    ]
+)
 from fastapi import FastAPI, Request, UploadFile, Form
 from fastapi.responses import HTMLResponse, FileResponse, JSONResponse, PlainTextResponse
 from fastapi.staticfiles import StaticFiles
@@ -19,8 +37,8 @@ print(f"DEBUG - Démarrage nemba-report version {APP_VERSION}")
 os.environ["ROOT_PATH"] = app.root_path or ""
 app.mount("/static", StaticFiles(directory="app/static"), name="static")
 templates = Jinja2Templates(directory="app/templates")
-templates.env.globals["asset_version"] = APP_VERSION  # usage direct: {{ asset_version }}
-# Cache des sessions actives pour éviter les conflits
+templates.env.globals["asset_version"] = APP_VERSION  #usage direct: {{ asset_version }}
+#Cache des sessions actives pour éviter les conflits
 _active_sessions = {}
 _session_timeout = 3600  # 1 heure
 
@@ -90,7 +108,20 @@ async def analyze(request: Request, payload: str = Form(...)):
     sid = request.cookies.get("sid")
     data = json.loads(payload)
     excel_path = data.get("excel_path")
+    import logging
+    from app.analysis import _to_disk_path
+    disk_path = _to_disk_path(excel_path)
+    logging.info(f"ANALYZE: sid={sid}, excel_path={excel_path}, disk_path={disk_path}")
+    if not os.path.exists(disk_path):
+        logging.warning(f"ANALYZE: Fichier non trouvé sur le disque: {disk_path}")
+        return {"ok": False, "error": f"Fichier non trouvé: {disk_path}"}
+    # Toujours passer le chemin web original à l'analyse (pas le chemin disque)
     kpis = analyze_excel(excel_path, sid) if excel_path else {}
+    
+    # Vérifier si l'analyse a retourné une erreur
+    if kpis.get("error"):
+        return {"ok": False, "error": kpis["error"]}
+    
     ctx = {**data, **kpis}
     save_context(sid, ctx)
     return {"ok": True, "kpis": kpis}

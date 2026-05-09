@@ -34,31 +34,74 @@ def _to_disk_path(web_path: str) -> str:
     Retourne: "app/static/…"
     Si ce n'est pas un chemin statique reconnu, renvoie tel quel.
     """
+    import logging
+    logging.debug(f"_to_disk_path: [DEBUT] chemin web reçu = {web_path}")
     if not web_path:
+        logging.warning("_to_disk_path: chemin web vide")
+        logging.debug("_to_disk_path: [FIN] return chemin vide")
         return ""
 
     p = web_path.strip().lstrip("/").replace("\\", "/")  # normalise
+    # Retire le préfixe /neembacoaching/ si présent
+    if p.startswith("neembacoaching/"):
+        logging.debug("_to_disk_path: suppression du préfixe 'neembacoaching/'")
+        p = p[len("neembacoaching/"):]
+    
     # Cherche le segment "static/" dans le chemin
     idx = p.find("static/")
     if idx == -1:
-        # rien à mapper: retourne le chemin tel quel (peut être un chemin absolu disque)
+        logging.warning(f"_to_disk_path: segment 'static/' non trouvé dans {p}, retour chemin original")
+        logging.debug(f"_to_disk_path: [FIN] return chemin original: {web_path}")
         return web_path
 
     # Extrait la partie après "static/"
-    after_static = p[idx + len("static/") :]
-    # Construit le chemin disque sous app/static/...
-    return os.path.join("app", "static", after_static.replace("/", os.sep))
-
+    after_static = p[idx + len("static/"):]
+    
+    # Liste de tous les chemins possibles à tester
+    possible_paths = [
+        # Chemin standard
+        os.path.join("app", "static", after_static.replace("/", os.sep)),
+        # Chemin depuis le répertoire courant
+        os.path.join("nemba-report", "app", "static", after_static.replace("/", os.sep)),
+        # Chemin direct sans app/
+        os.path.join("static", after_static.replace("/", os.sep)),
+        # Chemin complet tel quel
+        web_path.lstrip("/"),
+        # Chemin sans préfixe neembacoaching
+        web_path.replace("/neembacoaching/", "/").lstrip("/"),
+        # Chemin avec nemba-report/
+        os.path.join("nemba-report", web_path.lstrip("/")),
+    ]
+    
+    logging.debug(f"_to_disk_path: Test de {len(possible_paths)} chemins possibles")
+    
+    # Tester chaque chemin possible
+    for i, test_path in enumerate(possible_paths):
+        logging.debug(f"_to_disk_path: Test {i+1}: {test_path}")
+        if os.path.exists(test_path):
+            logging.info(f"_to_disk_path: ✅ Fichier trouvé avec le chemin {i+1}: {test_path}")
+            return test_path
+    
+    # Si aucun chemin ne fonctionne, retourner le premier (chemin standard)
+    disk_path = possible_paths[0]
+    logging.warning(f"_to_disk_path: ❌ Aucun chemin ne fonctionne, retour du chemin standard: {disk_path}")
+    logging.debug(f"_to_disk_path: [FIN] chemin disque généré = {disk_path}")
+    return disk_path
 # --- IO ----------------------------------------------------------------
 def _read_any(path: str) -> pd.DataFrame:
     p = (path or "").lower()
     if p.endswith(".xlsx") or p.endswith(".xls"):
         return pd.read_excel(path)
-    # CSV: on tente ";" puis ","
-    try:
-        return pd.read_csv(path, sep=";")
-    except Exception:
-        return pd.read_csv(path, sep=",")
+    else:
+        import csv
+        with open(path, "r", encoding="utf-8") as f:
+            sample = f.read(2048)
+            try:
+                dialect = csv.Sniffer().sniff(sample, delimiters=',;\t|')
+                sep = dialect.delimiter
+            except Exception:
+                sep = ','
+        return pd.read_csv(path, sep=sep)
 
 # --- Analyse -----------------------------------------------------------
 def analyze_excel(excel_web_path: str, sid: str) -> dict:
@@ -68,9 +111,20 @@ def analyze_excel(excel_web_path: str, sid: str) -> dict:
     Renvoie un payload prêt à être consommé par le front (URLs web root_path aware).
     """
     # Map web -> disque (supporte /neembacoaching/static/... et /static/...)
+    import logging
     disk_path = _to_disk_path(excel_web_path)
+    logging.info(f"ANALYZE_EXCEL: excel_web_path={excel_web_path}, disk_path={disk_path}")
     if not os.path.exists(disk_path):
-        raise FileNotFoundError(f"Fichier introuvable: {disk_path}")
+        logging.warning(f"ANALYZE_EXCEL: Fichier introuvable: {disk_path}")
+        # Retourner un dictionnaire d'erreur au lieu de lever une exception
+        return {
+            "error": f"Fichier Excel non trouvé: {excel_web_path}",
+            "kpi": None,
+            "charts": None,
+            "top_plus": [],
+            "top_moins": [],
+            "table": []
+        }
 
     df = _read_any(disk_path)
     df.columns = [c.strip().lower() for c in df.columns]

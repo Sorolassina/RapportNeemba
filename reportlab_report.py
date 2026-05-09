@@ -1,3 +1,4 @@
+import logging
 # app/reportlab_report.py
 import os, json, datetime, time, glob, uuid, threading
 from reportlab.pdfgen import canvas
@@ -120,9 +121,9 @@ def _cleanup_old_files():
                         os.remove(file_path)
                         deleted_count += 1
                         deleted_size += file_size
-                        print(f"DEBUG - Fichier supprimé: {file_path}")
+                        logging.info(f"Fichier supprimé: {file_path}")
                 except Exception as e:
-                    print(f"DEBUG - Erreur suppression {file_path}: {e}")
+                    logging.error(f"Erreur suppression {file_path}: {e}")
         
         # Supprimer les dossiers de session vides (avec vérification d'âge)
         for session_dir in os.listdir(upload_dir):
@@ -132,15 +133,15 @@ def _cleanup_old_files():
                     session_age = current_time - os.path.getmtime(session_path)
                     if session_age > max_age_seconds:  # Seulement les anciens dossiers vides
                         os.rmdir(session_path)
-                        print(f"DEBUG - Dossier vide supprimé: {session_path}")
+                        logging.info(f"Dossier vide supprimé: {session_path}")
                 except Exception as e:
-                    print(f"DEBUG - Erreur suppression dossier {session_path}: {e}")
+                    logging.error(f"Erreur suppression dossier {session_path}: {e}")
         
         if deleted_count > 0:
-            print(f"DEBUG - Nettoyage terminé: {deleted_count} fichiers supprimés ({deleted_size/1024/1024:.1f} MB)")
+            logging.info(f"Nettoyage terminé: {deleted_count} fichiers supprimés ({deleted_size/1024/1024:.1f} MB)")
             
     except Exception as e:
-        print(f"DEBUG - Erreur lors du nettoyage: {e}")
+        logging.error(f"Erreur lors du nettoyage: {e}")
 
 def _pt(mm_val: float) -> float:
     return mm_val * mm
@@ -168,24 +169,24 @@ def _ctx_path(sid: str) -> str:
 
 def _load_ctx(sid: str) -> dict:
     p = _ctx_path(sid)
-    if not os.path.exists(p): 
-        print(f"DEBUG - Fichier contexte non trouvé: {p}")
+    if not os.path.exists(p):
+        logging.warning(f"Fichier contexte non trouvé: {p}")
         return {}
-    
-    try:
-        with open(p, encoding="utf-8") as f:
-            ctx = json.load(f)
-        print(f"DEBUG - Contexte chargé depuis: {p}")
-        print(f"DEBUG - Contenu du contexte: {ctx}")
-        return ctx
-    except Exception as e:
-        print(f"DEBUG - Erreur chargement contexte: {e}")
-        return {}
+    else:
+        try:
+            with open(p, encoding="utf-8") as f:
+                ctx = json.load(f)
+            logging.info(f"Contexte chargé depuis: {p}")
+            logging.info(f"Contenu du contexte: {ctx}")
+            return ctx
+        except Exception as e:
+            logging.error(f"Erreur chargement contexte: {e}")
+            return {}
 
 def _web_to_disk(p: str | None) -> str | None:
     if not p: return None
-    p = p.lstrip("/")
-    return os.path.join("app", p) if p.startswith("static/") else p
+    from app.analysis import _to_disk_path
+    return _to_disk_path(p)
 
 def _resolve_image_for_reportlab(src_path: str | None, session_dir: str) -> str:
     """
@@ -388,9 +389,9 @@ def _draw_kv(c, x, y, w, label, value, lab_w_mm=28, gap_mm=2, line_h_mm=7, size=
     # DEBUG: Afficher les largeurs réelles
     if lab:
         actual_label_width = c.stringWidth(lab, FONT_TEXT, size)
-        print(f"Label '{lab}': réservé={lab_w:.1f}pt, réel={actual_label_width:.1f}pt")
+        logging.debug(f"Label '{lab}': réservé={lab_w:.1f}pt, réel={actual_label_width:.1f}pt")
         if actual_label_width > lab_w:
-            print(f"ATTENTION: Label déborde de {actual_label_width - lab_w:.1f}pt !")
+            logging.warning(f"Label déborde de {actual_label_width - lab_w:.1f}pt !")
 
     if lab:
         _draw_text(c, x, y, lab, size=size, color="#6B7280", font=FONT_TEXT)
@@ -538,12 +539,21 @@ class NembaReportLab:
         self._start_landscape(page_num=1, brand_size=30)
         machine = self.ctx.get("machine", {})
         c, W, H = self.c, self.W, self.H
-        title = self.ctx.get("cover",{}).get("title") or "Rapport  de  Formation"
+        title = self.ctx.get("training_type", "Rapport  de  Formation") 
         training_title = self.ctx.get("training_title", "")
         
-        # Titre principal
+        # Titre principal avec taille dynamique
+        title_length = len(title)
+        if title_length > 60:
+            title_font_size = 22
+        elif title_length > 40:
+            title_font_size = 28
+        elif title_length > 25:
+            title_font_size = 32
+        else:
+            title_font_size = 35
         _draw_text(c, W/2.0, H - _pt(LND["title_y_mm"] -35), title,
-                       size=35, color="#3b424c",  font=FONT_TITLE, center=True)
+                       size=title_font_size, color="#3b424c",  font=FONT_TITLE, center=True)
 
        
         # Titre de la formation (si fourni)
@@ -800,7 +810,7 @@ class NembaReportLab:
                               width=img_w, height=img_h, 
                               preserveAspectRatio=True, mask='auto', anchor='sw')
                 except Exception as e:
-                    print(f"Erreur lors du chargement de l'image IMG-Som: {e}")
+                    logging.error(f"Erreur lors du chargement de l'image IMG-Som: {e}")
         
         # Image pour la page Objectifs
         if title == "Objectifs":
@@ -857,7 +867,7 @@ class NembaReportLab:
                                      size=font_size, color="#0a0a0a", font=FONT_TITLE, center=True)
                     
                 except Exception as e:
-                    print(f"Erreur lors du chargement de l'image IMG-Objectif: {e}")
+                    logging.error(f"Erreur lors du chargement de l'image IMG-Objectif: {e}")
         
         # ========== CONTENU DE LA LISTE ==========
         # Position de départ du contenu : 80mm depuis le haut (descendu pour éviter confusion avec titre)
@@ -868,8 +878,8 @@ class NembaReportLab:
         text_width = W - _pt(130)  # Largeur disponible pour le texte (130mm de marge droite)
         
         # Debug : afficher les données reçues
-        print(f"DEBUG - Page: {title}, Items: {items}")
-        print(f"DEBUG - Type items: {type(items)}, Length: {len(items) if items else 0}")
+        logging.info(f"Page: {title}, Items: {items}")
+        logging.info(f"Type items: {type(items)}, Length: {len(items) if items else 0}")
         
         # Vérification si des données existent
         if not items or len(items) == 0:
@@ -1000,10 +1010,10 @@ class NembaReportLab:
             })
             current_monday += timedelta(days=7)
         
-        print(f"DEBUG - Nombre de semaines: {len(weeks)}")
-        print(f"DEBUG - Première semaine: {first_monday.strftime('%Y-%m-%d')}")
-        print(f"DEBUG - Dernière semaine: {last_monday.strftime('%Y-%m-%d')}")
-        
+        logging.info(f"Nombre de semaines: {len(weeks)}")
+        logging.info(f"Première semaine: {first_monday.strftime('%Y-%m-%d')}")
+        logging.info(f"Dernière semaine: {last_monday.strftime('%Y-%m-%d')}")
+
         # Dessiner chaque semaine sur une page séparée
         for week_index, week in enumerate(weeks):
             if week_index > 0:
@@ -1118,10 +1128,10 @@ class NembaReportLab:
                             # Dessiner la barre pour ce jour
                             c.rect(bar_x, bar_y, bar_width, bar_height, stroke=0, fill=1)
                         
-                        print(f"DEBUG - Semaine {week_index + 1}, Tâche '{task_name}': {start_date} à {end_date}, Jours: {affected_days}")
+                        logging.info(f"Semaine {week_index + 1}, Tâche '{task_name}': {start_date} à {end_date}, Jours: {affected_days}")
                         
                     except Exception as e:
-                        print(f"DEBUG - Erreur parsing dates pour '{task_name}': {e}")
+                        logging.error(f"Erreur parsing dates pour '{task_name}': {e}")
         
         c.showPage()
 
@@ -1144,7 +1154,7 @@ class NembaReportLab:
             # Préparation des données
             # Chercher les colonnes qui contiennent les données de test
             columns = list(df.columns)
-            print(f"DEBUG - Colonnes disponibles: {columns}")
+            logging.info(f"Colonnes disponibles: {columns}")
             
             # Essayer de trouver les bonnes colonnes
             nom_col = None
@@ -1168,62 +1178,38 @@ class NembaReportLab:
             if not test_out_col and len(columns) > 2:
                 test_out_col = columns[2]
             
-            print(f"DEBUG - Colonnes utilisées - Nom: {nom_col}, Test In: {test_in_col}, Test Out: {test_out_col}")
+            logging.info(f"Colonnes utilisées - Nom: {nom_col}, Test In: {test_in_col}, Test Out: {test_out_col}")
             
             if not all([nom_col, test_in_col, test_out_col]):
-                print("DEBUG - Colonnes manquantes pour le graphique")
+                logging.warning("Colonnes manquantes pour le graphique")
                 return None
             
             # Préparer les données pour le graphique
             df_plot = df[[nom_col, test_in_col, test_out_col]].copy()
             df_plot.columns = ['Nom', 'Test In', 'Test Out']
             
-            # Convertir en format long pour seaborn
-            df_long = df_plot.melt(id_vars=['Nom'], var_name='Test', value_name='Taux de réussite')
-            
-            # Créer le graphique avec une taille plus large pour l'axe X
+            # Création d'un diagramme à barres groupées pour Test In et Test Out
             plt.figure(figsize=(18, 8))
-            
-            # Graphique de ligne
-            sns.lineplot(data=df_long, x='Nom', y='Taux de réussite', hue='Test', 
-                        marker='o', linewidth=1, markersize=8)
-            
-            # Personnalisation avec polices agrandies
-            plt.title('Taux de réussite In/Out', fontsize=20, fontweight='bold', pad=20)
-            plt.xlabel('Stagiaires', fontsize=16, fontweight='bold')
+            x = range(len(df_plot))
+            bar_width = 0.4
+            plt.bar([i - bar_width/2 for i in x], df_plot['Test In'], width=bar_width, label='Test In (%)', color='#4e79a7')
+            plt.bar([i + bar_width/2 for i in x], df_plot['Test Out'], width=bar_width, label='Test Out (%)', color='#f28e2b')
+            plt.xticks(list(x), df_plot['Nom'], rotation=45, ha='right', fontsize=14)
             plt.ylabel('Taux de réussite (%)', fontsize=16, fontweight='bold')
-            
-            # Rotation des labels x pour éviter le chevauchement
-            plt.xticks(rotation=45, ha='right', fontsize=14)
-            plt.yticks(fontsize=14)
-            
-            # Limites de l'axe Y
+            plt.xlabel('Stagiaires', fontsize=16, fontweight='bold')
+            plt.title('Taux de réussite In/Out', fontsize=20, fontweight='bold', pad=20)
             plt.ylim(0, 120)
-            
-            # Légende avec police agrandie, centrée en haut
-            plt.legend( loc='upper center', bbox_to_anchor=(0.5, 1.05), 
-                      ncol=2, fontsize=14, title_fontsize=16)
-            
-            # Grille horizontale uniquement (pas de lignes verticales)
+            plt.yticks(fontsize=14)
+            plt.legend(loc='upper center', bbox_to_anchor=(0.5, 1.05), ncol=2, fontsize=14, title_fontsize=16)
             plt.grid(True, alpha=0.3, axis='y')
-            
-            # Enlever les bordures supérieure et droite
             ax = plt.gca()
             ax.spines['top'].set_visible(False)
             ax.spines['right'].set_visible(False)
-            
-            # Ajouter des étiquettes sur les points
-            for test_type in df_long['Test'].unique():
-                test_data = df_long[df_long['Test'] == test_type]
-                for _, row in test_data.iterrows():
-                    plt.annotate(f'{row["Taux de réussite"]:.0f}%', 
-                               (row['Nom'], row['Taux de réussite']),
-                               textcoords="offset points", 
-                               xytext=(0,10), 
-                               ha='center',
-                               fontsize=10,
-                               fontweight='bold')
-            
+            # Ajouter les valeurs sur chaque barre
+            for i in x:
+                plt.text(i - bar_width/2, df_plot['Test In'][i] + 2, f"{df_plot['Test In'][i]:.0f}%", ha='center', va='bottom', fontsize=10, fontweight='bold')
+                plt.text(i + bar_width/2, df_plot['Test Out'][i] + 2, f"{df_plot['Test Out'][i]:.0f}%", ha='center', va='bottom', fontsize=10, fontweight='bold')
+   
             # Ajuster la mise en page avec plus d'espace horizontal
             plt.tight_layout()
             plt.subplots_adjust(bottom=0.15, left=0.1, right=0.95, top=0.85)
@@ -1239,7 +1225,7 @@ class NembaReportLab:
             chart_filename = f'success_rate_chart_{file_hash}.png'
             chart_path = os.path.join(chart_dir, chart_filename)
             
-            print(f"DEBUG - Nom unique du graphique: {chart_filename}")
+            logging.info(f"Nom unique du graphique: {chart_filename}")
             
             # Supprimer toutes les anciennes images de graphique
             import glob
@@ -1248,19 +1234,19 @@ class NembaReportLab:
                 try:
                     if old_chart != chart_path:  # Ne pas supprimer la nouvelle
                         os.remove(old_chart)
-                        print(f"DEBUG - Ancienne image supprimée: {old_chart}")
+                        logging.info(f"Ancienne image supprimée: {old_chart}")
                 except Exception as e:
-                    print(f"DEBUG - Erreur suppression ancienne image: {e}")
+                    logging.error(f"Erreur suppression ancienne image: {e}")
             
             plt.savefig(chart_path, dpi=300, bbox_inches='tight', 
                        facecolor='white', edgecolor='none')
             plt.close()
             
-            print(f"DEBUG - Graphique sauvegardé: {chart_path}")
+            logging.info(f"Graphique sauvegardé: {chart_path}")
             return chart_path
             
         except Exception as e:
-            print(f"DEBUG - Erreur génération graphique seaborn: {e}")
+            logging.error(f"Erreur génération graphique seaborn: {e}")
             return None
 
     def _calculate_progression_metrics(self, excel_path):
@@ -1272,18 +1258,28 @@ class NembaReportLab:
                 return {'avg_test_in': 0, 'avg_test_out': 0, 'avg_evolution': 0}
             
             # Convertir le chemin web en chemin local
-            local_path = excel_path.lstrip("/")
-            if local_path.startswith("static/"):
-                local_path = os.path.join("app", local_path)
+            from app.analysis import _to_disk_path
+            local_path = _to_disk_path(excel_path)
             
             if not os.path.exists(local_path):
-                print(f"DEBUG - Fichier Excel non trouvé: {local_path}")
+                logging.warning(f"Fichier Excel non trouvé: {local_path}")
                 return {'avg_test_in': 0, 'avg_test_out': 0, 'avg_evolution': 0}
             
-            # Lire le fichier Excel
-            df = pd.read_excel(local_path)
-            print(f"DEBUG - Métriques calculées depuis: {local_path}")
-            print(f"DEBUG - Shape DataFrame métriques: {df.shape}")
+            # Lire le fichier Excel ou CSV
+            if local_path.lower().endswith('.csv'):
+                import csv
+                with open(local_path, 'r', encoding='utf-8') as f:
+                    sample = f.read(2048)
+                    try:
+                        dialect = csv.Sniffer().sniff(sample, delimiters=',;\t|')
+                        sep = dialect.delimiter
+                    except Exception:
+                        sep = ','
+                df = pd.read_csv(local_path, sep=sep)
+            else:
+                df = pd.read_excel(local_path)
+            logging.info(f"Métriques calculées depuis: {local_path}")
+            logging.info(f"Shape DataFrame métriques: {df.shape}")
             
             # Identifier les colonnes
             columns = df.columns.tolist()
@@ -1301,7 +1297,7 @@ class NembaReportLab:
                     test_out_col = col
             
             if not all([nom_col, test_in_col, test_out_col]):
-                print("DEBUG - Colonnes manquantes pour les métriques")
+                logging.warning("Colonnes manquantes pour les métriques")
                 return {'avg_test_in': 0, 'avg_test_out': 0, 'avg_evolution': 0}
             
             # Calculer les métriques
@@ -1318,11 +1314,11 @@ class NembaReportLab:
                 'success_rate_out': round((df[test_out_col] >= 70).mean() * 100, 1)
             }
             
-            print(f"DEBUG - Métriques calculées: {metrics}")
+            logging.info(f"Métriques calculées: {metrics}")
             return metrics
             
         except Exception as e:
-            print(f"DEBUG - Erreur calcul métriques: {e}")
+            logging.error(f"Erreur calcul métriques: {e}")
             return {'avg_test_in': 0, 'avg_test_out': 0, 'avg_evolution': 0}
 
     def _generate_interpretation(self, metrics):
@@ -1409,17 +1405,27 @@ class NembaReportLab:
                 return []
             
             # Convertir le chemin web en chemin local
-            local_path = excel_path.lstrip("/")
-            if local_path.startswith("static/"):
-                local_path = os.path.join("app", local_path)
+            from app.analysis import _to_disk_path
+            local_path = _to_disk_path(excel_path)
             
             if not os.path.exists(local_path):
-                print(f"DEBUG - Fichier Excel non trouvé pour top progress: {local_path}")
+                logging.warning(f"Fichier Excel non trouvé pour top progress: {local_path}")
                 return []
             
-            # Lire le fichier Excel
-            df = pd.read_excel(local_path)
-            print(f"DEBUG - Top progress calculé depuis: {local_path}")
+            # Lire le fichier Excel ou CSV
+            if local_path.lower().endswith('.csv'):
+                import csv
+                with open(local_path, 'r', encoding='utf-8') as f:
+                    sample = f.read(2048)
+                    try:
+                        dialect = csv.Sniffer().sniff(sample, delimiters=',;\t|')
+                        sep = dialect.delimiter
+                    except Exception:
+                        sep = ','
+                df = pd.read_csv(local_path, sep=sep)
+            else:
+                df = pd.read_excel(local_path)
+            logging.info(f"Top progress calculé depuis: {local_path}")
             
             # Identifier les colonnes
             columns = df.columns.tolist()
@@ -1437,7 +1443,7 @@ class NembaReportLab:
                     test_out_col = col
             
             if not all([nom_col, test_in_col, test_out_col]):
-                print("DEBUG - Colonnes manquantes pour top progress")
+                logging.warning("Colonnes manquantes pour top progress")
                 return []
             
             # Calculer les progressions
@@ -1456,11 +1462,11 @@ class NembaReportLab:
                     'progression': float(row['progression'])
                 })
             
-            print(f"DEBUG - Top progress calculé: {len(results)} participants")
+            logging.info(f"Top progress calculé: {len(results)} participants")
             return results
             
         except Exception as e:
-            print(f"DEBUG - Erreur calcul top progress: {e}")
+            logging.error(f"Erreur calcul top progress: {e}")
             return []
 
     def _generate_top_progress_interpretation(self, top_progress):
@@ -1502,17 +1508,27 @@ class NembaReportLab:
                 return []
             
             # Convertir le chemin web en chemin local
-            local_path = excel_path.lstrip("/")
-            if local_path.startswith("static/"):
-                local_path = os.path.join("app", local_path)
+            from app.analysis import _to_disk_path
+            local_path = _to_disk_path(excel_path)
             
             if not os.path.exists(local_path):
-                print(f"DEBUG - Fichier Excel non trouvé pour cas à surveiller: {local_path}")
+                logging.warning(f"Fichier Excel non trouvé pour cas à surveiller: {local_path}")
                 return []
             
-            # Lire le fichier Excel
-            df = pd.read_excel(local_path)
-            print(f"DEBUG - Cas à surveiller calculé depuis: {local_path}")
+            # Lire le fichier Excel ou CSV
+            if local_path.lower().endswith('.csv'):
+                import csv
+                with open(local_path, 'r', encoding='utf-8') as f:
+                    sample = f.read(2048)
+                    try:
+                        dialect = csv.Sniffer().sniff(sample, delimiters=',;\t|')
+                        sep = dialect.delimiter
+                    except Exception:
+                        sep = ','
+                df = pd.read_csv(local_path, sep=sep)
+            else:
+                df = pd.read_excel(local_path)
+            logging.info(f"Cas à surveiller calculé depuis: {local_path}")
             
             # Identifier les colonnes
             columns = df.columns.tolist()
@@ -1530,7 +1546,7 @@ class NembaReportLab:
                     test_out_col = col
             
             if not all([nom_col, test_in_col, test_out_col]):
-                print("DEBUG - Colonnes manquantes pour cas à surveiller")
+                logging.warning("Colonnes manquantes pour cas à surveiller")
                 return []
             
             # Calculer les progressions
@@ -1549,11 +1565,11 @@ class NembaReportLab:
                     'progression': float(row['progression'])
                 })
             
-            print(f"DEBUG - Cas à surveiller calculé: {len(results)} participants")
+            logging.info(f"Cas à surveiller calculé: {len(results)} participants")
             return results
             
         except Exception as e:
-            print(f"DEBUG - Erreur calcul cas à surveiller: {e}")
+            logging.error(f"Erreur calcul cas à surveiller: {e}")
             return []
 
     def _generate_cases_to_watch_interpretation(self, cases_to_watch):
@@ -1777,7 +1793,8 @@ class NembaReportLab:
         """
         def w2d(p):
             if not p: return None
-            p = p.lstrip("/"); return os.path.join("app", p) if p.startswith("static/") else p
+            from app.analysis import _to_disk_path
+            return _to_disk_path(p)
 
         charts = self.ctx.get("charts") or {}
         kpi = self.ctx.get("kpi") or {}
@@ -1797,10 +1814,10 @@ class NembaReportLab:
         # Recharger le contexte pour avoir les données les plus récentes
         self.ctx = _load_ctx(self.sid)
         excel_path = self.ctx.get("excel_path", "")
-        print(f"DEBUG - Chemin Excel dans le contexte (rechargé): {excel_path}")
-        print(f"DEBUG - Type du chemin: {type(excel_path)}")
-        print(f"DEBUG - Contexte complet (rechargé): {self.ctx}")
-        
+        logging.info(f"Chemin Excel dans le contexte (rechargé): {excel_path}")
+        logging.info(f"Type du chemin: {type(excel_path)}")
+        logging.info(f"Contexte complet (rechargé): {self.ctx}")
+
         chart_image_path = None
         
         if excel_path:
@@ -1808,54 +1825,64 @@ class NembaReportLab:
                 # Vérifier les dépendances
                 try:
                     import pandas as pd
-                    print("DEBUG - pandas importé avec succès")
+                    logging.info("pandas importé avec succès")
                 except ImportError as e:
-                    print(f"DEBUG - Erreur import pandas: {e}")
+                    logging.error(f"Erreur import pandas: {e}")
                     return
                 
                 try:
                     import seaborn as sns
-                    print("DEBUG - seaborn importé avec succès")
+                    logging.info("seaborn importé avec succès")
                 except ImportError as e:
-                    print(f"DEBUG - Erreur import seaborn: {e}")
+                    logging.error(f"Erreur import seaborn: {e}")
                     return
                 
                 try:
                     import matplotlib.pyplot as plt
                     import matplotlib
                     matplotlib.use('Agg')  # Backend non-interactif
-                    print("DEBUG - matplotlib importé avec succès")
+                    logging.info("matplotlib importé avec succès")
                 except ImportError as e:
-                    print(f"DEBUG - Erreur import matplotlib: {e}")
+                    logging.error(f"Erreur import matplotlib: {e}")
                     return
                 
-                # Convertir le chemin web en chemin local
+                # Convertir le chemin web en chemin local en utilisant la fonction corrigée
                 original_path = excel_path
-                if excel_path.startswith('/static/'):
-                    excel_path = excel_path[1:]  # Enlever le premier /
-                    excel_path = os.path.join("app", excel_path)
+                from app.analysis import _to_disk_path
+                excel_path = _to_disk_path(excel_path)
                 
-                print(f"DEBUG - Chemin original: {original_path}")
-                print(f"DEBUG - Chemin converti: {excel_path}")
-                print(f"DEBUG - Fichier existe: {os.path.exists(excel_path)}")
+                logging.info(f"Chemin original: {original_path}")
+                logging.info(f"Chemin converti: {excel_path}")
+                logging.info(f"Fichier existe: {os.path.exists(excel_path)}")
                 
                 if os.path.exists(excel_path):
                     try:
-                        # Lire le fichier Excel
-                        df = pd.read_excel(excel_path)
-                        print(f"DEBUG - Fichier Excel lu avec succès")
-                        print(f"DEBUG - Shape du DataFrame: {df.shape}")
-                        print(f"DEBUG - Colonnes Excel: {list(df.columns)}")
-                        print(f"DEBUG - Premières lignes: {df.head()}")
+                        # Lire le fichier Excel ou CSV
+                        if excel_path.lower().endswith('.csv'):
+                            import csv
+                            with open(excel_path, 'r', encoding='utf-8') as f:
+                                sample = f.read(2048)
+                                try:
+                                    dialect = csv.Sniffer().sniff(sample, delimiters=',;\t|')
+                                    sep = dialect.delimiter
+                                except Exception:
+                                    sep = ','
+                            df = pd.read_csv(excel_path, sep=sep)
+                        else:
+                            df = pd.read_excel(excel_path)
+                        logging.info(f"Fichier Excel lu avec succès")
+                        logging.info(f"Shape du DataFrame: {df.shape}")
+                        logging.info(f"Colonnes Excel: {list(df.columns)}")
+                        logging.info(f"Premières lignes: {df.head()}")
                         
                         # Générer le graphique
                         chart_image_path = self._generate_success_rate_chart(df, excel_path)
                         
                     except Exception as e:
-                        print(f"DEBUG - Erreur lecture Excel: {e}")
+                        logging.error(f"Erreur lecture Excel: {e}")
                         chart_image_path = None
                 else:
-                    print(f"DEBUG - Fichier Excel non trouvé: {excel_path}")
+                    logging.warning(f"Fichier Excel non trouvé: {excel_path}")
                     # Essayer d'autres chemins possibles
                     alt_paths = [
                         original_path,
@@ -1863,12 +1890,12 @@ class NembaReportLab:
                         os.path.join("static", "uploads", os.path.basename(original_path))
                     ]
                     for alt_path in alt_paths:
-                        print(f"DEBUG - Essai chemin alternatif: {alt_path} - Existe: {os.path.exists(alt_path)}")
+                        logging.info(f"Essai chemin alternatif: {alt_path} - Existe: {os.path.exists(alt_path)}")
                         if os.path.exists(alt_path):
                             excel_path = alt_path
                             break
             except Exception as e:
-                print(f"DEBUG - Erreur génération graphique: {e}")
+                logging.error(f"Erreur génération graphique: {e}")
         
         # Affichage du graphique dans le PDF
         if chart_image_path and os.path.exists(chart_image_path):
@@ -1882,8 +1909,8 @@ class NembaReportLab:
             c.drawImage(chart_image_path, img_x, img_y, width=img_width, height=img_height,
                         preserveAspectRatio=True, mask='auto')
             
-            print(f"DEBUG - Graphique inséré: {chart_image_path}")
-            print(f"DEBUG - Position image: x={img_x}, y={img_y}, w={img_width}, h={img_height}")
+            logging.info(f"Graphique inséré: {chart_image_path}")
+            logging.info(f"Position image: x={img_x}, y={img_y}, w={img_width}, h={img_height}")
         else:
             # Message si aucune donnée
             c.setFont(FONT_TEXT, 14)
@@ -1940,22 +1967,6 @@ class NembaReportLab:
         c.drawString(_pt(150), y, f"{evolution:+.1f} points")
         c.setFillColorRGB(0, 0, 0)  # Remettre en noir
         
-        # Section interprétation
-        y_section = y_start - _pt(55)
-        c.setFont(FONT_TITLE, 16)
-        c.drawString(_pt(20), y_section, "Interprétation :")
-        
-        y = y_section - _pt(14)
-        c.setFont(FONT_TEXT, 16)
-        
-        # Interprétation basée sur les métriques
-        interpretation = self._generate_interpretation(metrics)
-        lines = self._wrap_text(interpretation, W - _pt(40), 16)
-        c.setFont(FONT_TEXT, 16)
-        for line in lines:
-            c.drawString(_pt(22), y, line)
-            y -= _pt(10)
-        
         c.showPage(); n += 1
 
         # PAGE 3: Cas ayant le plus progressé
@@ -1997,22 +2008,6 @@ class NembaReportLab:
             
             y -= _pt(15)
         
-        # Section interprétation
-        y_section = y_start - _pt(60)
-        c.setFont(FONT_TITLE, 16)
-        c.drawString(_pt(20), y_section, "Interprétation :")
-        
-        y = y_section - _pt(14)
-        c.setFont(FONT_TEXT, 16)
-        
-        # Interprétation des meilleures progressions
-        interpretation = self._generate_top_progress_interpretation(top_progress)
-        lines = self._wrap_text(interpretation, W - _pt(40), 16)
-        c.setFont(FONT_TEXT, 16)
-        for line in lines:
-            c.drawString(_pt(22), y, line)
-            y -= _pt(10)
-        
         c.showPage()
 
         # PAGE 4: Cas à surveiller
@@ -2052,69 +2047,17 @@ class NembaReportLab:
             c.setFont(FONT_TEXT, 16)
             c.drawString(_pt(150), y, f"({test_in:.0f} --> {test_out:.0f})")
             
-            y -= _pt(15)
-        
-        # Section interprétation
-        y_section = y_start - _pt(60)
-        c.setFont(FONT_TITLE, 16)
-        c.drawString(_pt(20), y_section, "Interprétation :")
-        
-        y = y_section - _pt(14)
-        c.setFont(FONT_TEXT, 16)
-        
-        # Interprétation des cas à surveiller
-        interpretation = self._generate_cases_to_watch_interpretation(cases_to_watch)
-        lines = self._wrap_text(interpretation, W - _pt(40), 16)
-        c.setFont(FONT_TEXT, 16)
-        for line in lines:
-            c.drawString(_pt(22), y, line)
-            y -= _pt(10)
-        
+            y -= _pt(15)  
         c.showPage()
 
-        # PAGE 5: Conclusion générale Évaluation & Analyses
-        self._start_landscape(n)
-        c, W, H = self.c, self.W, self.H
         
-        # Titre principal
-        _draw_text(c, _pt(20), H - _pt(52), "2. Evaluation & Analyses", size=30, font=FONT_TITLE)
-        
-        # Sous-titre
-        c.setFont(FONT_TITLE, 18)
-        c.drawString(_pt(20), H - _pt(70), "💡 Conclusion et recommandations")
-        
-        # Calculer les métriques pour la conclusion
-        metrics = self._calculate_progression_metrics(excel_path)
-        top_progress = self._calculate_top_progress(excel_path)
-        cases_to_watch = self._calculate_cases_to_watch(excel_path)
-        
-        # Générer la conclusion générale
-        conclusion = self._generate_general_conclusion(metrics, top_progress, cases_to_watch)
-        
-        # Section conclusion
-        y_start = H - _pt(80)
-        c.setFont(FONT_TEXT, 14)
-        
-        # Diviser la conclusion en paragraphes et les afficher
-        paragraphs = conclusion.split('\n\n')
-        y = y_start
-        
-        for paragraph in paragraphs:
-            if paragraph.strip():
-                lines = self._wrap_text(paragraph.strip(), W - _pt(40), 14)
-                for line in lines:
-                    c.drawString(_pt(20), y, line)
-                    y -= _pt(8)
-                y -= _pt(5)  # Espacement entre paragraphes
-        
-        c.showPage()
 
     def media(self, n):
         """
         Génère la page médiathèque avec galerie d'images de la formation.
         
         STRUCTURE :
-        - Titre : "3. Médiathèque"
+        - Titre : "3. Médiathèque"+
         - Grille 2x4 (8 photos par page)
         - Boîtes simples avec ombres
         - Pagination automatique

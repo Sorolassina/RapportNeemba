@@ -1,0 +1,45 @@
+{
+  "training_type": "",
+  "training_title": "",
+  "client": {
+    "name": "",
+    "phone": "",
+    "country": "",
+    "address": "",
+    "logo_path": null
+  },
+  "machine": {
+    "name": "",
+    "model": "",
+    "type": "",
+    "serial": "",
+    "photo_path": null
+  },
+  "trainer": {
+    "fullname": "",
+    "contacts": "",
+    "place": "",
+    "participants_count": 1,
+    "photo_path": null,
+    "start_date": "",
+    "end_date": ""
+  },
+  "summary": [],
+  "objectives": [],
+  "planning": [],
+  "excel_path": null,
+  "media_paths": [],
+  "appreciation": {
+    "accueil": "",
+    "logement": "",
+    "moyens": "",
+    "logistique": "",
+    "deroulement": ""
+  },
+  "conclusion": "",
+  "attendance_images": [],
+  "kpi": null,
+  "charts": null,
+  "top_plus": [],
+  "top_moins": []
+}

@@ -3,7 +3,7 @@
   --card:#ffffff; --border:#e5e7eb;
 }
 *{ box-sizing: border-box; }
-html, body{ margin:0; padding:0; font-family: Inter, system-ui, -apple-system, Segoe UI, Roboto, Arial; color:var(--ink); background:var(--bg); }
+html, body{ margin:0; padding:0; font-family: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif; color:var(--ink); background:var(--bg); }
 a{ color: var(--brand); text-decoration: none; }
 .container{ max-width: 1100px; margin: 24px auto; padding: 0 16px 80px 16px; }
 
@@ -213,8 +213,7 @@ a{ color: var(--brand); text-decoration: none; }
 .grid-3{ display:grid; grid-template-columns: 1fr 1fr 1fr auto; gap:8px; }
 .field{ display:flex; flex-direction:column; gap:6px; margin-bottom:10px; }
 .field input{ padding:10px 12px; border:1px solid var(--border); border-radius:10px; font-size:14px; }
-.preview{ margin-top:8px; height: 80%;width: 50%; border:1px dashed var(--border); border-radius:10px; padding:6px; background:#fafafa; }
-
+/* .preview : règle responsive consolidée plus bas dans la section RESPONSIVE */
 
 .adder{ display:flex; gap:8px; align-items:center; margin:8px 0; }
 .adder input{ flex:1; padding:10px 12px; border:1px solid var(--border); border-radius:10px; }
@@ -307,7 +306,8 @@ a{ color: var(--brand); text-decoration: none; }
 
 .kpi-box{ display:grid; grid-template-columns: repeat(4,1fr); gap:8px; margin-top:12px; }
 .kpi-box > div{ background:#f3f8ff; border:1px solid #dbeafe; border-radius:10px; padding:10px; }
-.hidden{ display:none; }
+/* .hidden retiré : Tailwind fournit déjà cette utility et la redéfinir ici
+   écrasait .md:flex / .sm:flex (chargé avant style.css) → topbar caché en desktop. */
 
 .actions{ display:flex; justify-content:flex-end; margin-top:10px; }
 .btn{ background:#fff; border:1px solid var(--border); padding:10px 14px; border-radius:10px; cursor:pointer; font-weight:600; }
@@ -359,7 +359,7 @@ a{ color: var(--brand); text-decoration: none; }
 .table-preview .hint{
   padding:8px 10px; color:var(--muted); font-size:12px;
 }
-.hidden{ display:none; } /* si pas déjà présent */
+/* (.hidden retiré ici aussi - voir commentaire plus haut) */
 
 /* textareas cohérentes avec les inputs */
 textarea{
@@ -672,4 +672,237 @@ table.plan.tight th, table.plan.tight td{ padding:6px 8px; font-size: 13px; }
 .reset-btn:focus {
   outline: none;
   box-shadow: 0 0 0 3px rgba(220, 53, 69, 0.3);
+}
+
+/* ============================================================
+   RESPONSIVE — Mobile & tablettes
+   ============================================================ */
+
+/* Tablettes (≤ 1024px) — surface tactile : appareils avec touch */
+@media (max-width: 1024px) {
+  .container {
+    max-width: 100%;
+    padding: 0 16px 80px 16px;
+  }
+  .grid-3 {
+    grid-template-columns: 1fr 1fr auto;
+  }
+  .grid-4 {
+    grid-template-columns: 1fr 1fr 1fr auto;
+  }
+  .kpi-box {
+    grid-template-columns: 1fr 1fr;
+  }
+  /* Wizard : header sticky avec boutons qui peuvent wrap */
+  .wizard {
+    max-width: 100% !important;
+    padding: 0 16px !important;
+  }
+  .accordion-header-home > div {
+    flex-wrap: wrap !important;
+    gap: 12px !important;
+  }
+
+  /* Boutons remove/drag toujours visibles sur tablette tactile */
+  .gallery.sortable .gallery-item .remove-btn,
+  .gallery.sortable .gallery-item .drag-handle {
+    opacity: 1 !important;
+  }
+}
+
+/* Aperçus image — desktop : taille raisonnable (au lieu du width: 50%; height: 80% bizarre) */
+.preview {
+  display: block;
+  margin-top: 8px;
+  width: 100%;
+  max-width: 280px;
+  max-height: 180px;
+  height: auto;
+  object-fit: contain;
+  border: 1px dashed var(--border);
+  border-radius: 10px;
+  padding: 6px;
+  background: #fafafa;
+}
+.preview:not([src]),
+.preview[src=""] {
+  display: none;
+}
+
+/* Mobile (≤ 640px) */
+@media (max-width: 640px) {
+  .container {
+    padding: 0 12px 60px 12px;
+    margin: 12px auto;
+  }
+
+  /* Grilles legacy : tout en une seule colonne sur mobile */
+  .grid-2,
+  .grid-3,
+  .grid-4 {
+    grid-template-columns: 1fr;
+    gap: 12px;
+  }
+  .kpi-box {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+
+  /* ============================================================
+     ZONES D'AFFICHAGE D'IMAGES (PREVIEWS) — mobile-friendly
+     ============================================================ */
+
+  /* Aperçu logo/photo individuel (.preview) : pleine largeur + hauteur raisonnable */
+  .preview {
+    width: 100% !important;
+    height: auto !important;
+    max-height: 220px !important;
+    object-fit: contain !important;
+    display: block;
+    background: #fafafa;
+  }
+  /* Empêcher les previews vides (pas d'image chargée) de prendre de la hauteur */
+  .preview:not([src]),
+  .preview[src=""] {
+    display: none;
+  }
+
+  /* Galerie simple (non-sortable) : items plus petits */
+  .gallery {
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+    gap: 8px;
+  }
+  .gallery img {
+    height: 100px;
+  }
+
+  /* Galerie sortable (Médiathèque + Émargements) :
+     items en grille fluide 2-3 colonnes, boutons toujours visibles */
+  .gallery.sortable {
+    display: grid !important;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)) !important;
+    gap: 8px !important;
+  }
+  .gallery.sortable .gallery-item {
+    width: 100% !important;
+    height: 110px !important;
+    aspect-ratio: 4 / 3;
+  }
+  /* Boutons remove + drag-handle : TOUJOURS visibles sur mobile (pas de hover) */
+  .gallery.sortable .gallery-item .remove-btn {
+    opacity: 1 !important;
+    width: 28px !important;
+    height: 28px !important;
+    font-size: 16px !important;
+    background: rgba(0, 0, 0, 0.75) !important;
+  }
+  .gallery.sortable .gallery-item .drag-handle {
+    opacity: 1 !important;
+    background: rgba(0, 0, 0, 0.75) !important;
+    font-size: 9px !important;
+    padding: 3px 6px !important;
+  }
+  /* Pas d'effet hover scale (trop intrusif sur mobile) */
+  .gallery.sortable .gallery-item:hover {
+    transform: none !important;
+    box-shadow: none !important;
+  }
+
+  /* Aperçu Excel : scroll horizontal pour les tableaux larges */
+  .table-preview {
+    overflow-x: auto !important;
+    max-width: 100% !important;
+  }
+  .table-preview table {
+    min-width: 480px;
+    font-size: 12px;
+  }
+  .table-preview th,
+  .table-preview td {
+    padding: 6px 8px !important;
+  }
+
+  /* Wizard : sticky qui s'empile, padding réduit */
+  .wizard {
+    padding: 0 12px !important;
+    margin: 12px auto !important;
+  }
+  .accordion-header-home {
+    top: 60px !important;
+    padding: 8px 0 !important;
+  }
+  .accordion-header-home > div {
+    flex-direction: column !important;
+    align-items: stretch !important;
+    gap: 8px !important;
+  }
+  .accordion-header-home > div > div {
+    flex-direction: column !important;
+    width: 100%;
+    gap: 6px !important;
+  }
+  .accordion-header-home > div > div > button,
+  .accordion-header-home > div > div > a {
+    width: 100% !important;
+    justify-content: center !important;
+  }
+
+  /* Champs de formulaire pleine largeur */
+  .field input,
+  .field textarea,
+  .field select {
+    width: 100% !important;
+    box-sizing: border-box;
+  }
+
+  /* Accordion : padding réduit */
+  .accordion-header,
+  .accordion-content {
+    padding: 12px !important;
+  }
+  .accordion-header h2 {
+    font-size: 16px !important;
+  }
+
+  /* Boutons : même style mais largeur 100% pour les actions principales */
+  .wizard .btn,
+  .wizard button[id^="btn"],
+  .wizard button.btn-primary,
+  .wizard button.btn-secondary {
+    min-height: 44px; /* zone tactile confortable */
+  }
+
+  /* Aperçu HTML du rapport (.page) */
+  .page {
+    padding: 16px !important;
+    margin-bottom: 12px !important;
+  }
+  .cover .title {
+    font-size: 24px !important;
+  }
+  .training-title,
+  .subtitle {
+    font-size: 16px !important;
+  }
+  .section > h2 {
+    font-size: 18px !important;
+  }
+
+  /* Tableaux : permettre le scroll horizontal */
+  .plan {
+    display: block;
+    overflow-x: auto;
+    white-space: nowrap;
+    font-size: 13px;
+  }
+}
+
+/* Très petits écrans (≤ 380px) */
+@media (max-width: 380px) {
+  .accordion-header h2 {
+    font-size: 14px !important;
+  }
+  .cover .title {
+    font-size: 20px !important;
+  }
 }

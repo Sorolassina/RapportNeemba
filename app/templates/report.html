@@ -1,4 +1,180 @@
-{% extends "base.html" %}
+{% extends "base_v2.html" %}
+{% block title %}Aperçu du rapport – Neemba Academy{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* ============================================================
+     Typographie Neemba Academy appliquée à l'aperçu du rapport
+     ============================================================ */
+  .page,
+  .page p,
+  .page td,
+  .page th,
+  .page li,
+  .page span:not(.material-symbols-outlined),
+  .page strong,
+  .page em,
+  .page a {
+    font-family: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+  }
+  .page h1,
+  .page h2,
+  .page h3,
+  .page h4 {
+    font-family: "Archivo Narrow", "IBM Plex Sans", sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    color: #000000;
+  }
+  .page .material-symbols-outlined {
+    font-family: 'Material Symbols Outlined' !important;
+  }
+
+  /* Cadre de page : bord noir, plus de coins arrondis */
+  .page {
+    border: 2px solid #000000 !important;
+    border-radius: 0 !important;
+    background: #ffffff;
+    padding: 32px !important;
+    margin: 0 auto 24px !important;
+    max-width: 1024px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+  }
+
+  /* Couverture */
+  .cover {
+    border-top: 8px solid #ffcd00 !important;
+  }
+  .cover .title {
+    color: #000000 !important;
+    font-size: 36px !important;
+    letter-spacing: 0.04em !important;
+  }
+  .cover .training-title {
+    color: #000000 !important;
+    font-style: normal !important;
+    font-weight: 600;
+    border-left: 4px solid #ffcd00;
+    padding-left: 12px;
+    display: inline-block;
+    text-transform: none;
+  }
+  .cover .subtitle {
+    color: #000000 !important;
+  }
+  .cover .meta {
+    color: #555555 !important;
+  }
+
+  /* Titres de section : barre jaune CAT à gauche */
+  .section > h2 {
+    border-left: 6px solid #ffcd00 !important;
+    padding-left: 14px !important;
+    margin: 0 0 16px !important;
+    font-size: 22px !important;
+  }
+
+  /* Sous-titres */
+  .page h3 {
+    color: #000000;
+    font-size: 16px;
+    margin-top: 18px;
+    border-bottom: 2px solid #ffcd00;
+    padding-bottom: 4px;
+    display: inline-block;
+  }
+
+  /* Bloc client */
+  .client-block .client-name {
+    color: #000000;
+  }
+
+  /* Tables (planning) */
+  .plan {
+    border: 1px solid #000000 !important;
+  }
+  .plan th {
+    background: #000000 !important;
+    color: #ffffff !important;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-family: "Archivo Narrow", sans-serif;
+    font-weight: 700;
+  }
+  .plan td {
+    border: 1px solid #d4d4d4 !important;
+  }
+
+  /* KPIs */
+  .kpis {
+    background: #fff8db !important;
+    border: 1px solid #ffcd00 !important;
+    border-radius: 0 !important;
+  }
+  .kpis strong {
+    color: #000000;
+  }
+
+  /* Charts */
+  .chart {
+    border: 1px solid #000000 !important;
+    border-radius: 0 !important;
+    background: #ffffff !important;
+  }
+
+  /* Galerie médias / émargements */
+  .gallery img,
+  .attendance,
+  .trainer-photo {
+    border: 1px solid #000000 !important;
+    border-radius: 0 !important;
+  }
+
+  /* Item d'appréciation */
+  .evaluation-item {
+    border-left: 4px solid #ffcd00 !important;
+    border-radius: 0 !important;
+    padding: 10px 14px;
+    background: #fafafa;
+    margin: 12px 0;
+  }
+  .evaluation-item h3 {
+    border-bottom: none !important;
+    margin-top: 0;
+  }
+
+  /* Conclusion */
+  .conclusion-text {
+    font-family: "IBM Plex Sans", sans-serif;
+    line-height: 1.7;
+    text-align: justify;
+  }
+
+  /* Responsive : aperçu rapport sur mobile/tablette */
+  @media (max-width: 768px) {
+    .page {
+      padding: 20px !important;
+      max-width: 100%;
+    }
+    .page .grid-2.cols,
+    .page .grid-2 {
+      grid-template-columns: 1fr !important;
+      gap: 16px !important;
+    }
+    .cover .title {
+      font-size: 26px !important;
+    }
+    .section > h2 {
+      font-size: 18px !important;
+    }
+    .gallery {
+      grid-template-columns: repeat(auto-fill, minmax(120px, 1fr)) !important;
+    }
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 
 <!-- COUVERTURE -->

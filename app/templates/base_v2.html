@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html class="light" lang="fr">
+<head>
+<meta charset="utf-8"/>
+<meta name="app-root" content="{{ root_path }}">
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>{% block title %}Neemba Academy – Façonner l'Excellence Technique{% endblock %}</title>
+
+{# Favicon — set complet (PWA-ready) #}
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', path='img/favicon/favicon.ico') }}">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ url_for('static', path='img/favicon/favicon-32x32.png') }}">
+<link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', path='img/favicon/favicon-16x16.png') }}">
+<link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', path='img/favicon/apple-touch-icon.png') }}">
+<link rel="manifest" href="{{ url_for('static', path='img/favicon/site.webmanifest') }}">
+<meta name="theme-color" content="#ffcd00">
+
+{# Polices texte (Google Fonts CDN) #}
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@400;600;700&amp;family=IBM+Plex+Sans:wght@400;600&amp;display=swap" rel="stylesheet"/>
+
+{# Material Symbols Outlined : auto-hébergé en local (fiable, pas de dépendance CDN) #}
+<style>
+  @font-face {
+    font-family: 'Material Symbols Outlined';
+    font-style: normal;
+    font-weight: 100 700;
+    font-display: block;
+    src: url("{{ url_for('static', path='fonts/MaterialSymbolsOutlined.woff2') }}?v={{ asset_v('fonts/MaterialSymbolsOutlined.woff2') }}") format('woff2-variations'),
+         url("{{ url_for('static', path='fonts/MaterialSymbolsOutlined.woff2') }}?v={{ asset_v('fonts/MaterialSymbolsOutlined.woff2') }}") format('woff2');
+  }
+</style>
+{# Fallback CDN Google si jamais le fichier local manque #}
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&amp;display=block" rel="stylesheet"/>
+
+{# Tailwind compilé en local (build via tools\tailwindcss.exe — voir README) #}
+<link rel="stylesheet" href="{{ url_for('static', path='css/tailwind.css') }}?v={{ asset_v('css/tailwind.css') }}">
+
+{# CSS legacy (utilisé par wizard/help/deployment/report) #}
+<link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}?v={{ asset_v('css/style.css') }}">
+
+{% block extra_head %}{% endblock %}
+</head>
+<body class="bg-background text-on-surface font-body-md overflow-x-hidden">
+
+{# ------------------ TopNavBar ------------------ #}
+<header class="bg-surface-container-lowest border-b-4 border-primary docked full-width top-0 sticky z-50">
+<nav class="flex justify-between items-center px-gutter py-sm max-w-max-width-desktop mx-auto w-full gap-sm">
+<a class="flex items-center gap-base shrink-0" href="{{ root_path }}/home" aria-label="Neemba Academy - Accueil">
+<img alt="Neemba Academy" class="h-10 sm:h-12 w-auto object-contain" src="{{ url_for('static', path='img/branding/nemba-academy_logo.png') }}"/>
+</a>
+
+{# Menu desktop / tablette ≥ 768px #}
+<div class="hidden md:flex items-center gap-md lg:gap-lg">
+<a class="font-label-bold text-label-bold {% if active_nav == 'home' %}text-on-surface border-b-4 border-primary pb-1{% else %}text-on-surface hover:border-b-4 hover:border-primary pb-1{% endif %} transition-colors" href="{{ root_path }}/home">Accueil</a>
+<a class="font-label-bold text-label-bold {% if active_nav == 'rapport' %}text-on-surface border-b-4 border-primary pb-1{% else %}text-on-surface hover:border-b-4 hover:border-primary pb-1{% endif %} transition-colors" href="{{ root_path }}/rapport">Rapport</a>
+<a class="font-label-bold text-label-bold {% if active_nav == 'dashboard' %}text-on-surface border-b-4 border-primary pb-1{% else %}text-on-surface hover:border-b-4 hover:border-primary pb-1{% endif %} transition-colors" href="{{ root_path }}/dashboard">Tableaux de bord</a>
+</div>
+
+<a class="hidden sm:flex items-center shrink-0" href="https://neemba.com" target="_blank" rel="noopener" aria-label="Neemba - Site officiel">
+<img alt="Neemba" class="h-10 sm:h-12 w-auto object-contain" src="{{ url_for('static', path='img/branding/nemba_logo.jpg') }}"/>
+</a>
+
+{# Bouton hamburger mobile < 768px #}
+<button type="button"
+        id="mobile-menu-toggle"
+        class="md:hidden flex items-center justify-center w-10 h-10 border-2 border-on-surface text-on-surface hover:bg-on-surface hover:text-white transition-colors"
+        aria-label="Ouvrir le menu"
+        aria-expanded="false"
+        aria-controls="mobile-menu">
+<span class="material-symbols-outlined" id="mobile-menu-icon">menu</span>
+</button>
+</nav>
+
+{# Menu mobile (déroulant) #}
+<div id="mobile-menu" class="md:hidden hidden bg-surface-container-lowest border-t-2 border-on-surface">
+<a class="block px-gutter py-md font-label-bold text-label-bold uppercase {% if active_nav == 'home' %}bg-primary-container text-on-primary-container border-l-4 border-on-surface{% else %}text-on-surface hover:bg-primary-container hover:text-on-primary-container border-l-4 border-transparent hover:border-on-surface{% endif %} transition-colors" href="{{ root_path }}/home">
+  <span class="material-symbols-outlined align-middle mr-sm" style="font-size: 20px;">home</span>
+  Accueil
+</a>
+<a class="block px-gutter py-md font-label-bold text-label-bold uppercase {% if active_nav == 'rapport' %}bg-primary-container text-on-primary-container border-l-4 border-on-surface{% else %}text-on-surface hover:bg-primary-container hover:text-on-primary-container border-l-4 border-transparent hover:border-on-surface{% endif %} transition-colors" href="{{ root_path }}/rapport">
+  <span class="material-symbols-outlined align-middle mr-sm" style="font-size: 20px;">description</span>
+  Rapport
+</a>
+<a class="block px-gutter py-md font-label-bold text-label-bold uppercase {% if active_nav == 'dashboard' %}bg-primary-container text-on-primary-container border-l-4 border-on-surface{% else %}text-on-surface hover:bg-primary-container hover:text-on-primary-container border-l-4 border-transparent hover:border-on-surface{% endif %} transition-colors" href="{{ root_path }}/dashboard">
+  <span class="material-symbols-outlined align-middle mr-sm" style="font-size: 20px;">dashboard</span>
+  Tableaux de bord
+</a>
+</div>
+</header>
+
+<script>
+  /* Toggle menu hamburger mobile */
+  (function () {
+    const btn = document.getElementById('mobile-menu-toggle');
+    const menu = document.getElementById('mobile-menu');
+    const icon = document.getElementById('mobile-menu-icon');
+    if (!btn || !menu) return;
+    btn.addEventListener('click', () => {
+      const isOpen = !menu.classList.contains('hidden');
+      menu.classList.toggle('hidden');
+      btn.setAttribute('aria-expanded', !isOpen ? 'true' : 'false');
+      btn.setAttribute('aria-label', !isOpen ? 'Fermer le menu' : 'Ouvrir le menu');
+      if (icon) icon.textContent = !isOpen ? 'close' : 'menu';
+    });
+  })();
+</script>
+
+
+{# ------------------ Contenu de page ------------------ #}
+<main>
+{% block content %}{% endblock %}
+</main>
+
+{# ------------------ Footer ------------------ #}
+<footer class="bg-inverse-surface text-white border-t-4 border-primary">
+<div class="max-w-max-width-desktop mx-auto px-gutter py-lg">
+<div class="flex flex-col md:flex-row justify-between items-start gap-lg mb-lg">
+<div class="max-w-xs">
+<span class="font-headline-lg text-headline-lg text-primary-fixed block mb-base uppercase font-bold">Neemba</span>
+<p class="text-surface-variant font-body-md opacity-80">
+    Partenaire de votre performance. Leader de la distribution de solutions d'équipement en Afrique de l'Ouest.
+</p>
+</div>
+<div class="grid grid-cols-2 gap-xl">
+<div class="flex flex-col gap-base">
+<h4 class="font-label-bold uppercase text-primary-fixed">Liens Utiles</h4>
+<a class="text-surface-variant hover:text-primary-container transition-colors" href="#">Mentions Légales</a>
+<a class="text-surface-variant hover:text-primary-container transition-colors" href="#">Politique de Confidentialité</a>
+<a class="text-surface-variant hover:text-primary-container transition-colors" href="#">Recrutement</a>
+</div>
+<div class="flex flex-col gap-base">
+<h4 class="font-label-bold uppercase text-primary-fixed">Académie</h4>
+<a class="text-surface-variant hover:text-primary-container transition-colors" href="#">Locations</a>
+<a class="text-surface-variant hover:text-primary-container transition-colors" href="#">Contact</a>
+</div>
+</div>
+</div>
+<div class="border-t border-outline-variant pt-md flex flex-col md:flex-row justify-between items-center gap-md">
+<p class="text-surface-variant text-body-md opacity-80">© {{ current_year or 2026 }} Neemba. Tous droits réservés.</p>
+<div class="flex gap-md">
+<span class="material-symbols-outlined text-surface-variant cursor-pointer hover:text-primary-container">public</span>
+<span class="material-symbols-outlined text-surface-variant cursor-pointer hover:text-primary-container">mail</span>
+<span class="material-symbols-outlined text-surface-variant cursor-pointer hover:text-primary-container">share</span>
+</div>
+</div>
+</div>
+</footer>
+
+{# JS legacy (utilisé par wizard) #}
+<script src="{{ url_for('static', path='js/app.js') }}?v={{ asset_v('js/app.js') }}"></script>
+{% block scripts %}{% endblock %}
+</body>
+</html>

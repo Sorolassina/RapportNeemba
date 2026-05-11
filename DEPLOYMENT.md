@@ -1,129 +1,300 @@
-# Guide de Déploiement - NEMBA Report Generator
+# Guide de Déploiement — NEMBA Report Generator
 
 ## Vue d'ensemble
 
-Cette application est un générateur de rapports de formation développé avec FastAPI et ReportLab. Elle permet de créer des rapports PDF professionnels à partir de données de formation saisies via une interface web.
+Application **FastAPI + Tailwind + ReportLab** pour générer des rapports de formation
+au format PDF. **Aucune base de données** : tout est en mémoire + fichiers temporaires
+par session.
 
-## Prérequis système
+Le projet est **Windows-first** : un script PowerShell `makefile.ps1` automatise tout
+le déploiement (diagnostic, dépendances, build front-end, services Windows, conteneurs
+Docker, tunnel Cloudflare).
 
-### Serveur recommandé
-- **OS** : Ubuntu 20.04+ / CentOS 8+ / Debian 11+
-- **RAM** : Minimum 2GB, recommandé 4GB+
-- **CPU** : 2 cœurs minimum
-- **Stockage** : 10GB d'espace libre minimum
-- **Python** : 3.9+ (recommandé 3.11)
+---
 
-### Dépendances système
-```bash
-# Ubuntu/Debian
-sudo apt update
-sudo apt install python3.11 python3.11-venv python3.11-dev build-essential
+## 🚀 Quick start (1 commande)
 
-# CentOS/RHEL
-sudo yum install python311 python311-devel gcc gcc-c++ make
+Sur Windows, après `git clone` :
+
+```powershell
+.\makefile.ps1 start
 ```
 
-## Installation
+Le script effectue **12 vérifications avec auto-fix**, puis propose un menu :
+1. **Dev local** (uvicorn --reload)
+2. **Service NSSM** (Windows Service permanent)
+3. **Docker** (conteneur isolé)
 
-### 1. Cloner le projet
-```bash
-cd /opt
-sudo git clone <URL_DU_REPOSITORY> nemba-report
-sudo chown -R www-data:www-data nemba-report
+Et propose ensuite **Cloudflare Tunnel** (Quick ou nommé) pour exposer sur Internet.
+
+```powershell
+# Variantes utiles
+.\makefile.ps1 start -Port 8080
+.\makefile.ps1 start -Profile prod -Pull -Backup
+.\makefile.ps1 start -NoBrowser -NoFirewall   # CI / serveur headless
+.\makefile.ps1 help                            # aide complète
+```
+
+---
+
+## Prérequis
+
+### Windows (recommandé)
+
+| Outil | Version | Rôle | Auto-installé par `start` |
+|---|---|---|---|
+| **PowerShell** | 5.1+ ou 7+ | Shell | ✅ (Windows) |
+| **uv** | 0.4+ | Gestion Python | ❌ → `irm https://astral.sh/uv/install.ps1 \| iex` |
+| **Python** | 3.11+ | Runtime | ✅ via `uv python install` |
+| **git** | 2.x | Clone + pull | Recommandé |
+| **NSSM** | 2.24+ | Service Windows | Optionnel (mode 2) |
+| **Docker Desktop** | 4.x+ | Conteneur | ✅ via `winget install` (mode 3) |
+| **cloudflared** | 2024+ | Tunnel CF | ✅ via `winget install` (option) |
+
+### Linux / cloud
+
+| Cible | Version |
+|---|---|
+| **Ubuntu / Debian** | 20.04 / 11+ |
+| **Python** | 3.11+ |
+| **uv** ou **pip** | dernière |
+| **Render** / **Railway** / **Fly.io** | compte gratuit OK |
+
+---
+
+## 1. Workflow Windows recommandé
+
+### a) Pré-requis machine
+
+```powershell
+# 1. Installer uv (gestionnaire Python rapide)
+powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+# 2. Cloner le projet
+git clone <URL_DU_REPO> nemba-report
 cd nemba-report
+
+# 3. Lancement assisté
+.\makefile.ps1 start
 ```
 
-### 2. Configuration de l'environnement Python
-```bash
-# Créer un environnement virtuel
-python3.11 -m venv venv
-source venv/bin/activate
+Tout le reste (Python 3.11, dépendances, Tailwind CLI, CSS compilé,
+police d'icônes, dossiers `uploads/` et `logs/`, génération SECRET_KEY,
+configuration Docker / NSSM / Cloudflare) est automatique.
 
-# Installer les dépendances
-pip install --upgrade pip
-pip install -r requirements.txt
+### b) Mode dev local
+
+Lancement uvicorn avec `--reload`, ouverture auto du navigateur après ~2s.
+
+```powershell
+.\makefile.ps1 start
+# (puis : 1)
+# ou directement :
+.\makefile.ps1 dev
 ```
 
-### 3. Configuration des variables d'environnement
-```bash
-# Créer le fichier de configuration
-sudo nano /etc/nemba-report.env
+### c) Mode service Windows (NSSM)
+
+Le script crée un service Windows nommé **`nemba-report`** qui :
+- Démarre automatiquement au boot (`SERVICE_AUTO_START`)
+- Redémarre automatiquement en cas de crash (5 s de délai)
+- Logge dans `logs/nemba-report.out.log` et `logs/nemba-report.err.log`
+- Tourne via `uv run uvicorn app.main:app --host 0.0.0.0 --port 8000`
+
+```powershell
+.\makefile.ps1 start
+# (puis : 2 → o pour confirmer la création)
+
+# Commandes utiles ensuite
+nssm status nemba-report
+nssm restart nemba-report
+nssm stop nemba-report
+nssm remove nemba-report confirm     # désinstaller
+Get-Content logs\nemba-report.out.log -Tail 50 -Wait
 ```
 
-Contenu du fichier :
+**Pré-requis** : avoir installé NSSM ([https://nssm.cc/download](https://nssm.cc/download))
+et l'avoir ajouté au PATH système.
+
+### d) Mode Docker
+
+Le `Dockerfile` à la racine est multi-stage (builder + runtime python:3.11-slim),
+avec utilisateur non-root, healthcheck HTTP, et libs cairo/freetype pour matplotlib.
+
+```powershell
+.\makefile.ps1 start
+# (puis : 3)
+# Le script propose d'installer Docker Desktop via winget si absent.
+
+# Commandes utiles ensuite
+docker ps -f name=nemba-report
+docker logs -f nemba-report
+docker restart nemba-report
+docker stop nemba-report
+docker rm -f nemba-report             # supprimer le conteneur
+```
+
+Le conteneur expose `0.0.0.0:8000` et monte `app/static/uploads/` en volume
+pour persister les uploads de session.
+
+### e) Cloudflare Tunnel
+
+Après le choix du mode (1, 2 ou 3), le script demande :
+
+```text
+Voulez-vous aussi exposer via Cloudflare Tunnel ? (o/n) [n]:
+```
+
+Si **oui**, deux modes disponibles :
+
+| Mode | Pour quoi | URL générée |
+|---|---|---|
+| **Quick Tunnel** | Test rapide, démo (pas de compte requis) | `*.trycloudflare.com` (éphémère) |
+| **Tunnel nommé** | Production avec domaine | `https://votre-sous-domaine.votre-domaine.com` |
+
+Le tunnel nommé crée automatiquement :
+- `~/.cloudflared/config.yml` (ingress vers `localhost:port`)
+- Une route DNS dans Cloudflare
+- Un service `cloudflared` (optionnel, pour autostart)
+
+```powershell
+# Pour démarrer comme service Windows ensuite (autostart)
+cloudflared service install
+```
+
+---
+
+## 2. Structure des dossiers en runtime
+
+```
+nemba-report/
+├── app/
+│   ├── main.py                  # Routes FastAPI
+│   ├── analysis.py              # Lecture Excel + KPIs
+│   ├── charts.py                # Matplotlib
+│   ├── templates/               # Jinja2
+│   └── static/
+│       ├── css/
+│       │   ├── tailwind.css     # GÉNÉRÉ (~20 Ko, ne pas éditer)
+│       │   ├── tailwind.input.css
+│       │   └── style.css
+│       ├── fonts/
+│       │   └── MaterialSymbolsOutlined.woff2  # subseté
+│       └── uploads/             # uploads de session (volume Docker)
+├── reportlab_report.py          # Génération PDF
+├── tools/
+│   └── tailwindcss.exe          # Binaire CLI (gitignored, ~38 Mo)
+├── scripts/
+│   ├── tailwind.ps1
+│   └── subset_material_symbols.py
+├── logs/                        # Logs NSSM (gitignored)
+├── backups/                     # Backups uploads (gitignored)
+├── makefile.ps1                 # Task runner principal
+├── Dockerfile
+├── tailwind.config.js
+├── pyproject.toml
+└── .env.example
+```
+
+---
+
+## 3. Variables d'environnement
+
+`.env` (copié depuis `.env.example` au premier lancement) :
+
 ```env
-# Configuration serveur
-HOST=0.0.0.0
-PORT=8000
-DEBUG=False
+# Port d'écoute (défaut: 8000)
+# PORT=8000
 
-# Configuration des chemins
-UPLOAD_DIR=/var/lib/nemba-report/uploads
-LOG_DIR=/var/log/nemba-report
+# Root path FastAPI (reverse proxy)
+# ROOT_PATH=/neembacoaching
 
-# Configuration de sécurité
-SECRET_KEY=votre_cle_secrete_ici
-SESSION_TIMEOUT=3600
+# Version applicative (sinon: court SHA git, sinon timestamp)
+# APP_VERSION=
 
-# Configuration des polices (optionnel)
-FONTS_DIR=/opt/nemba-report/app/static/fonts
+# Clé secrète pour les sessions (auto-générée par makefile.ps1 start si vide)
+# SECRET_KEY=
 ```
 
-### 4. Création des répertoires système
+**Profils multi-environnement** : créer `.env.dev`, `.env.staging`, `.env.prod`
+puis lancer avec `-Profile <nom>`. Le bon `.env` est copié à chaque démarrage.
+
+---
+
+## 4. Maintenance
+
+### Mise à jour du code
+
+```powershell
+.\makefile.ps1 start -Pull -Backup
+# (-Pull : git pull avant lancement)
+# (-Backup : sauvegarde uploads/ avant)
+```
+
+### Mise à jour du CSS / icônes après modification de templates
+
+```powershell
+.\makefile.ps1 build-css            # une fois
+.\makefile.ps1 watch-css            # mode dev (recompile auto)
+.\makefile.ps1 icons                # après ajout d'une nouvelle icône
+```
+
+### Nettoyage
+
+```powershell
+.\makefile.ps1 clean -Force         # __pycache__, *.pyc, uploads, caches
+```
+
+### Diagnostic / état
+
+```powershell
+.\makefile.ps1 info                 # versions des outils + tailles
+.\makefile.ps1 tree                 # arborescence
+```
+
+---
+
+## 5. Déploiement Linux (alternative)
+
+Si la cible est un serveur Linux (sans Windows / NSSM), voici la procédure
+manuelle équivalente.
+
+### a) Installation
+
 ```bash
-# Répertoires de données
-sudo mkdir -p /var/lib/nemba-report/uploads
-sudo mkdir -p /var/log/nemba-report
-sudo mkdir -p /opt/nemba-report/app/static/fonts
+# Pré-requis système (Debian/Ubuntu)
+sudo apt update && sudo apt install -y python3.11 python3.11-venv build-essential nginx git
 
-# Permissions
-sudo chown -R www-data:www-data /var/lib/nemba-report
-sudo chown -R www-data:www-data /var/log/nemba-report
-sudo chmod -R 755 /var/lib/nemba-report
-sudo chmod -R 755 /var/log/nemba-report
+# uv
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Cloner et installer
+sudo git clone <URL> /opt/nemba-report
+cd /opt/nemba-report
+uv sync
+
+# Build du CSS Tailwind (équivalent .\scripts\tailwind.ps1 build)
+curl -L https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.17/tailwindcss-linux-x64 \
+     -o tools/tailwindcss && chmod +x tools/tailwindcss
+./tools/tailwindcss -c tailwind.config.js \
+                    -i app/static/css/tailwind.input.css \
+                    -o app/static/css/tailwind.css --minify
 ```
 
-## Configuration du serveur web
+### b) Service systemd
 
-### Comparaison des options
-
-| Aspect | Nginx + Gunicorn | Apache + mod_wsgi |
-|--------|------------------|-------------------|
-| **Performance** | Excellente | Bonne |
-| **Facilité de config** | Moyenne | Facile |
-| **Intégration** | Externe | Native |
-| **Monitoring** | Via systemd | Via Apache |
-| **Ressources** | Faibles | Moyennes |
-| **Sécurité** | Excellente | Bonne |
-| **Maintenance** | Moyenne | Facile |
-
-### Option 1 : Nginx + Gunicorn (Recommandé pour la performance)
-
-#### Installation de Gunicorn
-```bash
-source venv/bin/activate
-pip install gunicorn
-```
-
-#### Configuration Gunicorn
-```bash
-sudo nano /etc/systemd/system/nemba-report.service
-```
-
-Contenu du service :
 ```ini
+# /etc/systemd/system/nemba-report.service
 [Unit]
 Description=NEMBA Report Generator
 After=network.target
 
 [Service]
-Type=notify
+Type=simple
 User=www-data
 Group=www-data
 WorkingDirectory=/opt/nemba-report
-Environment=PATH=/opt/nemba-report/venv/bin
-ExecStart=/opt/nemba-report/venv/bin/gunicorn --bind unix:/run/nemba-report.sock --workers 3 --worker-class uvicorn.workers.UvicornWorker app.main:app
-ExecReload=/bin/kill -s HUP $MAINPID
+ExecStart=/root/.local/bin/uv run uvicorn app.main:app --host 127.0.0.1 --port 8000
 Restart=always
 RestartSec=5
 
@@ -131,346 +302,182 @@ RestartSec=5
 WantedBy=multi-user.target
 ```
 
-#### Configuration Nginx
 ```bash
-sudo nano /etc/nginx/sites-available/nemba-report
+sudo systemctl daemon-reload
+sudo systemctl enable --now nemba-report
+sudo systemctl status nemba-report
 ```
 
-Configuration Nginx :
+### c) Reverse proxy Nginx
+
 ```nginx
+# /etc/nginx/sites-available/nemba-report
 server {
     listen 80;
-    server_name votre-domaine.com;  # Remplacer par votre domaine
-    
-    # Taille maximale des uploads (ajustez selon vos besoins)
+    server_name votre-domaine.com;
     client_max_body_size 50M;
-    
-    # Logs
-    access_log /var/log/nginx/nemba-report.access.log;
-    error_log /var/log/nginx/nemba-report.error.log;
-    
-    # Fichiers statiques
+
     location /static/ {
         alias /opt/nemba-report/app/static/;
         expires 1y;
         add_header Cache-Control "public, immutable";
     }
-    
-    # Application principale
+
     location / {
-        proxy_pass http://unix:/run/nemba-report.sock;
+        proxy_pass http://127.0.0.1:8000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
         proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
-        
-        # Timeouts
-        proxy_connect_timeout 60s;
-        proxy_send_timeout 60s;
-        proxy_read_timeout 60s;
-    }
-    
-    # Gestion des erreurs
-    error_page 500 502 503 504 /50x.html;
-    location = /50x.html {
-        root /usr/share/nginx/html;
     }
 }
 ```
 
-#### Activation des services
 ```bash
-# Activer le site Nginx
 sudo ln -s /etc/nginx/sites-available/nemba-report /etc/nginx/sites-enabled/
-sudo nginx -t
-sudo systemctl reload nginx
-
-# Démarrer le service
-sudo systemctl enable nemba-report
-sudo systemctl start nemba-report
-sudo systemctl status nemba-report
+sudo nginx -t && sudo systemctl reload nginx
+sudo certbot --nginx -d votre-domaine.com   # SSL via Let's Encrypt
 ```
 
-### Option 2 : Apache + mod_wsgi (Mode HTML)
+---
 
-#### Installation des modules Apache
-```bash
-# Ubuntu/Debian
-sudo apt install apache2 libapache2-mod-wsgi-py3
+## 6. Déploiement cloud (Render / Railway)
 
-# CentOS/RHEL
-sudo yum install httpd mod_wsgi python3-mod_wsgi
+### Render
+
+Créer `render.yaml` à la racine :
+
+```yaml
+services:
+  - type: web
+    name: nemba-report
+    env: python
+    plan: free
+    buildCommand: |
+      pip install uv
+      uv sync --frozen
+      curl -L https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.17/tailwindcss-linux-x64 -o /tmp/tailwindcss
+      chmod +x /tmp/tailwindcss
+      /tmp/tailwindcss -c tailwind.config.js -i app/static/css/tailwind.input.css -o app/static/css/tailwind.css --minify
+    startCommand: uv run uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.11.0
 ```
 
-#### Configuration du fichier WSGI
-```bash
-# Le fichier app.wsgi est déjà créé dans le projet
-sudo chmod 755 /opt/nemba-report/app.wsgi
+Puis : Render → New + → Web Service → connecter le repo. SSL automatique inclus.
+
+### Railway / Fly.io
+
+Le `Dockerfile` du projet fonctionne tel quel. Configurer le port (`8000` exposé).
+
+---
+
+## 7. Sécurité
+
+| Aspect | Recommandation |
+|---|---|
+| **Firewall** | Le mode `start` propose d'ouvrir le port via `Add-FirewallRule` (UAC) |
+| **HTTPS** | Cloudflare Tunnel fournit TLS automatiquement, sinon Let's Encrypt |
+| **`.env`** | Jamais commit (déjà dans `.gitignore`) |
+| **`SECRET_KEY`** | Auto-généré par `start` si vide dans `.env` |
+| **User non-root** | Image Docker tourne en `nemba` (UID dédié) |
+| **Permissions uploads** | NSSM tourne en LocalSystem ; sur Linux, `www-data` |
+
+---
+
+## 8. Dépannage
+
+### Port déjà utilisé
+
+```powershell
+Get-NetTCPConnection -LocalPort 8000 | Select-Object OwningProcess
+Stop-Process -Id <PID> -Force
+# Ou changer de port :
+.\makefile.ps1 start -Port 8080
 ```
 
-#### Configuration Apache complète
-```bash
-# Copier la configuration Apache
-sudo cp apache-config.conf /etc/apache2/sites-available/nemba-report.conf
+### Icônes Material Symbols affichées comme texte
 
-# Ou créer manuellement
-sudo nano /etc/apache2/sites-available/nemba-report.conf
+Police absente. Lancer :
+
+```powershell
+.\makefile.ps1 icons
 ```
 
-Configuration Apache complète (voir fichier `apache-config.conf`) :
-```apache
-<VirtualHost *:80>
-    ServerName votre-domaine.com
-    DocumentRoot /opt/nemba-report
-    
-    # Configuration WSGI optimisée
-    WSGIDaemonProcess nemba-report \
-        python-path=/opt/nemba-report \
-        python-home=/opt/nemba-report/venv \
-        processes=4 \
-        threads=15 \
-        maximum-requests=1000 \
-        user=www-data \
-        group=www-data
-    
-    WSGIProcessGroup nemba-report
-    WSGIScriptAlias / /opt/nemba-report/app.wsgi
-    
-    # Sécurité renforcée
-    <Directory /opt/nemba-report>
-        WSGIApplicationGroup %{GLOBAL}
-        Require all granted
-        
-        # Interdire l'accès aux fichiers sensibles
-        <Files "*.py">
-            Require all denied
-        </Files>
-        <Files "*.env">
-            Require all denied
-        </Files>
-    </Directory>
-    
-    # Fichiers statiques avec cache
-    Alias /static /opt/nemba-report/app/static
-    <Directory /opt/nemba-report/app/static>
-        Require all granted
-        ExpiresActive On
-        ExpiresByType text/css "access plus 1 month"
-        ExpiresByType application/javascript "access plus 1 month"
-    </Directory>
-    
-    # Uploads sécurisés
-    Alias /uploads /var/lib/nemba-report/uploads
-    <Directory /var/lib/nemba-report/uploads>
-        Require all granted
-        Options -ExecCGI
-        <Files "*.php">
-            Require all denied
-        </Files>
-    </Directory>
-    
-    # Headers de sécurité
-    Header always set X-Content-Type-Options nosniff
-    Header always set X-Frame-Options DENY
-    Header always set X-XSS-Protection "1; mode=block"
-    
-    # Logs
-    ErrorLog ${APACHE_LOG_DIR}/nemba-report_error.log
-    CustomLog ${APACHE_LOG_DIR}/nemba-report_access.log combined
-</VirtualHost>
+### CSS non à jour après modification d'un template
+
+Le pre-flight de `start` détecte automatiquement. Sinon manuellement :
+
+```powershell
+.\makefile.ps1 build-css
 ```
 
-#### Activation du site Apache
-```bash
-# Activer les modules nécessaires
-sudo a2enmod wsgi
-sudo a2enmod headers
-sudo a2enmod expires
-sudo a2enmod deflate
+### Service NSSM ne démarre pas
 
-# Activer le site
-sudo a2ensite nemba-report
-sudo apache2ctl configtest
-sudo systemctl reload apache2
-sudo systemctl status apache2
+```powershell
+nssm status nemba-report
+Get-Content logs\nemba-report.err.log -Tail 50
+# Erreurs typiques : port pris, deps manquantes, .env corrompu
 ```
 
-## Configuration SSL (HTTPS)
+### Container Docker crash au démarrage
 
-### Avec Let's Encrypt (Certbot)
-```bash
-# Installation
-sudo apt install certbot python3-certbot-nginx
-
-# Génération du certificat
-sudo certbot --nginx -d votre-domaine.com
-
-# Renouvellement automatique
-sudo crontab -e
-# Ajouter : 0 12 * * * /usr/bin/certbot renew --quiet
+```powershell
+docker logs nemba-report --tail 100
+docker exec -it nemba-report bash    # debug interactif
 ```
 
-## Configuration de la base de données (Optionnel)
+### Cloudflared : authentification échouée
 
-Si vous souhaitez persister les sessions :
-```bash
-# Installation PostgreSQL
-sudo apt install postgresql postgresql-contrib
+Si pas de compte / domaine Cloudflare :
+1. Sign up gratuit : <https://dash.cloudflare.com/sign-up>
+2. Sites → Add a site (plan Free)
+3. Pointer les nameservers du domaine vers Cloudflare
+4. Relancer `.\makefile.ps1 start` → option Cloudflared → mode 2
 
-# Création de la base
-sudo -u postgres createdb nemba_report
-sudo -u postgres createuser nemba_user
-sudo -u postgres psql -c "ALTER USER nemba_user PASSWORD 'mot_de_passe';"
-sudo -u postgres psql -c "GRANT ALL PRIVILEGES ON DATABASE nemba_report TO nemba_user;"
+### Mode dev : auto-reload ne déclenche rien
+
+Vérifier que les fichiers modifiés sont bien dans le watcher uvicorn.
+Le `--reload` surveille `app/`. Pour les templates HTML, le serveur les
+recharge à chaque requête (Jinja).
+
+---
+
+## 9. Commandes de référence rapide
+
+```powershell
+# Démarrage assisté (le plus simple)
+.\makefile.ps1 start
+
+# Production avec backup + git pull
+.\makefile.ps1 start -Profile prod -Pull -Backup
+
+# Mode CI / headless
+.\makefile.ps1 start -NoBrowser -NoFirewall -NoChecks
+
+# Diagnostic seul (sans démarrage)
+.\makefile.ps1 info
+
+# Front-end uniquement
+.\makefile.ps1 build-css
+.\makefile.ps1 watch-css
+
+# Maintenance
+.\makefile.ps1 clean -Force
+.\makefile.ps1 lint
+.\makefile.ps1 format
+
+# Aide complète
+.\makefile.ps1 help
 ```
 
-## Monitoring et logs
-
-### Configuration des logs
-```bash
-# Rotation des logs
-sudo nano /etc/logrotate.d/nemba-report
-```
-
-Contenu :
-```
-/var/log/nemba-report/*.log {
-    daily
-    missingok
-    rotate 30
-    compress
-    delaycompress
-    notifempty
-    create 644 www-data www-data
-    postrotate
-        systemctl reload nemba-report
-    endscript
-}
-```
-
-### Monitoring avec systemd
-```bash
-# Vérifier le statut
-sudo systemctl status nemba-report
-
-# Voir les logs en temps réel
-sudo journalctl -u nemba-report -f
-
-# Redémarrer le service
-sudo systemctl restart nemba-report
-```
-
-## Sécurité
-
-### Configuration du pare-feu
-```bash
-# UFW (Ubuntu)
-sudo ufw allow 22/tcp
-sudo ufw allow 80/tcp
-sudo ufw allow 443/tcp
-sudo ufw enable
-
-# iptables (CentOS)
-sudo firewall-cmd --permanent --add-service=http
-sudo firewall-cmd --permanent --add-service=https
-sudo firewall-cmd --permanent --add-service=ssh
-sudo firewall-cmd --reload
-```
-
-### Sécurisation des fichiers
-```bash
-# Permissions restrictives
-sudo chmod 600 /etc/nemba-report.env
-sudo chmod 755 /opt/nemba-report
-sudo chmod -R 644 /opt/nemba-report/app/static
-```
-
-## Maintenance
-
-### Mise à jour de l'application
-```bash
-cd /opt/nemba-report
-sudo systemctl stop nemba-report
-sudo -u www-data git pull origin main
-source venv/bin/activate
-pip install -r requirements.txt
-sudo systemctl start nemba-report
-```
-
-### Sauvegarde
-```bash
-# Script de sauvegarde
-sudo nano /usr/local/bin/backup-nemba-report.sh
-```
-
-Contenu du script :
-```bash
-#!/bin/bash
-BACKUP_DIR="/backup/nemba-report"
-DATE=$(date +%Y%m%d_%H%M%S)
-
-mkdir -p $BACKUP_DIR/$DATE
-cp -r /opt/nemba-report $BACKUP_DIR/$DATE/
-cp -r /var/lib/nemba-report/uploads $BACKUP_DIR/$DATE/
-
-# Garder seulement les 7 dernières sauvegardes
-find $BACKUP_DIR -type d -mtime +7 -exec rm -rf {} \;
-```
-
-### Nettoyage automatique
-```bash
-# Cron job pour nettoyer les fichiers temporaires
-sudo crontab -e
-# Ajouter : 0 2 * * * find /var/lib/nemba-report/uploads -type f -mtime +7 -delete
-```
-
-## Dépannage
-
-### Problèmes courants
-
-1. **Erreur de permissions**
-   ```bash
-   sudo chown -R www-data:www-data /opt/nemba-report
-   sudo chmod -R 755 /opt/nemba-report
-   ```
-
-2. **Port déjà utilisé**
-   ```bash
-   sudo netstat -tlnp | grep :8000
-   sudo lsof -i :8000
-   ```
-
-3. **Problème de mémoire**
-   ```bash
-   # Réduire le nombre de workers dans le service systemd
-   # Changer --workers 3 en --workers 1
-   ```
-
-4. **Logs d'erreur**
-   ```bash
-   sudo journalctl -u nemba-report --since "1 hour ago"
-   sudo tail -f /var/log/nginx/nemba-report.error.log
-   ```
-
-### Test de fonctionnement
-```bash
-# Test local
-curl http://localhost:8000/health
-
-# Test depuis l'extérieur
-curl http://votre-domaine.com/health
-```
+---
 
 ## Support
 
-Pour toute question technique :
-- Vérifiez les logs : `sudo journalctl -u nemba-report -f`
-- Consultez la documentation FastAPI : https://fastapi.tiangolo.com/
-- Consultez la documentation ReportLab : https://www.reportlab.com/docs/
-
-## Notes importantes
-
-- L'application génère des fichiers temporaires dans `/var/lib/nemba-report/uploads`
-- Les sessions utilisateur expirent après 1 heure par défaut
-- La taille maximale des fichiers uploadés est de 50MB (configurable)
-- Les polices personnalisées peuvent être ajoutées dans `/opt/nemba-report/app/static/fonts/`
+- Code source : `app/main.py`, `reportlab_report.py`
+- Documentation FastAPI : <https://fastapi.tiangolo.com/>
+- Documentation ReportLab : <https://www.reportlab.com/docs/>
+- Documentation Tailwind v3 : <https://v3.tailwindcss.com/docs/installation>
+- Documentation Cloudflare Tunnel : <https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/>

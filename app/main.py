@@ -1,6 +1,58 @@
 
 import os
 import logging
+from pathlib import Path
+from fastapi import FastAPI, Request, UploadFile, Form, APIRouter, Body
+from fastapi.responses import HTMLResponse, FileResponse, JSONResponse, PlainTextResponse
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
+import uuid
+import json
+import time
+
+from app.storage import save_upload, load_context, save_context
+from app.analysis import analyze_excel
+from app.templates.default import with_defaults
+from reportlab_report import generate_reportlab
+from app.versionning import get_app_version, asset_v
+
+# ──────────────────────────────────────────────────────────────────────────────
+# Chargement du .env (zéro dépendance) — DOIT s'exécuter avant tout le reste
+# pour que ROOT_PATH / APP_VERSION / PORT / SECRET_KEY soient disponibles
+# au moment où FastAPI est instancié.
+# ──────────────────────────────────────────────────────────────────────────────
+def _load_dotenv_once() -> None:
+    env_file = Path(__file__).resolve().parent.parent / ".env"
+    if not env_file.is_file():
+        return
+    try:
+        for raw in env_file.read_text(encoding="utf-8").splitlines():
+            line = raw.strip()
+            if not line or line.startswith("#") or "=" not in line:
+                continue
+            key, _, value = line.partition("=")
+            key = key.strip()
+            value = value.strip().strip('"').strip("'")
+            if key and key not in os.environ:
+                os.environ[key] = value
+    except OSError:
+        pass
+
+
+def _normalize_root_path(value: str) -> str:
+    """Normalise ROOT_PATH : "" si vide, sinon "/xxx" sans slash final."""
+    rp = (value or "").strip()
+    if not rp:
+        return ""
+    if not rp.startswith("/"):
+        rp = "/" + rp
+    return rp.rstrip("/")
+
+
+_load_dotenv_once()
+ROOT_PATH = _normalize_root_path(os.environ.get("ROOT_PATH", ""))
+os.environ["ROOT_PATH"] = ROOT_PATH  # version normalisée pour les autres modules
+
 LOG_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..','..', 'logs', 'log-sderr.log'))
 PYTHON_LOG_PATH = os.path.abspath(os.path.join(os.path.dirname(__file__), '..','..', 'logs', 'log-python.log'))
 
@@ -16,35 +68,48 @@ logging.basicConfig(
         logging.StreamHandler()
     ]
 )
-from fastapi import FastAPI, Request, UploadFile, Form
-from fastapi.responses import HTMLResponse, FileResponse, JSONResponse, PlainTextResponse
-from fastapi.staticfiles import StaticFiles
-from fastapi.templating import Jinja2Templates
-from pydantic import BaseModel
-import uuid, json, os, time
 
-from app.storage import get_session_dir, save_upload, load_context, save_context
-from app.analysis import analyze_excel
-from app.pdf import render_pdf
-from app.templates.default import with_defaults
-from reportlab_report import generate_reportlab
-from app.versionning import get_app_version
 
-app = FastAPI(root_path="/neembacoaching",title="NEMBA GROUP – Générateur de rapports de formation")
+app = FastAPI(title="NEMBA GROUP – Générateur de rapports de formation")
 APP_VERSION = get_app_version()
-print(f"DEBUG - Démarrage nemba-report version {APP_VERSION}")
-# Assure que ROOT_PATH est défini pour les templates et les URLs statiques
-os.environ["ROOT_PATH"] = app.root_path or ""
-app.mount("/static", StaticFiles(directory="app/static"), name="static")
-templates = Jinja2Templates(directory="app/templates")
-templates.env.globals["asset_version"] = APP_VERSION  #usage direct: {{ asset_version }}
-#Cache des sessions actives pour éviter les conflits
+print(f"DEBUG - Démarrage nemba-report version {APP_VERSION} (ROOT_PATH={ROOT_PATH or '/'})")
+
+# Chemins absolus dérivés de __file__ : robustes contre le cwd du process
+_APP_DIR = Path(__file__).resolve().parent
+_STATIC_DIR = _APP_DIR / "static"
+_TEMPLATES_DIR = _APP_DIR / "templates"
+
+# ──────────────────────────────────────────────────────────────────────────────
+# ROOT_PATH (préfixe d'URL) lu depuis l'environnement. Si défini (ex.
+# "/neembacoaching"), TOUTES les routes et le mount static sont préfixés
+# en conséquence, ce qui permet à cloudflared (ou tout reverse proxy)
+# d'exposer l'app sous ce préfixe sans rewrite, et à un accès local direct
+# (http://127.0.0.1:8000/neembacoaching/...) de fonctionner aussi.
+# Si ROOT_PATH est vide, l'app se comporte normalement à la racine.
+# ──────────────────────────────────────────────────────────────────────────────
+app.mount(
+    f"{ROOT_PATH}/static" if ROOT_PATH else "/static",
+    StaticFiles(directory=str(_STATIC_DIR)),
+    name="static",
+)
+templates = Jinja2Templates(directory=str(_TEMPLATES_DIR))
+templates.env.globals["asset_version"] = APP_VERSION  # usage direct: {{ asset_version }}
+templates.env.globals["asset_v"] = asset_v  # cache-bust par fichier: {{ asset_v('css/tailwind.css') }}
+templates.env.globals["root_path"] = ROOT_PATH  # préfixe d'URL pour les liens absolus
+
+# Toutes les routes applicatives passent par ce router préfixé pour qu'elles
+# soient automatiquement servies sous ROOT_PATH si défini.
+router = APIRouter(prefix=ROOT_PATH)
+
+# Cache des sessions actives pour éviter les conflits
 _active_sessions = {}
 _session_timeout = 3600  # 1 heure
 
-@app.get("/version", response_class=PlainTextResponse)
+
+@router.get("/version", response_class=PlainTextResponse)
 def version():
     return APP_VERSION
+
 
 def generate_secure_session():
     """Génère une session sécurisée avec timestamp."""
@@ -65,33 +130,49 @@ def cleanup_expired_sessions():
 
 # ------------------ Health Check ------------------
 
-@app.get("/health")
-@app.head("/health")
+@router.get("/health")
+@router.head("/health")
 async def health_check():
     return {"status": "ok", "service": "nemba-report"}
 
 # ------------------ Web UI ------------------
-@app.get("/home", response_class=HTMLResponse)
-@app.get("/")
-@app.head("/")
+@router.get("/", response_class=HTMLResponse)
+@router.head("/")
+async def intro(request: Request):
+    """Page d'animation d'entrée (~4,5 s) puis redirection vers /home."""
+    home_url = (ROOT_PATH or "") + "/home"
+    return templates.TemplateResponse(
+        "intro.html",
+        {"request": request, "home_url": home_url},
+    )
+
+@router.get("/home", response_class=HTMLResponse)
+async def home(request: Request):
+    """Page d'accueil (landing Neemba Academy)."""
+    return templates.TemplateResponse("home.html", {"request": request})
+
+@router.get("/dashboard", response_class=HTMLResponse)
+async def dashboard(request: Request):
+    """Tableaux de bord Power BI."""
+    return templates.TemplateResponse("dashboard.html", {"request": request})
+
+@router.get("/rapport", response_class=HTMLResponse)
 async def wizard(request: Request):
-    # Nettoyer les sessions expirées
+    """Générateur de rapports de formation (wizard 6 étapes)."""
     cleanup_expired_sessions()
-    
-    # Générer une session sécurisée
+
     sid = request.cookies.get("sid") or generate_secure_session()
     resp = templates.TemplateResponse("wizard.html", {"request": request})
-    #resp.set_cookie("sid", sid, httponly=True, samesite="Lax")
     resp.set_cookie(
-    "sid", sid,
-    httponly=True,
-    samesite="Lax",
-    path=app.root_path or "/"   # <- clé !
-)
+        "sid", sid,
+        httponly=True,
+        samesite="Lax",
+        path=ROOT_PATH or "/",
+    )
     return resp
 
 # ------------------ Uploads ------------------
-@app.post("/upload")
+@router.post("/upload")
 async def upload(request: Request, file: UploadFile):
     sid = request.cookies.get("sid")
     if not sid:
@@ -103,59 +184,46 @@ async def upload(request: Request, file: UploadFile):
         return JSONResponse({"ok": False, "error": str(e)}, status_code=400)
 
 # ------------------ Analyse ------------------
-@app.post("/analyze")
+@router.post("/analyze")
 async def analyze(request: Request, payload: str = Form(...)):
     sid = request.cookies.get("sid")
     data = json.loads(payload)
     excel_path = data.get("excel_path")
-    import logging
     from app.analysis import _to_disk_path
     disk_path = _to_disk_path(excel_path)
     logging.info(f"ANALYZE: sid={sid}, excel_path={excel_path}, disk_path={disk_path}")
     if not os.path.exists(disk_path):
         logging.warning(f"ANALYZE: Fichier non trouvé sur le disque: {disk_path}")
         return {"ok": False, "error": f"Fichier non trouvé: {disk_path}"}
-    # Toujours passer le chemin web original à l'analyse (pas le chemin disque)
     kpis = analyze_excel(excel_path, sid) if excel_path else {}
-    
-    # Vérifier si l'analyse a retourné une erreur
+
     if kpis.get("error"):
         return {"ok": False, "error": kpis["error"]}
-    
+
     ctx = {**data, **kpis}
     save_context(sid, ctx)
     return {"ok": True, "kpis": kpis}
 
 # ------------------ Prévisualisation ------------------
-# dans la route preview
-@app.get("/preview", response_class=HTMLResponse)
+@router.get("/preview", response_class=HTMLResponse)
 async def preview(request: Request):
     sid = request.cookies.get("sid")
     ctx = load_context(sid)
-    ctx = with_defaults(ctx)  # <-- important
+    ctx = with_defaults(ctx)
     return templates.TemplateResponse("report.html", {"request": request, **ctx})
 
 # ------------------ Mode d'emploi ------------------
-@app.get("/help", response_class=HTMLResponse)
+@router.get("/help", response_class=HTMLResponse)
 async def help_page(request: Request):
     return templates.TemplateResponse("help.html", {"request": request})
 
 # ------------------ Guide de déploiement ------------------
-@app.get("/deployment", response_class=HTMLResponse)
+@router.get("/deployment", response_class=HTMLResponse)
 async def deployment_page(request: Request):
     return templates.TemplateResponse("deployment.html", {"request": request})
 
 # ------------------ Génération PDF ------------------
-"""@app.post("/generate")
-async def generate(request: Request):
-    sid = request.cookies.get("sid")
-    pdf_path = render_pdf("report.html", sid)
-    return FileResponse(pdf_path, media_type="application/pdf", filename="rapport_nemba.pdf")"""
-
-from fastapi.responses import JSONResponse
-from fastapi import Body
-
-@app.post("/preview-excel")
+@router.post("/preview-excel")
 async def preview_excel_route(payload: dict = Body(...)):
     from .analysis import preview_excel
     excel_path = payload.get("excel_path")
@@ -169,7 +237,7 @@ async def preview_excel_route(payload: dict = Body(...)):
     except Exception as e:
         return JSONResponse({"ok": False, "error": f"Lecture impossible: {e}"}, status_code=400)
 
-@app.post("/generate-reportlab")
+@router.post("/generate-reportlab")
 async def generate_reportlab_pdf(request: Request):
     sid = request.cookies.get("sid")
     print(f"DEBUG - generate_reportlab_pdf appelée avec sid: {sid}")
@@ -217,8 +285,11 @@ async def generate_reportlab_pdf(request: Request):
         return JSONResponse({"error": f"Erreur lors de la génération du PDF: {str(e)}"}, status_code=500)
 
 
+# Enregistrement final du routeur (après définition de toutes les routes).
+app.include_router(router)
+
+
 if __name__ == "__main__":
     import uvicorn
-    import os
     port = int(os.environ.get("PORT", 8000))
     uvicorn.run("app.main:app", host="0.0.0.0", port=port, reload=False)

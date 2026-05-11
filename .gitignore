@@ -7,3 +7,10 @@ __pycache__/
 .env
 app/static/uploads/*
 !app/static/uploads/.gitkeep
+
+# Binaire Tailwind CLI (38 MB) — récupéré via .\scripts\tailwind.ps1 install
+tools/tailwindcss.exe
+
+# Si tu préfères régénérer le CSS au lieu de le versionner, décommente :
+# app/static/css/tailwind.css
+

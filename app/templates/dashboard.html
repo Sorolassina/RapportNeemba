@@ -1,0 +1,131 @@
+{% extends "base_v2.html" %}
+{% set active_nav = "dashboard" %}
+{% block title %}Tableaux de bord – Neemba Academy{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* Wrapper responsive 16:10 (ratio natif Power BI) — look industriel CAT */
+  .pbi-wrapper {
+    position: relative;
+    width: 100%;
+    padding-bottom: 62.5%; /* 5/8 = 62.5% → ratio 16:10 */
+    height: 0;
+    overflow: hidden;
+    border-radius: 0;
+    border: 2px solid #000000;
+    background: #f7f9fb;
+  }
+  /* Sur mobile : ratio 3:4 (vertical) pour mieux exploiter l'écran */
+  @media (max-width: 640px) {
+    .pbi-wrapper {
+      padding-bottom: 130%;
+    }
+  }
+  .pbi-wrapper iframe {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    border: 0;
+  }
+
+  /* Carte Power BI : barre supérieure jaune CAT */
+  .pbi-card {
+    position: relative;
+    border-top: 6px solid #ffcd00;
+  }
+
+  /* Tag "PILOTAGE & ANALYSE" : style CAT yellow + noir pour matcher l'identité */
+  .dashboard-eyebrow {
+    background: #000000;
+    color: #ffcd00;
+    padding: 4px 12px;
+    display: inline-block;
+    font-family: "IBM Plex Sans", sans-serif;
+    font-weight: 600;
+    font-size: 12px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+  }
+
+  /* Cartes de KPI rapides */
+  .kpi-card {
+    background: #ffffff;
+    border: 2px solid #000000;
+    padding: 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .kpi-card .kpi-label {
+    font-family: "IBM Plex Sans", sans-serif;
+    font-weight: 600;
+    font-size: 11px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: #000000;
+  }
+  .kpi-card .kpi-value {
+    font-family: "Archivo Narrow", sans-serif;
+    font-weight: 700;
+    font-size: 32px;
+    color: #000000;
+    line-height: 1;
+  }
+  .kpi-card .kpi-icon {
+    align-self: flex-end;
+    color: #ffcd00;
+    font-size: 32px !important;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="py-xl bg-surface">
+  <div class="max-w-max-width-desktop mx-auto px-gutter">
+
+    {# Header de section #}
+    <div class="border-b-4 border-on-surface pb-md mb-lg">
+      <span class="dashboard-eyebrow mb-base">Pilotage &amp; Analyse</span>
+      <h1 class="font-headline-xl text-headline-xl uppercase text-on-surface leading-tight mt-sm">
+        Tableau de bord <span class="bg-primary-container text-on-primary-container px-sm">Formation</span>
+      </h1>
+      <p class="text-on-surface-variant font-body-md max-w-2xl mt-sm">
+        Indicateurs clés de performance, suivi des sessions et analyses des résultats des formations Neemba Academy.
+      </p>
+    </div>
+
+    {# Power BI #}
+    <div class="pbi-card bg-surface-container-lowest border-2 border-on-surface p-md">
+      <div class="flex items-center justify-between mb-md flex-wrap gap-sm">
+        <div class="flex items-center gap-sm">
+          <span class="material-symbols-outlined bg-primary-container text-on-primary-container p-xs" style="font-size: 28px;">analytics</span>
+          <h2 class="font-headline-md text-headline-md uppercase">Neemba Formation TB</h2>
+        </div>
+        <a class="bg-inverse-surface text-white font-label-bold px-md py-sm uppercase tracking-widest text-label-bold inline-flex items-center gap-xs hover:bg-primary-container hover:text-on-primary-container active:scale-95 transition-all no-underline"
+           href="https://app.powerbi.com/view?r=eyJrIjoiNzk3NDhhZDMtMzI4OC00Y2QzLWFhZGUtNDRhNmUzMDIwZjY3IiwidCI6IjgxMzg2OTIwLTdiMTItNDVkNi1hMTA4LTZlYWZkMzRkYjY3NSJ9&pageName=1c193ad9147e525b8c1d"
+           target="_blank" rel="noopener">
+          Plein écran
+          <span class="material-symbols-outlined">open_in_new</span>
+        </a>
+      </div>
+
+      <div class="pbi-wrapper">
+        <iframe
+          title="Neemba Formation TB"
+          src="https://app.powerbi.com/view?r=eyJrIjoiNzk3NDhhZDMtMzI4OC00Y2QzLWFhZGUtNDRhNmUzMDIwZjY3IiwidCI6IjgxMzg2OTIwLTdiMTItNDVkNi1hMTA4LTZlYWZkMzRkYjY3NSJ9&embedImagePlaceholder=true&pageName=1c193ad9147e525b8c1d"
+          allowFullScreen="true"
+          loading="lazy"
+          referrerpolicy="no-referrer-when-downgrade"></iframe>
+      </div>
+
+      <p class="text-on-surface-variant text-sm mt-sm opacity-80 flex items-center gap-xs">
+        <span class="material-symbols-outlined" style="font-size: 16px;">info</span>
+        Source : Microsoft Power BI · Mise à jour automatique selon les paramètres du rapport.
+      </p>
+    </div>
+
+  </div>
+</section>
+{% endblock %}

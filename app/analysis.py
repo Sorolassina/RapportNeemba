@@ -42,11 +42,12 @@ def _to_disk_path(web_path: str) -> str:
         return ""
 
     p = web_path.strip().lstrip("/").replace("\\", "/")  # normalise
-    # Retire le préfixe /neembacoaching/ si présent
-    if p.startswith("neembacoaching/"):
-        logging.debug("_to_disk_path: suppression du préfixe 'neembacoaching/'")
-        p = p[len("neembacoaching/"):]
-    
+    # Retire le préfixe ROOT_PATH si présent (ex: "neembacoaching/")
+    rp_segment = _root_path().lstrip("/")  # "neembacoaching" ou ""
+    if rp_segment and p.startswith(rp_segment + "/"):
+        logging.debug(f"_to_disk_path: suppression du préfixe '{rp_segment}/'")
+        p = p[len(rp_segment) + 1:]
+
     # Cherche le segment "static/" dans le chemin
     idx = p.find("static/")
     if idx == -1:
@@ -56,7 +57,13 @@ def _to_disk_path(web_path: str) -> str:
 
     # Extrait la partie après "static/"
     after_static = p[idx + len("static/"):]
-    
+
+    # Variante "sans préfixe ROOT_PATH" pour les fallbacks
+    if rp_segment:
+        web_path_no_prefix = web_path.replace(f"/{rp_segment}/", "/", 1).lstrip("/")
+    else:
+        web_path_no_prefix = web_path.lstrip("/")
+
     # Liste de tous les chemins possibles à tester
     possible_paths = [
         # Chemin standard
@@ -67,8 +74,8 @@ def _to_disk_path(web_path: str) -> str:
         os.path.join("static", after_static.replace("/", os.sep)),
         # Chemin complet tel quel
         web_path.lstrip("/"),
-        # Chemin sans préfixe neembacoaching
-        web_path.replace("/neembacoaching/", "/").lstrip("/"),
+        # Chemin sans préfixe ROOT_PATH
+        web_path_no_prefix,
         # Chemin avec nemba-report/
         os.path.join("nemba-report", web_path.lstrip("/")),
     ]

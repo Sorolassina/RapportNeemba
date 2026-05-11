@@ -1,0 +1,38 @@
+# Caches & build artifacts
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+
+# Environnements & secrets
+.venv/
+.env
+*.log
+
+# Outils build (pas nécessaires en runtime — la police et le CSS sont
+# pré-générés et copiés via app/static/)
+tools/
+scripts/
+makefile.ps1
+
+# Versionning
+.git/
+.gitignore
+
+# Docs / configs locaux
+README.md
+DEPLOYMENT.md
+.dockerignore
+Dockerfile
+
+# IDE
+.vscode/
+.idea/
+
+# Uploads de session (le container démarre vide)
+app/static/uploads/*
+!app/static/uploads/.gitkeep

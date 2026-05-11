@@ -1,21 +1,500 @@
-{% extends "base.html" %}
+{% extends "base_v2.html" %}
+{% set active_nav = "rapport" %}
+{% block title %}Générateur de rapport – Neemba Academy{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* Typo Neemba Academy appliquée au wizard */
+  .wizard,
+  .wizard input,
+  .wizard textarea,
+  .wizard select,
+  .wizard button,
+  .wizard label,
+  .wizard p,
+  .wizard span:not(.material-symbols-outlined),
+  .wizard a {
+    font-family: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+  }
+  /* Garde la police Material Symbols pour les icônes */
+  .wizard .material-symbols-outlined {
+    font-family: 'Material Symbols Outlined' !important;
+  }
+  .wizard h1,
+  .wizard h2,
+  .wizard h3,
+  .wizard h4,
+  .wizard h5,
+  .wizard h6,
+  .wizard .accordion-header h2,
+  .wizard .accordion-header-home h2 {
+    font-family: "Archivo Narrow", "IBM Plex Sans", sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+  }
+  .wizard .btn,
+  .wizard .help-btn,
+  .wizard .deployment-btn,
+  .wizard .reset-btn {
+    font-family: "IBM Plex Sans", sans-serif;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+  }
+
+  /* ============================================================
+     Labels & placeholders — style "label-bold" Neemba Academy
+     ============================================================ */
+  .wizard label,
+  .wizard .field > label {
+    font-family: "IBM Plex Sans", system-ui, sans-serif !important;
+    font-weight: 600 !important;
+    font-size: 12px !important;
+    letter-spacing: 0.08em !important;
+    text-transform: uppercase !important;
+    color: #000000 !important;
+    margin-bottom: 6px;
+    display: inline-block;
+  }
+
+  /* Inputs / textarea / select : look industriel anguleux */
+  .wizard input[type="text"],
+  .wizard input[type="number"],
+  .wizard input[type="date"],
+  .wizard input[type="email"],
+  .wizard input[type="tel"],
+  .wizard input[type="password"],
+  .wizard input:not([type]),
+  .wizard textarea,
+  .wizard select {
+    font-family: "IBM Plex Sans", system-ui, sans-serif !important;
+    font-weight: 400;
+    font-size: 14px !important;
+    color: #000000;
+    background: #ffffff;
+    border: 2px solid #000000 !important;
+    border-radius: 0 !important;
+    padding: 10px 12px !important;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .wizard input[type="text"]:focus,
+  .wizard input[type="number"]:focus,
+  .wizard input[type="date"]:focus,
+  .wizard input[type="email"]:focus,
+  .wizard input[type="tel"]:focus,
+  .wizard input[type="password"]:focus,
+  .wizard input:not([type]):focus,
+  .wizard textarea:focus,
+  .wizard select:focus {
+    outline: none;
+    border-color: #ffcd00 !important;
+    box-shadow: 0 0 0 3px rgba(255, 205, 0, 0.25);
+  }
+
+  /* Placeholders : police IBM Plex, italique discret, couleur grise */
+  .wizard ::placeholder,
+  .wizard input::placeholder,
+  .wizard textarea::placeholder {
+    font-family: "IBM Plex Sans", system-ui, sans-serif !important;
+    font-weight: 400 !important;
+    font-style: italic;
+    color: #888888 !important;
+    opacity: 1;
+    text-transform: none !important;
+    letter-spacing: normal !important;
+  }
+  .wizard input::-webkit-input-placeholder,
+  .wizard textarea::-webkit-input-placeholder {
+    font-family: "IBM Plex Sans", sans-serif !important;
+    font-style: italic;
+    color: #888888 !important;
+  }
+  .wizard input::-moz-placeholder,
+  .wizard textarea::-moz-placeholder {
+    font-family: "IBM Plex Sans", sans-serif !important;
+    font-style: italic;
+    color: #888888 !important;
+    opacity: 1;
+  }
+
+  /* Inputs file : style harmonisé */
+  .wizard input[type="file"] {
+    font-family: "IBM Plex Sans", sans-serif !important;
+    font-size: 13px;
+    padding: 6px 0 !important;
+    border: none !important;
+  }
+  .wizard input[type="file"]::file-selector-button {
+    font-family: "IBM Plex Sans", sans-serif;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    background: #000000;
+    color: #ffffff;
+    border: none;
+    padding: 8px 14px;
+    margin-right: 12px;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .wizard input[type="file"]::file-selector-button:hover {
+    background: #ffcd00;
+    color: #000000;
+  }
+
+  /* Phrase d'intro de la toolbar wizard */
+  .wizard-toolbar-intro {
+    margin: 0;
+    flex: 1 1 240px;          /* desktop : occupe l'espace dispo, grandit jusqu'à pousser les boutons */
+    min-width: 0;             /* évite les bugs de débordement flex */
+  }
+
+  /* ============================================================
+     RESPONSIVE — Wizard mobile / tablette
+     ============================================================ */
+
+  /* Tablette ≤ 1024px : toolbar moins agressif */
+  @media (max-width: 1024px) {
+    .accordion-header-home {
+      top: 70px !important;
+    }
+    .wizard-toolbar-intro {
+      /* En tablette/colonne : la basis 240px imposerait 240px de hauteur */
+      flex: 0 0 auto;
+      width: 100%;
+    }
+  }
+
+  /* Mobile ≤ 768px : toolbar non-sticky + compact */
+  @media (max-width: 768px) {
+    /* Désactive le sticky du toolbar : il prendrait trop d'espace écran */
+    .accordion-header-home {
+      position: static !important;
+      top: auto !important;
+      padding: 12px 0 !important;
+      margin-bottom: 12px;
+      border-bottom: 2px solid #d4d4d4;
+    }
+    .wizard-toolbar {
+      flex-direction: column !important;
+      align-items: stretch !important;
+      gap: 10px !important;
+      padding-right: 0 !important;
+    }
+    .wizard-toolbar-intro {
+      flex: 0 0 auto;
+      width: 100%;
+      min-height: 0;
+      text-align: center;
+      font-size: 14px;
+      line-height: 1.4;
+    }
+    .wizard-toolbar-actions {
+      flex-direction: column !important;
+      gap: 8px !important;
+    }
+    .wizard-toolbar-actions > button {
+      width: 100%;
+      min-height: 44px;
+    }
+
+    /* Bouton "Générer le Rapport PDF" : pleine largeur */
+    .generate-section .actions {
+      padding: 0;
+    }
+    .generate-section .actions > button {
+      width: 100%;
+      min-height: 48px;
+      justify-content: center;
+    }
+
+    /* Champs et inputs pleine largeur */
+    .wizard .field input,
+    .wizard .field textarea,
+    .wizard .field select {
+      width: 100% !important;
+    }
+
+    /* Titre "type de formation" / "Intitulé de la formation"
+       les inline styles font 1.1em, on les remet au format label normal */
+    .wizard label[for="training_type"],
+    .wizard label[for="training_title"] {
+      font-size: 12px !important;
+    }
+    .wizard input#training_type,
+    .wizard input#training_title {
+      font-size: 14px !important;
+      padding: 10px 12px !important;
+    }
+  }
+
+  /* Très petit mobile ≤ 480px : encore plus compact */
+  @media (max-width: 480px) {
+    .accordion-header-home {
+      padding: 8px 0 !important;
+    }
+    .wizard-toolbar-intro {
+      font-size: 13px;
+    }
+    .accordion-header h2 {
+      font-size: 15px !important;
+    }
+    .generate-section {
+      padding: 8px !important;
+    }
+    .generate-section .actions > button {
+      font-size: 13px;
+      padding: 12px 16px !important;
+    }
+  }
+
+  /* ============================================================
+     Overlay "Mécanique" — génération PDF
+     ============================================================ */
+  #gen-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.88);
+    z-index: 9999;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    backdrop-filter: blur(4px);
+    -webkit-backdrop-filter: blur(4px);
+    font-family: "Archivo Narrow", "IBM Plex Sans", sans-serif;
+    color: #ffcd00;
+  }
+  #gen-overlay.active { display: flex; animation: gen-fade .25s ease-out; }
+  @keyframes gen-fade { from { opacity: 0; } to { opacity: 1; } }
+
+  /* Panneau industriel acier */
+  .gen-panel {
+    position: relative;
+    width: min(560px, 92vw);
+    background: linear-gradient(145deg, #1a1a1a 0%, #0a0a0a 100%);
+    border: 2px solid #2a2a2a;
+    box-shadow:
+      0 0 0 4px #000,
+      0 30px 80px rgba(0, 0, 0, .9),
+      inset 0 1px 0 rgba(255, 255, 255, .06);
+    padding: 36px 32px 28px;
+    overflow: hidden;
+  }
+
+  /* Bandes de sécurité haute & basse (warning stripes) */
+  .gen-panel::before,
+  .gen-panel::after {
+    content: "";
+    position: absolute;
+    left: 0; right: 0;
+    height: 14px;
+    background-image: repeating-linear-gradient(
+      45deg,
+      #ffcd00 0 16px,
+      #000 16px 32px
+    );
+  }
+  .gen-panel::before { top: 0; }
+  .gen-panel::after { bottom: 0; }
+
+  /* Rivets aux 4 coins */
+  .rivet {
+    position: absolute;
+    width: 14px; height: 14px;
+    border-radius: 50%;
+    background: radial-gradient(circle at 35% 35%, #6e6e6e 0%, #2a2a2a 50%, #000 100%);
+    box-shadow: inset 0 -1px 1px rgba(0,0,0,.6), 0 1px 1px rgba(255,255,255,.05);
+  }
+  .rivet.tl { top: 22px; left: 16px; }
+  .rivet.tr { top: 22px; right: 16px; }
+  .rivet.bl { bottom: 22px; left: 16px; }
+  .rivet.br { bottom: 22px; right: 16px; }
+
+  /* Engrenages */
+  .gears {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 20px auto 18px;
+    height: 130px;
+    position: relative;
+  }
+  .gear {
+    color: #ffcd00;
+    filter: drop-shadow(0 0 12px rgba(255, 205, 0, .35));
+  }
+  .gear-big   { width: 110px; height: 110px; animation: gear-spin 4s linear infinite; }
+  .gear-small { width: 70px;  height: 70px;  margin-left: -14px;
+                animation: gear-spin-rev 3s linear infinite; }
+  @keyframes gear-spin     { to { transform: rotate(360deg); } }
+  @keyframes gear-spin-rev { to { transform: rotate(-360deg); } }
+
+  /* Titre industriel */
+  .gen-title {
+    text-align: center;
+    font-size: 22px;
+    font-weight: 700;
+    letter-spacing: .15em;
+    color: #ffcd00;
+    text-transform: uppercase;
+    margin: 0 0 6px;
+  }
+  .gen-sub {
+    text-align: center;
+    font-family: "IBM Plex Sans", monospace;
+    font-size: 12px;
+    letter-spacing: .25em;
+    color: #888;
+    text-transform: uppercase;
+    margin: 0 0 18px;
+  }
+
+  /* Status courant (cycle texte) */
+  .gen-status {
+    text-align: center;
+    font-family: "IBM Plex Sans", sans-serif;
+    font-size: 14px;
+    letter-spacing: .05em;
+    color: #fff;
+    min-height: 22px;
+    margin: 0 0 18px;
+  }
+  .gen-status .dot {
+    color: #ffcd00;
+    animation: gen-blink 1.2s steps(3, end) infinite;
+  }
+  @keyframes gen-blink {
+    0%, 33%   { opacity: 0; }
+    50%, 100% { opacity: 1; }
+  }
+
+  /* Barre de progression industrielle (style jauge) */
+  .gen-bar {
+    position: relative;
+    height: 16px;
+    background: #0a0a0a;
+    border: 1px solid #333;
+    border-radius: 2px;
+    overflow: hidden;
+    box-shadow: inset 0 2px 4px rgba(0,0,0,.8);
+  }
+  .gen-bar-fill {
+    position: absolute;
+    inset: 0;
+    width: 0%;
+    background-image:
+      repeating-linear-gradient(45deg, #ffcd00 0 8px, #e0b400 8px 16px);
+    box-shadow: 0 0 14px rgba(255, 205, 0, .55);
+    animation: gen-fill 12s cubic-bezier(.2, .8, .25, 1) forwards;
+  }
+  @keyframes gen-fill {
+    0%   { width: 0%;   }
+    20%  { width: 35%;  }
+    50%  { width: 65%;  }
+    80%  { width: 88%;  }
+    100% { width: 95%;  }
+  }
+  .gen-bar-tick {
+    position: absolute;
+    top: 0; bottom: 0;
+    width: 1px;
+    background: #000;
+    opacity: .6;
+  }
+
+  /* Coordonnées techniques fictives (déco) */
+  .gen-meta {
+    display: flex;
+    justify-content: space-between;
+    font-family: "IBM Plex Sans", monospace;
+    font-size: 10px;
+    letter-spacing: .1em;
+    color: #6c6c6c;
+    text-transform: uppercase;
+    margin-top: 10px;
+  }
+  .gen-meta span b { color: #ffcd00; font-weight: 600; }
+</style>
+{% endblock %}
+
 {% block content %}
 
-<div class="wizard accordion" style="position: fixed; top: 70px; bottom: 50px; left: 20px; right: 20px; overflow-y: auto;">
-  
-  <div class="accordion-header-home" style="position: sticky; top: 0; z-index: 200;background: #f7f8fb;">
-    <!-- <h1>Configuration du Rapport de Formation</h1> -->
-    <div style="display: flex; justify-content: space-between; align-items: center; padding-right: 20px;">
-      <p style="margin: 0;">Remplissez les informations ci-dessous pour générer votre rapport</p>
-      <div style="display: flex; gap: 10px;">
-        <button id="btn-help" class="btn secondary help-btn" style="border: none;padding: 8px 16px; font-size: 14px; background: #fdcb18; color: black;  border-radius: 6px; cursor: pointer; transition: all 0.2s ease; position: relative; overflow: hidden; box-shadow: 6px 6px 12px black;">
-          📖 Mode d'emploi
+{# ============================================================
+   Overlay "mécanique" affiché pendant la génération du PDF
+   ============================================================ #}
+<div id="gen-overlay" role="dialog" aria-modal="true" aria-labelledby="gen-title">
+  <div class="gen-panel">
+    <span class="rivet tl"></span><span class="rivet tr"></span>
+    <span class="rivet bl"></span><span class="rivet br"></span>
+
+    {# Engrenages SVG #}
+    <div class="gears" aria-hidden="true">
+      <svg class="gear gear-big" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <g fill="currentColor">
+          <path d="M50 6l4 8h-8z M50 94l4-8h-8z M6 50l8-4v8z M94 50l-8-4v8z
+                   M19 19l8 2-2 8-8-2z M81 81l-8-2 2-8 8 2z
+                   M81 19l2 8-8 2-2-8z M19 81l-2-8 8-2 2 8z" />
+          <circle cx="50" cy="50" r="34"/>
+        </g>
+        <circle cx="50" cy="50" r="16" fill="#0a0a0a"/>
+        <circle cx="50" cy="50" r="6"  fill="#ffcd00"/>
+      </svg>
+      <svg class="gear gear-small" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+        <g fill="currentColor">
+          <path d="M50 6l4 8h-8z M50 94l4-8h-8z M6 50l8-4v8z M94 50l-8-4v8z
+                   M19 19l8 2-2 8-8-2z M81 81l-8-2 2-8 8 2z
+                   M81 19l2 8-8 2-2-8z M19 81l-2-8 8-2 2 8z" />
+          <circle cx="50" cy="50" r="34"/>
+        </g>
+        <circle cx="50" cy="50" r="14" fill="#0a0a0a"/>
+        <circle cx="50" cy="50" r="5"  fill="#ffcd00"/>
+      </svg>
+    </div>
+
+    <h3 id="gen-title" class="gen-title">Génération en cours</h3>
+    <p class="gen-sub">Neemba · Compilation Pipeline</p>
+
+    <p class="gen-status" id="gen-status">
+      Initialisation du moteur<span class="dot">...</span>
+    </p>
+
+    {# Barre de progression #}
+    <div class="gen-bar" aria-hidden="true">
+      <div class="gen-bar-fill"></div>
+      {# Ticks décoratifs #}
+      <div class="gen-bar-tick" style="left:25%"></div>
+      <div class="gen-bar-tick" style="left:50%"></div>
+      <div class="gen-bar-tick" style="left:75%"></div>
+    </div>
+
+    <div class="gen-meta">
+      <span>RIG <b>NMB-001</b></span>
+      <span>PSI <b id="gen-psi">0140</b></span>
+      <span>RPM <b id="gen-rpm">2400</b></span>
+    </div>
+  </div>
+</div>
+
+<div class="wizard accordion" style="max-width: 1280px; margin: 24px auto; padding: 0 24px;">
+
+  <div class="accordion-header-home" style="position: sticky; top: 80px; z-index: 40; background: #f7f8fb; padding: 12px 0;">
+    <div class="wizard-toolbar" style="display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; padding-right: 20px;">
+      <p class="wizard-toolbar-intro">Remplissez les informations ci-dessous pour générer votre rapport</p>
+      <div class="wizard-toolbar-actions" style="display: flex; flex-wrap: wrap; gap: 10px;">
+        <button id="btn-help"
+                class="bg-primary-container text-on-primary-container font-label-bold px-md py-sm rounded uppercase tracking-widest text-label-bold flex items-center justify-center gap-xs hover:opacity-90 active:scale-95 transition-all">
+          <span class="material-symbols-outlined">menu_book</span>
+          Mode d'emploi
         </button>
-        <button id="btn-deployment" class="btn secondary deployment-btn" style="border: none;padding: 8px 16px; font-size: 14px; background: #04BFBF; color: white;  border-radius: 6px; cursor: pointer; transition: all 0.2s ease; position: relative; overflow: hidden; box-shadow: 6px 6px 12px black;">
-          🚀 Guide déploiement
+        <button id="btn-deployment"
+                class="bg-inverse-surface text-white font-label-bold px-md py-sm rounded uppercase tracking-widest text-label-bold flex items-center justify-center gap-xs hover:opacity-90 active:scale-95 transition-all">
+          <span class="material-symbols-outlined">rocket_launch</span>
+          Guide déploiement
         </button>
-        <button id="btn-reset" class="btn secondary reset-btn">
-          🔄 Réinitialiser
+        <button id="btn-reset"
+                class="border-2 border-on-surface text-on-surface font-label-bold px-md py-sm rounded uppercase tracking-widest text-label-bold flex items-center justify-center gap-xs hover:bg-on-surface hover:text-white active:scale-95 transition-all">
+          <span class="material-symbols-outlined">restart_alt</span>
+          Réinitialiser
         </button>
       </div>
     </div>
@@ -121,7 +600,7 @@
   <section class="card step" data-step="4">
       <div class="list-editor">
           <label>Points du sommaire</label>
-          <div class="adder"><input id="summary_input" placeholder="Ajouter un point du sommaire"><button id="summary_add" class="btn small">+</button></div>
+          <div class="adder"><input id="summary_input" placeholder="Ajouter un point du sommaire"><button id="summary_add" class="bg-primary-container text-on-primary-container font-label-bold px-sm py-xs rounded uppercase tracking-wider hover:opacity-90 active:scale-95 transition-all" aria-label="Ajouter">+</button></div>
         <ol id="summary_list"></ol>
       </div>
       </section>
@@ -138,7 +617,7 @@
       <section class="card step" data-step="5">
       <div class="list-editor">
           <label>Objectifs de la formation</label>
-        <div class="adder"><input id="objectives_input" placeholder="Ajouter un objectif"><button id="objectives_add" class="btn small">+</button></div>
+        <div class="adder"><input id="objectives_input" placeholder="Ajouter un objectif"><button id="objectives_add" class="bg-primary-container text-on-primary-container font-label-bold px-sm py-xs rounded uppercase tracking-wider hover:opacity-90 active:scale-95 transition-all" aria-label="Ajouter">+</button></div>
         <ul id="objectives_list"></ul>
       </div>
       </section>
@@ -173,7 +652,10 @@
       <label for="plan_notes" style="width: 100%;">Notes</label>
       <textarea id="plan_notes" rows="2" placeholder="Notes complémentaires" style="width: 100%;"></textarea>
       <div>
-        <button id="plan_add" class="btn medium" >Ajouter</button>
+        <button id="plan_add" class="bg-primary-container text-on-primary-container font-label-bold px-md py-sm rounded uppercase tracking-widest text-label-bold inline-flex items-center gap-xs hover:opacity-90 active:scale-95 transition-all">
+        <span class="material-symbols-outlined">add</span>
+        Ajouter
+      </button>
       </div>
     </div>
     <span>Apperçu</span>
@@ -208,7 +690,11 @@
       <div><strong>Interprétation</strong> <span id="kpi_interp">—</span></div>
     </div>
     <div class="actions">
-      <button id="btn_analyze" class="btn">Analyser</button>
+      <button id="btn_analyze"
+              class="bg-primary-container text-on-primary-container font-label-bold px-lg py-md rounded uppercase tracking-widest text-label-bold inline-flex items-center gap-sm hover:opacity-90 active:scale-95 transition-all">
+        <span class="material-symbols-outlined">analytics</span>
+        Analyser
+      </button>
     </div>
   </section>
     </div>
@@ -360,7 +846,12 @@
   <!-- Bouton de génération du rapport -->
   <div class="generate-section" style="position: sticky; bottom: 0; background: #f7f8fb; padding: 10px; border-top: 2px solid #ddd; z-index: 100;">
     <div class="actions" style="text-align: center;">
-      <button id="btn_generate" class="btn primary" style="font-size: 1em; padding: 10px 20px;">Générer le Rapport PDF</button>
+      <button id="btn_generate"
+              class="bg-primary-container text-on-primary-container font-label-bold px-lg py-md rounded uppercase tracking-widest text-label-bold inline-flex items-center gap-sm hover:opacity-90 active:scale-95 transition-all disabled:opacity-50 disabled:cursor-not-allowed">
+        <span class="material-symbols-outlined">picture_as_pdf</span>
+        Générer le Rapport PDF
+        <span class="material-symbols-outlined">arrow_forward</span>
+      </button>
     </div>
   </div>
 </div>
@@ -380,4 +871,95 @@ function toggleAccordion(header) {
 }
 </script>
 
+{% endblock %}
+
+{% block scripts %}
+<script>
+/* ============================================================
+   Pilotage de l'overlay "mécanique" pendant la génération PDF
+   On observe les classes du bouton #btn_generate (ajoutées par
+   app.js : .generating / .success / .error).
+   ============================================================ */
+(function () {
+  const overlay = document.getElementById('gen-overlay');
+  const btn     = document.getElementById('btn_generate');
+  if (!overlay || !btn) return;
+
+  const statusEl = document.getElementById('gen-status');
+  const psiEl    = document.getElementById('gen-psi');
+  const rpmEl    = document.getElementById('gen-rpm');
+
+  const STATUS_CYCLE = [
+    "Initialisation du moteur",
+    "Compilation des données",
+    "Assemblage des sections",
+    "Rendu graphique des KPIs",
+    "Optimisation du PDF",
+    "Finalisation",
+  ];
+
+  let cycleTimer = null;
+  let metaTimer  = null;
+
+  function setStatus(text) {
+    if (!statusEl) return;
+    statusEl.innerHTML = text + '<span class="dot">...</span>';
+  }
+
+  function startCycle() {
+    let i = 0;
+    setStatus(STATUS_CYCLE[i]);
+    cycleTimer = setInterval(() => {
+      i = (i + 1) % STATUS_CYCLE.length;
+      setStatus(STATUS_CYCLE[i]);
+    }, 1800);
+
+    // Petites valeurs PSI / RPM qui frémissent
+    metaTimer = setInterval(() => {
+      if (psiEl) psiEl.textContent = String(120 + Math.floor(Math.random() * 80)).padStart(4, '0');
+      if (rpmEl) rpmEl.textContent = String(2200 + Math.floor(Math.random() * 600));
+    }, 350);
+  }
+
+  function stopCycle() {
+    if (cycleTimer) { clearInterval(cycleTimer); cycleTimer = null; }
+    if (metaTimer)  { clearInterval(metaTimer);  metaTimer  = null; }
+  }
+
+  function show() {
+    overlay.classList.add('active');
+    document.body.style.overflow = 'hidden';
+    startCycle();
+  }
+
+  function hide(delay = 0) {
+    setTimeout(() => {
+      overlay.classList.remove('active');
+      document.body.style.overflow = '';
+      stopCycle();
+    }, delay);
+  }
+
+  // Surveille les changements d'état du bouton de génération
+  const observer = new MutationObserver(() => {
+    if (btn.classList.contains('generating')) {
+      if (!overlay.classList.contains('active')) show();
+    } else if (btn.classList.contains('success')) {
+      setStatus("Rapport généré avec succès");
+      hide(900);
+    } else if (btn.classList.contains('error')) {
+      setStatus("Erreur de génération");
+      hide(1200);
+    } else if (overlay.classList.contains('active')) {
+      hide();
+    }
+  });
+  observer.observe(btn, { attributes: true, attributeFilter: ['class'] });
+
+  // Sécurité : Echap masque l'overlay (la requête continue côté serveur)
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && overlay.classList.contains('active')) hide();
+  });
+})();
+</script>
 {% endblock %}

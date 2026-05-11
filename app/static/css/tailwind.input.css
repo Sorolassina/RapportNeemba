@@ -1,0 +1,55 @@
+/*
+ * Source CSS pour Tailwind CLI.
+ * Ne PAS éditer le fichier généré `tailwind.css` (il est écrasé à chaque build).
+ *
+ * Build prod : tools\tailwindcss.exe -i app\static\css\tailwind.input.css -o app\static\css\tailwind.css --minify
+ * Watch dev  : tools\tailwindcss.exe -i app\static\css\tailwind.input.css -o app\static\css\tailwind.css --watch
+ */
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* ---------------------------------------------------------------------------
+ * Surcharges globales spécifiques Neemba (extraites de l'inline <style> du
+ * base_v2.html). On les met ici pour qu'elles soient compilées et minifiées
+ * avec le reste du CSS Tailwind.
+ * ------------------------------------------------------------------------- */
+
+@layer base {
+  /* Material Symbols : règle universelle avec !important pour battre toute
+     règle plus spécifique (notamment sur .wizard span, etc.). */
+  .material-symbols-outlined,
+  span.material-symbols-outlined,
+  button .material-symbols-outlined,
+  a .material-symbols-outlined,
+  .wizard .material-symbols-outlined,
+  .help-container .material-symbols-outlined,
+  .deployment-container .material-symbols-outlined {
+    font-family: "Material Symbols Outlined" !important;
+    font-weight: normal !important;
+    font-style: normal !important;
+    font-size: 24px;
+    line-height: 1 !important;
+    letter-spacing: normal !important;
+    text-transform: none !important;
+    display: inline-block;
+    white-space: nowrap !important;
+    word-wrap: normal !important;
+    direction: ltr !important;
+    font-feature-settings: "liga" !important;
+    -webkit-font-feature-settings: "liga" !important;
+    -webkit-font-smoothing: antialiased;
+    font-variation-settings: "FILL" 0, "wght" 400, "GRAD" 0, "opsz" 24;
+  }
+}
+
+@layer components {
+  .hero-gradient {
+    background: linear-gradient(
+      to right,
+      rgba(0, 0, 0, 0.9) 0%,
+      rgba(0, 0, 0, 0.4) 100%
+    );
+  }
+}

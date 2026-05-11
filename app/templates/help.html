@@ -1,27 +1,127 @@
-{% extends "base.html" %}
+{% extends "base_v2.html" %}
+{% block title %}Mode d'emploi – Neemba Academy{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* Typo Neemba Academy appliquée au mode d'emploi */
+  .help-container,
+  .help-container input,
+  .help-container textarea,
+  .help-container select,
+  .help-container button,
+  .help-container label,
+  .help-container p,
+  .help-container li,
+  .help-container span:not(.material-symbols-outlined),
+  .help-container a {
+    font-family: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+  }
+  .help-container h1,
+  .help-container h2,
+  .help-container h3,
+  .help-container h4 {
+    font-family: "Archivo Narrow", "IBM Plex Sans", sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    color: #000000 !important;
+    border-left-color: #ffcd00 !important;
+  }
+  .help-container .material-symbols-outlined {
+    font-family: 'Material Symbols Outlined' !important;
+  }
+  .help-container h1 { font-size: 2em; }
+  .help-container .help-header {
+    border-bottom: 4px solid #ffcd00 !important;
+  }
+  .help-container .step-number {
+    background: #000000 !important;
+    border-radius: 0 !important;
+    font-family: "Archivo Narrow", sans-serif;
+  }
+  .help-container .step-box {
+    border-left: 4px solid #ffcd00 !important;
+    border-radius: 0 !important;
+  }
+  .help-container .info-box,
+  .help-container .warning-box,
+  .help-container .tip-box,
+  .help-container .troubleshooting-box,
+  .help-container .contact-box,
+  .help-container .file-type-card {
+    border-radius: 0 !important;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 
 <div class="help-container">
     <div class="help-header">
-        <h1>📋 Mode d'emploi - NEMBA Report Generator</h1>
+        <h1><span class="material-symbols-outlined" style="font-size: 1em; vertical-align: -4px; margin-right: 8px;">menu_book</span>Mode d'emploi &mdash; Neemba Academy</h1>
         <div class="help-nav">
-            <a href="{{ url_for('wizard') }}" class="btn secondary">← Retour au wizard</a>
-            <button onclick="window.print()" class="btn secondary">🖨️ Imprimer</button>
+            <a href="{{ url_for('wizard') }}"
+               class="bg-primary-container text-on-primary-container font-label-bold px-md py-sm rounded uppercase tracking-widest text-label-bold inline-flex items-center justify-center gap-xs hover:opacity-90 active:scale-95 transition-all no-underline">
+                <span class="material-symbols-outlined">arrow_back</span>
+                Retour au rapport
+            </a>
+            <button onclick="window.print()"
+                    class="bg-inverse-surface text-white font-label-bold px-md py-sm rounded uppercase tracking-widest text-label-bold inline-flex items-center justify-center gap-xs hover:opacity-90 active:scale-95 transition-all">
+                <span class="material-symbols-outlined">print</span>
+                Imprimer
+            </button>
         </div>
     </div>
-    
+
     <div class="help-content">
         <div class="info-box">
-            <strong>🎯 Objectif :</strong> Ce guide vous accompagne dans l'utilisation du générateur de rapports de formation NEMBA. Vous apprendrez à créer des rapports PDF professionnels étape par étape.
+            <strong>Objectif :</strong> Ce guide vous accompagne pas à pas dans la création d'un rapport de formation au format PDF sur la plateforme Neemba Academy. Vous y trouverez la description de la navigation, le détail des 11 sections du formulaire, les formats de fichiers acceptés et les bonnes pratiques.
         </div>
 
-        <h2>🚀 Démarrage rapide</h2>
-        
+        <h2><span class="material-symbols-outlined" style="vertical-align: -5px;">home</span> Découvrir l'application</h2>
+
+        <p>L'application est organisée autour de 3 espaces accessibles depuis la barre de navigation en haut de page :</p>
+
+        <div class="step-box">
+            <span class="step-number"><span class="material-symbols-outlined" style="color:#fff;font-size:18px;">home</span></span>
+            <div class="step-content">
+                <strong>Accueil</strong><br>
+                Page d'introduction qui présente la plateforme Neemba Academy et les modules à venir (Formations, Budgets, Référentiels, Import / Export, Administration). Lors de votre première visite, une courte animation d'introduction (~4&nbsp;s) est jouée &mdash; vous pouvez l'ignorer avec le bouton <code>Skip</code> ou la touche <code>Esc</code>.
+            </div>
+        </div>
+
+        <div class="step-box">
+            <span class="step-number"><span class="material-symbols-outlined" style="color:#fff;font-size:18px;">description</span></span>
+            <div class="step-content">
+                <strong>Rapport</strong> &mdash; <em>c'est ici que vous générez vos rapports.</em><br>
+                Formulaire en 11 étapes pour saisir toutes les informations d'une formation, prévisualiser le rendu, puis exporter en PDF. Le PDF est généré nativement avec <strong>ReportLab</strong>.
+            </div>
+        </div>
+
+        <div class="step-box">
+            <span class="step-number"><span class="material-symbols-outlined" style="color:#fff;font-size:18px;">dashboard</span></span>
+            <div class="step-content">
+                <strong>Tableaux de bord</strong><br>
+                Dashboard <strong>Power BI</strong> embarqué qui consolide les indicateurs (formations, stagiaires, taux de réussite). Lecture seule.
+            </div>
+        </div>
+
+        <div class="tip-box">
+            <strong>Bon à savoir :</strong>
+            <ul>
+                <li>L'application ne stocke pas vos données dans une base : tout reste <strong>en mémoire et dans des fichiers temporaires de session</strong>.</li>
+                <li>Les uploads (logos, photos, Excel) sont conservés le temps de la session puis nettoyés automatiquement.</li>
+                <li>L'interface est <strong>responsive</strong> &mdash; elle s'adapte à mobile, tablette et desktop.</li>
+            </ul>
+        </div>
+
+        <h2><span class="material-symbols-outlined" style="vertical-align: -5px;">rocket_launch</span> Démarrage rapide (4 étapes)</h2>
+
         <div class="step-box">
             <span class="step-number">1</span>
             <div class="step-content">
-                <strong>Accédez à l'application</strong><br>
-                Ouvrez votre navigateur et connectez-vous à l'URL fournie par votre administrateur système.
+                <strong>Ouvrez l'onglet Rapport</strong><br>
+                Dans la barre de navigation en haut, cliquez sur <strong>Rapport</strong> (ou rendez-vous directement à l'URL <code>/rapport</code>).
             </div>
         </div>
 
@@ -29,27 +129,27 @@
             <span class="step-number">2</span>
             <div class="step-content">
                 <strong>Saisissez l'intitulé de la formation</strong><br>
-                En haut de la page, renseignez le titre de votre formation (ex: "Formation sur l'utilisation de la machine XYZ").
+                En haut de la page, renseignez le titre (ex&nbsp;: <em>«&nbsp;Formation sur l'utilisation de la machine 320GC&nbsp;»</em>).
             </div>
         </div>
 
         <div class="step-box">
             <span class="step-number">3</span>
             <div class="step-content">
-                <strong>Remplissez les informations</strong><br>
-                Suivez les étapes dans l'ordre en cliquant sur chaque accordéon pour déplier les sections.
+                <strong>Remplissez les 11 sections</strong><br>
+                Cliquez sur chaque accordéon pour le déplier. Vous pouvez les remplir dans l'ordre que vous voulez, mais l'ordre proposé reflète celui du PDF final.
             </div>
         </div>
 
         <div class="step-box">
             <span class="step-number">4</span>
             <div class="step-content">
-                <strong>Générez votre rapport</strong><br>
-                Cliquez sur le bouton "Générer le Rapport PDF" en bas de page pour télécharger votre rapport.
+                <strong>Générez votre rapport PDF</strong><br>
+                Cliquez sur le bouton jaune <strong>«&nbsp;Générer le rapport PDF&nbsp;»</strong>. Une animation de génération mécanique s'affiche pendant la création du fichier (quelques secondes), puis le PDF se télécharge automatiquement.
             </div>
         </div>
 
-        <h2>📝 Guide détaillé par section</h2>
+        <h2><span class="material-symbols-outlined" style="vertical-align: -5px;">description</span> Guide détaillé par section</h2>
 
         <div class="section-group">
             <h3>1. Informations Client</h3>
@@ -135,7 +235,7 @@
         </div>
 
         <div class="warning-box">
-            <strong>⚠️ Attention :</strong> Si les colonnes de votre fichier Excel ne correspondent pas aux noms attendus, un message d'avertissement apparaîtra. Cela peut affecter la qualité des analyses.
+            <strong>Attention &mdash; structure du fichier :</strong> les colonnes attendues sont <code>Stagiaire</code>, <code>Test_In</code>, <code>Test_Out</code>. Si elles ne correspondent pas, un message d'avertissement s'affiche dans l'aperçu et les graphiques de progression peuvent être faussés. Vérifiez aussi que les valeurs de tests sont bien numériques (sans pourcentage&nbsp;<code>%</code> ni texte).
         </div>
 
         <div class="section-group">
@@ -182,7 +282,7 @@
             </div>
         </div>
 
-        <h2>📁 Formats de fichiers supportés</h2>
+        <h2><span class="material-symbols-outlined" style="vertical-align: -5px;">picture_as_pdf</span> Formats de fichiers supportés</h2>
         
         <div class="file-types-grid">
             <div class="file-type-card supported">
@@ -202,88 +302,110 @@
             </div>
         </div>
 
-        <h2>💡 Conseils et bonnes pratiques</h2>
+        <h2><span class="material-symbols-outlined" style="vertical-align: -5px;">check_circle</span> Conseils et bonnes pratiques</h2>
 
         <div class="tip-box">
-            <strong>✅ Bonnes pratiques :</strong>
+            <strong>Bonnes pratiques :</strong>
             <ul>
-                <li>Préparez tous vos fichiers avant de commencer</li>
-                <li>Utilisez des images de bonne qualité (minimum 800x600px)</li>
-                <li>Nommez vos fichiers de manière claire</li>
-                <li>Sauvegardez régulièrement votre travail</li>
-                <li>Vérifiez l'aperçu avant de générer le PDF</li>
+                <li>Préparez tous vos fichiers (logos, photos, Excel, émargements) <strong>avant</strong> de commencer la saisie.</li>
+                <li>Utilisez des images de bonne qualité (idéalement &geq; 1200&nbsp;px de large pour les photos de machine et de salle).</li>
+                <li>Nommez vos fichiers de façon explicite (<code>logo-client.png</code>, <code>machine-320GC.jpg</code>, etc.).</li>
+                <li>Renseignez d'abord les sections <strong>Client</strong> et <strong>Formateur</strong> &mdash; elles alimentent la page de garde du PDF.</li>
+                <li>Utilisez <strong>«&nbsp;Aperçu&nbsp;»</strong> pour relire le rendu HTML avant de lancer la génération PDF.</li>
+                <li>Sur mobile, faites pivoter votre appareil en mode paysage pour les sections avec plusieurs colonnes.</li>
             </ul>
         </div>
 
         <div class="warning-box">
-            <strong>❌ À éviter :</strong>
+            <strong>À éviter :</strong>
             <ul>
-                <li>Fichiers corrompus ou trop volumineux</li>
-                <li>Images floues ou de mauvaise qualité</li>
-                <li>Données Excel avec des colonnes mal nommées</li>
-                <li>Oublier de remplir les champs obligatoires</li>
+                <li>Fichiers Excel avec des colonnes renommées ou des cellules fusionnées dans la zone de données.</li>
+                <li>Images floues, captures d'écran de basse résolution ou photos sous-exposées.</li>
+                <li>Champs obligatoires laissés vides (intitulé de formation, dates, nombre de stagiaires&hellip;).</li>
+                <li>Fermer l'onglet en plein milieu d'une saisie &mdash; les données sont en mémoire, elles seront perdues.</li>
+                <li>Uploader plusieurs dizaines de photos non recadrées (privilégiez 5 à 15 photos représentatives).</li>
             </ul>
         </div>
 
-        <h2>🔧 Résolution de problèmes</h2>
+        <h2><span class="material-symbols-outlined" style="vertical-align: -5px;">restart_alt</span> Résolution de problèmes</h2>
 
         <div class="troubleshooting-box">
             <h3>Problèmes courants et solutions :</h3>
-            
+
             <div class="problem-section">
-                <strong>🚫 Erreur d'upload :</strong>
+                <strong>Erreur d'upload</strong>
                 <ul>
-                    <li>Vérifiez la taille du fichier (max 50MB)</li>
-                    <li>Assurez-vous que le format est supporté</li>
-                    <li>Vérifiez votre connexion internet</li>
+                    <li>Vérifiez la taille du fichier (max 50&nbsp;Mo pour Excel, 10&nbsp;Mo pour les images).</li>
+                    <li>Assurez-vous que le format est supporté (JPG, PNG, SVG, XLSX, XLS, CSV).</li>
+                    <li>Vérifiez que votre connexion réseau est stable.</li>
+                    <li>Si vous êtes derrière un VPN d'entreprise, essayez de désactiver temporairement le proxy.</li>
                 </ul>
             </div>
 
             <div class="problem-section">
-                <strong>📊 Analyse Excel échouée :</strong>
+                <strong>Analyse Excel échouée</strong>
                 <ul>
-                    <li>Vérifiez les noms des colonnes</li>
-                    <li>Assurez-vous que les données numériques sont bien formatées</li>
-                    <li>Évitez les cellules vides dans les colonnes importantes</li>
+                    <li>Les colonnes doivent s'appeler exactement <code>Stagiaire</code>, <code>Test_In</code>, <code>Test_Out</code> (sensible à la casse).</li>
+                    <li>Les notes doivent être des <strong>nombres</strong> (pas de texte, pas de signe&nbsp;<code>%</code>).</li>
+                    <li>Évitez les cellules fusionnées et les en-têtes multi-lignes.</li>
+                    <li>Si vous utilisez un CSV, le séparateur doit être <code>;</code> ou <code>,</code> (point-virgule recommandé).</li>
                 </ul>
             </div>
 
             <div class="problem-section">
-                <strong>🖼️ Images non affichées :</strong>
+                <strong>Images non affichées dans l'aperçu</strong>
                 <ul>
-                    <li>Vérifiez le format (JPG, PNG, SVG uniquement)</li>
-                    <li>Assurez-vous que l'image n'est pas corrompue</li>
-                    <li>Réduisez la taille si nécessaire</li>
+                    <li>Vérifiez le format (JPG, PNG, SVG uniquement &mdash; pas de HEIC ni de WebP).</li>
+                    <li>Assurez-vous que l'image n'est pas corrompue (essayez de l'ouvrir avec une visionneuse).</li>
+                    <li>Si l'image dépasse 10&nbsp;Mo, réduisez sa résolution avant l'upload.</li>
                 </ul>
             </div>
 
             <div class="problem-section">
-                <strong>📄 PDF non généré :</strong>
+                <strong>PDF non généré ou bouton bloqué</strong>
                 <ul>
-                    <li>Vérifiez que tous les champs obligatoires sont remplis</li>
-                    <li>Attendez la fin du processus (peut prendre quelques minutes)</li>
-                    <li>Vérifiez que votre navigateur autorise les téléchargements</li>
+                    <li>Vérifiez que <strong>tous les champs obligatoires</strong> sont remplis (sinon le serveur renvoie une erreur 422).</li>
+                    <li>Patientez quelques secondes &mdash; la génération peut prendre 5 à 15&nbsp;s selon le volume d'images. L'animation mécanique vous tient au courant.</li>
+                    <li>Vérifiez que votre navigateur autorise les téléchargements (un bandeau peut apparaître la première fois).</li>
+                    <li>Désactivez les bloqueurs de pop-up et les extensions de sécurité agressives sur cette URL.</li>
+                </ul>
+            </div>
+
+            <div class="problem-section">
+                <strong>Icônes affichées comme du texte (<code>menu_book</code>, <code>home</code>&hellip;)</strong>
+                <ul>
+                    <li>La police d'icônes Material Symbols n'a pas pu se charger.</li>
+                    <li>Faites <code>Ctrl</code>+<code>F5</code> pour vider le cache et recharger.</li>
+                    <li>Si le problème persiste, contactez votre administrateur (la police est servie en local sous <code>app/static/fonts/</code>).</li>
+                </ul>
+            </div>
+
+            <div class="problem-section">
+                <strong>Mise en page cassée après une mise à jour</strong>
+                <ul>
+                    <li>Forcez le rechargement avec <code>Ctrl</code>+<code>F5</code> &mdash; le navigateur peut conserver une ancienne feuille de styles en cache.</li>
+                    <li>En mode privé / navigation privée, le cache est isolé : c'est un bon test rapide.</li>
                 </ul>
             </div>
         </div>
 
-        <h2>📞 Support et contact</h2>
+        <h2><span class="material-symbols-outlined" style="vertical-align: -5px;">mail</span> Support et contact</h2>
 
         <div class="contact-box">
-            <strong>🆘 Besoin d'aide ?</strong><br><br>
-            Si vous rencontrez des difficultés ou avez des questions :<br><br>
-            <strong>📧 Email :</strong> support@nemba-group.com<br>
-            <strong>📞 Téléphone :</strong> +225 XX XX XX XX<br>
-            <strong>🕒 Horaires :</strong> Lundi - Vendredi, 8h00 - 17h00<br><br>
-            <em>N'oubliez pas de mentionner votre nom, votre entreprise et une description précise du problème rencontré.</em>
+            <strong>Besoin d'aide ?</strong><br><br>
+            Si vous rencontrez des difficultés ou avez des questions sur l'utilisation de la plateforme&nbsp;:<br><br>
+            <strong>Email :</strong> support@nemba-group.com<br>
+            <strong>Horaires :</strong> Lundi - Vendredi, 8h00 - 17h00<br><br>
+            <em>Pensez à préciser votre nom, votre entreprise, l'étape qui pose problème et, si possible, une copie d'écran.</em>
         </div>
 
         <div class="info-box">
-            <strong>📚 Ressources supplémentaires :</strong><br>
-            • Guide d'administration système<br>
-            • Modèles de fichiers Excel<br>
-            • Exemples de rapports générés<br>
-            • FAQ technique
+            <strong>Ressources complémentaires :</strong>
+            <ul style="margin-top:8px;">
+                <li><a href="{{ url_for('deployment_page') }}">Guide de déploiement</a> &mdash; pour les administrateurs (installation, NSSM, Docker, Cloudflare Tunnel).</li>
+                <li><a href="{{ url_for('dashboard') }}">Tableaux de bord Power BI</a> &mdash; vue consolidée des indicateurs de formation.</li>
+                <li><a href="{{ url_for('home') }}">Accueil Neemba Academy</a> &mdash; modules à venir et roadmap 2026.</li>
+            </ul>
         </div>
     </div>
 </div>
@@ -474,21 +596,116 @@ li {
     }
 }
 
-/* Responsive */
+/* ============================================================
+   RESPONSIVE — Mode d'emploi
+   ============================================================ */
+
+/* Tablette ≤ 1024px : container plus aéré */
+@media (max-width: 1024px) {
+    .help-container {
+        margin: 16px;
+        padding: 24px;
+    }
+    .help-content h1 { font-size: 1.7em; }
+}
+
+/* Mobile ≤ 768px : layout vertical, padding compact */
 @media (max-width: 768px) {
+    .help-container {
+        padding: 16px;
+        margin: 0;
+        box-shadow: none;
+    }
     .help-header {
         flex-direction: column;
         gap: 15px;
         text-align: center;
+        align-items: stretch;
     }
-    
+    .help-header h1 {
+        font-size: 1.4em !important;
+        text-align: left;
+        line-height: 1.25;
+    }
     .help-nav {
-        justify-content: center;
+        flex-direction: column;
+        gap: 8px;
     }
-    
+    .help-nav > a,
+    .help-nav > button {
+        width: 100%;
+        min-height: 44px;
+    }
     .file-types-grid {
         grid-template-columns: 1fr;
+        gap: 12px;
     }
+    .step-box {
+        padding: 14px;
+        gap: 10px;
+    }
+    .help-content h2 {
+        font-size: 1.2em !important;
+        margin-top: 24px;
+    }
+    .help-content h3 {
+        font-size: 1.05em !important;
+        margin-top: 20px;
+    }
+    /* Boxes colorées : padding réduit pour économiser l'espace */
+    .info-box,
+    .warning-box,
+    .tip-box,
+    .troubleshooting-box,
+    .contact-box {
+        padding: 14px;
+        margin: 14px 0;
+        font-size: 14.5px;
+    }
+    .step-number {
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+    }
+    /* Listes : moins d'indentation */
+    ul, ol { padding-left: 20px; }
+    li { margin: 6px 0; }
+}
+
+/* Mobile ≤ 480px : ultra-compact, step-box en colonne */
+@media (max-width: 480px) {
+    .help-container {
+        padding: 12px;
+    }
+    .help-header h1 {
+        font-size: 1.15em !important;
+    }
+    /* Step-box : numéro au-dessus du texte sur très petit écran */
+    .step-box {
+        flex-direction: column;
+        gap: 8px;
+        padding: 12px;
+    }
+    .step-number {
+        width: 26px;
+        height: 26px;
+        font-size: 13px;
+    }
+    .file-type-card {
+        padding: 14px;
+    }
+    .info-box,
+    .warning-box,
+    .tip-box,
+    .troubleshooting-box,
+    .contact-box {
+        padding: 12px;
+        margin: 12px 0;
+        font-size: 13.5px;
+    }
+    .help-content h2 { font-size: 1.1em !important; }
+    .help-content h3 { font-size: 1em !important; }
+    ul, ol { padding-left: 18px; }
 }
 </style>
 

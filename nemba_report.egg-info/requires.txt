@@ -6,12 +6,7 @@ pydantic
 pandas
 matplotlib
 openpyxl
-pdfkit
-weasyprint>=66.0
 reportlab>=4.4.3
 cairosvg>=2.8.2
 seaborn>=0.13.2
 psutil>=5.9.6
-
-[:platform_system != "Windows"]
-weasyprint

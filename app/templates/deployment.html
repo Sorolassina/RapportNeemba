@@ -1,328 +1,547 @@
-{% extends "base.html" %}
+{% extends "base_v2.html" %}
+{% block title %}Guide de déploiement – Neemba Academy{% endblock %}
+
+{% block extra_head %}
+<style>
+  /* Typo Neemba Academy appliquée au guide de déploiement */
+  .deployment-container,
+  .deployment-container input,
+  .deployment-container textarea,
+  .deployment-container select,
+  .deployment-container button,
+  .deployment-container label,
+  .deployment-container p,
+  .deployment-container li,
+  .deployment-container span:not(.material-symbols-outlined),
+  .deployment-container a {
+    font-family: "IBM Plex Sans", system-ui, -apple-system, sans-serif;
+  }
+  .deployment-container h1,
+  .deployment-container h2,
+  .deployment-container h3,
+  .deployment-container h4 {
+    font-family: "Archivo Narrow", "IBM Plex Sans", sans-serif;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+    text-transform: uppercase;
+    color: #000000 !important;
+    border-left-color: #ffcd00 !important;
+  }
+  .deployment-container .material-symbols-outlined {
+    font-family: 'Material Symbols Outlined' !important;
+  }
+  .deployment-container h1 { font-size: 2em; }
+  /* Garde la police monospace pour les blocs de code */
+  .deployment-container .code-block,
+  .deployment-container .code-block pre,
+  .deployment-container .code-block code {
+    font-family: 'Courier New', Consolas, monospace !important;
+    text-transform: none !important;
+  }
+  .deployment-container .deployment-header {
+    border-bottom: 4px solid #ffcd00 !important;
+  }
+  .deployment-container .step-number {
+    background: #000000 !important;
+    border-radius: 0 !important;
+    font-family: "Archivo Narrow", sans-serif;
+  }
+  .deployment-container .step-box,
+  .deployment-container .deployment-section {
+    border-left: 4px solid #ffcd00 !important;
+    border-radius: 0 !important;
+  }
+  .deployment-container .info-box,
+  .deployment-container .warning-box,
+  .deployment-container .tip-box,
+  .deployment-container .troubleshooting-box,
+  .deployment-container .contact-box,
+  .deployment-container .prereq-card,
+  .deployment-container .code-block {
+    border-radius: 0 !important;
+  }
+  .deployment-container a {
+    color: #000000;
+    border-bottom: 2px solid #ffcd00;
+  }
+</style>
+{% endblock %}
+
 {% block content %}
 
 <div class="deployment-container">
     <div class="deployment-header">
-        <h1>🚀 Guide de Déploiement - NEMBA Report Generator</h1>
+        <h1><span class="material-symbols-outlined" style="font-size: 1em; vertical-align: -4px; margin-right: 8px;">rocket_launch</span>Guide de Déploiement &mdash; NEMBA Report Generator</h1>
         <div class="deployment-nav">
-            <a href="{{ url_for('wizard') }} " class="btn secondary">← Retour au wizard</a>
-            <button onclick="window.print()" class="btn secondary">🖨️ Imprimer</button>
+            <a href="{{ url_for('wizard') }}"
+               class="bg-primary-container text-on-primary-container font-label-bold px-md py-sm rounded uppercase tracking-widest text-label-bold inline-flex items-center justify-center gap-xs hover:opacity-90 active:scale-95 transition-all no-underline">
+                <span class="material-symbols-outlined">arrow_back</span>
+                Retour au wizard
+            </a>
+            <button onclick="window.print()"
+                    class="bg-inverse-surface text-white font-label-bold px-md py-sm rounded uppercase tracking-widest text-label-bold inline-flex items-center justify-center gap-xs hover:opacity-90 active:scale-95 transition-all">
+                <span class="material-symbols-outlined">print</span>
+                Imprimer
+            </button>
         </div>
     </div>
     
     <div class="deployment-content">
         <div class="info-box">
-            <strong>🎯 Objectif :</strong> Ce guide vous accompagne dans le déploiement de l'application NEMBA Report Generator, que ce soit sur un serveur interne ou sur une plateforme cloud comme Render.
+            <strong>Objectif :</strong> Déployer NEMBA Report Generator <strong>en une seule commande</strong> grâce au task runner <code>makefile.ps1</code> &mdash; sur Windows (dev / service NSSM / Docker), avec exposition Internet via Cloudflare Tunnel, ou sur Linux / cloud (alternative).
         </div>
 
-        <h2>📋 Prérequis</h2>
-        
+        <h2><span class="material-symbols-outlined" style="vertical-align: -5px;">rocket_launch</span> Quick start (1 commande)</h2>
+
+        <div class="deployment-section">
+            <p>Sur Windows, après <code>git clone</code> :</p>
+            <div class="code-block">
+                <pre><code>cd nemba-report
+.\makefile.ps1 start</code></pre>
+            </div>
+            <p>Le script effectue <strong>12 vérifications avec auto-fix</strong>, puis propose un menu interactif (Dev / NSSM / Docker) et propose ensuite Cloudflare Tunnel.</p>
+
+            <h4>Variantes utiles</h4>
+            <div class="code-block">
+                <pre><code># Production : git pull + backup uploads + service NSSM
+.\makefile.ps1 start -Profile prod -Pull -Backup
+
+# Mode CI / serveur headless (sans navigateur, sans pare-feu)
+.\makefile.ps1 start -NoBrowser -NoFirewall
+
+# Aide complète
+.\makefile.ps1 help</code></pre>
+            </div>
+        </div>
+
+        <h2><span class="material-symbols-outlined" style="vertical-align: -5px;">check_circle</span> Pré-requis</h2>
+
         <div class="prerequisites-grid">
             <div class="prereq-card">
-                <h3>💻 Serveur Interne</h3>
+                <h3>Windows (recommandé)</h3>
                 <ul>
-                    <li>Ubuntu 20.04+ / CentOS 8+ / Debian 11+</li>
-                    <li>Python 3.9+ (recommandé 3.11)</li>
-                    <li>RAM : 2GB minimum, 4GB recommandé</li>
-                    <li>CPU : 2 cœurs minimum</li>
-                    <li>Stockage : 10GB d'espace libre</li>
+                    <li>PowerShell 5.1+ ou 7+</li>
+                    <li><strong>uv</strong> 0.4+ (gestion Python rapide)</li>
+                    <li>Python 3.11+ (auto-installé par uv)</li>
+                    <li>git 2.x</li>
+                    <li>NSSM 2.24+ (pour mode service Windows)</li>
+                    <li>Docker Desktop (pour mode container)</li>
+                    <li>cloudflared (optionnel, tunnel)</li>
                 </ul>
             </div>
-            
+
             <div class="prereq-card">
-                <h3>☁️ Render (Cloud)</h3>
+                <h3>Linux / cloud</h3>
                 <ul>
-                    <li>Compte Render gratuit ou payant</li>
-                    <li>Repository Git (GitHub/GitLab)</li>
-                    <li>Domaine personnalisé (optionnel)</li>
-                    <li>Variables d'environnement</li>
+                    <li>Ubuntu 20.04+ / Debian 11+</li>
+                    <li>Python 3.11+, uv ou pip</li>
+                    <li>Nginx (reverse proxy) ou Cloudflare Tunnel</li>
+                    <li>Render / Railway / Fly.io (PaaS)</li>
+                    <li>RAM 2 GB min., 10 GB de disque</li>
                 </ul>
             </div>
         </div>
 
-        <h2>🏠 Déploiement Serveur Interne</h2>
-
-        <div class="deployment-section">
-            <h3>1. Installation des dépendances système</h3>
-            <div class="code-block">
-                <h4>Ubuntu/Debian :</h4>
-                <pre><code>sudo apt update
-sudo apt install python3.11 python3.11-venv python3.11-dev build-essential
-sudo apt install nginx apache2-utils</code></pre>
-                
-                <h4>CentOS/RHEL :</h4>
-                <pre><code>sudo yum install python311 python311-devel gcc gcc-c++ make
-sudo yum install nginx httpd-tools</code></pre>
-            </div>
+        <div class="info-box">
+            <strong>Astuce :</strong> Sur Windows, <code>start</code> installe automatiquement Docker et cloudflared via <code>winget</code> si absents, et fournit le lien de téléchargement manuel en cas d'échec.
         </div>
 
+        <h2><span class="material-symbols-outlined" style="vertical-align: -5px;">description</span> Workflow Windows recommandé</h2>
+
         <div class="deployment-section">
-            <h3>2. Configuration de l'application</h3>
+            <h3>1. Installation initiale</h3>
             <div class="step-box">
                 <span class="step-number">1</span>
                 <div class="step-content">
-                    <strong>Cloner le projet</strong><br>
-                    <code>cd /opt && sudo git clone [URL_REPO] nemba-report</code>
+                    <strong>Installer uv (une seule fois sur la machine)</strong><br>
+                    <code>powershell -c "irm https://astral.sh/uv/install.ps1 | iex"</code>
                 </div>
             </div>
-            
             <div class="step-box">
                 <span class="step-number">2</span>
                 <div class="step-content">
-                    <strong>Créer l'environnement virtuel</strong><br>
-                    <code>cd nemba-report && python3.11 -m venv venv</code>
+                    <strong>Cloner le projet</strong><br>
+                    <code>git clone &lt;URL_DU_REPO&gt; nemba-report &amp;&amp; cd nemba-report</code>
                 </div>
             </div>
-            
             <div class="step-box">
                 <span class="step-number">3</span>
                 <div class="step-content">
-                    <strong>Installer les dépendances</strong><br>
-                    <code>source venv/bin/activate && pip install -r requirements.txt</code>
+                    <strong>Lancer le démarrage assisté</strong><br>
+                    <code>.\makefile.ps1 start</code><br>
+                    <em>Le reste (Python 3.11, dépendances, Tailwind CLI, CSS, police d'icônes, dossiers uploads/logs, SECRET_KEY, Docker, Cloudflared) est automatique.</em>
                 </div>
             </div>
         </div>
 
         <div class="deployment-section">
-            <h3>3. Configuration Nginx + Gunicorn</h3>
+            <h3>2. Mode dev local</h3>
+            <p>Lancement <code>uvicorn --reload</code> avec ouverture auto du navigateur.</p>
             <div class="code-block">
-                <h4>Service systemd :</h4>
-                <pre><code>sudo nano /etc/systemd/system/nemba-report.service</code></pre>
-                <pre><code>[Unit]
+                <pre><code>.\makefile.ps1 start
+# (puis : 1)
+
+# Ou directement :
+.\makefile.ps1 dev
+.\makefile.ps1 dev -Port 8080</code></pre>
+            </div>
+        </div>
+
+        <div class="deployment-section">
+            <h3>3. Mode service Windows (NSSM)</h3>
+            <p>Crée un service Windows <strong>nemba-report</strong> qui :</p>
+            <ul>
+                <li>Démarre automatiquement au boot (<code>SERVICE_AUTO_START</code>)</li>
+                <li>Redémarre auto en cas de crash (5 s de délai)</li>
+                <li>Logge dans <code>logs/nemba-report.out.log</code> et <code>.err.log</code></li>
+                <li>Tourne via <code>uv run uvicorn app.main:app --host 0.0.0.0 --port 8000</code></li>
+            </ul>
+            <div class="code-block">
+                <h4>Création du service :</h4>
+                <pre><code>.\makefile.ps1 start
+# (puis : 2 → o pour confirmer)</code></pre>
+                <h4>Commandes de gestion :</h4>
+                <pre><code>nssm status nemba-report
+nssm restart nemba-report
+nssm stop nemba-report
+nssm remove nemba-report confirm     # désinstaller
+
+# Logs en direct
+Get-Content logs\nemba-report.out.log -Tail 50 -Wait</code></pre>
+            </div>
+            <div class="info-box">
+                <strong>Pré-requis :</strong> NSSM doit être installé et dans le PATH (<a href="https://nssm.cc/download" target="_blank">nssm.cc/download</a>).
+            </div>
+        </div>
+
+        <div class="deployment-section">
+            <h3>4. Mode Docker</h3>
+            <p>Le <code>Dockerfile</code> à la racine est multi-stage (builder + runtime <code>python:3.11-slim</code>), avec utilisateur non-root, healthcheck HTTP, libs cairo/freetype.</p>
+            <div class="code-block">
+                <pre><code>.\makefile.ps1 start
+# (puis : 3)
+# Le script propose d'installer Docker Desktop via winget si absent.</code></pre>
+                <h4>Commandes utiles :</h4>
+                <pre><code>docker ps -f name=nemba-report
+docker logs -f nemba-report
+docker restart nemba-report
+docker stop nemba-report
+docker rm -f nemba-report</code></pre>
+            </div>
+            <p>Le conteneur expose <code>0.0.0.0:8000</code> et monte <code>app/static/uploads/</code> en volume pour persister les uploads.</p>
+        </div>
+
+        <div class="deployment-section">
+            <h3>5. Cloudflare Tunnel (exposition Internet)</h3>
+            <p>Après le choix du mode, le script demande :</p>
+            <div class="code-block">
+                <pre><code>Voulez-vous aussi exposer via Cloudflare Tunnel ? (o/n)</code></pre>
+            </div>
+
+            <h4>Deux modes disponibles</h4>
+            <div class="prerequisites-grid">
+                <div class="prereq-card">
+                    <h3>Quick Tunnel</h3>
+                    <p><strong>URL aléatoire</strong> <code>*.trycloudflare.com</code> (éphémère).</p>
+                    <ul>
+                        <li>Pas de compte requis</li>
+                        <li>Idéal pour démo / test rapide</li>
+                        <li>Disparaît à la fermeture</li>
+                    </ul>
+                </div>
+                <div class="prereq-card">
+                    <h3>Tunnel nommé (production)</h3>
+                    <p>Domaine personnalisé persistant : <code>https://rapport.votre-domaine.com</code></p>
+                    <ul>
+                        <li>Compte Cloudflare gratuit + domaine ajouté</li>
+                        <li>Authentification via navigateur</li>
+                        <li>Génère <code>~/.cloudflared/config.yml</code></li>
+                        <li>TLS automatique</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="code-block">
+                <h4>Pour faire de cloudflared un service Windows persistant :</h4>
+                <pre><code>cloudflared service install</code></pre>
+            </div>
+        </div>
+
+        <h2><span class="material-symbols-outlined" style="vertical-align: -5px;">check_circle</span> Pré-flight checks de <code>start</code></h2>
+
+        <div class="deployment-section">
+            <p>Le script vérifie 12 points avant tout lancement, et corrige automatiquement quand c'est possible :</p>
+            <div class="code-block">
+<pre><code>1.  uv installé
+2.  Profil .env (-Profile dev/staging/prod) chargé
+3.  Dépendances Python (uv sync)
+4.  Python ≥ 3.11
+5.  SECRET_KEY auto-généré si vide dans .env
+6.  Tailwind CLI (auto-téléchargé si absent)
+7.  CSS Tailwind à jour (auto-rebuild si templates plus récents)
+8.  Police Material Symbols Outlined
+9.  Dossiers uploads/ et logs/ (auto-créés)
+10. Smoke test : import app.main sans erreur
+11. Espace disque > 500 MB + état git
+12. Port libre</code></pre>
+            </div>
+        </div>
+
+        <h2><span class="material-symbols-outlined" style="vertical-align: -5px;">admin_panel_settings</span> Variables d'environnement</h2>
+
+        <div class="deployment-section">
+            <p>Le fichier <code>.env</code> est créé automatiquement depuis <code>.env.example</code> au premier lancement.</p>
+            <div class="code-block">
+                <pre><code># Port d'écoute (défaut: 8000)
+# PORT=8000
+
+# Root path FastAPI quand l'app est servie derrière un reverse proxy
+# ROOT_PATH=/neembacoaching
+
+# Version applicative (sinon: court SHA git, sinon timestamp)
+# APP_VERSION=
+
+# Clé secrète des sessions (auto-générée par 'start' si vide)
+# SECRET_KEY=</code></pre>
+            </div>
+
+            <div class="info-box">
+                <strong>Profils multi-environnement :</strong> créer <code>.env.dev</code>, <code>.env.staging</code>, <code>.env.prod</code> puis lancer avec <code>-Profile &lt;nom&gt;</code>. Le bon <code>.env</code> est copié à chaque démarrage.
+            </div>
+        </div>
+
+        <h2><span class="material-symbols-outlined" style="vertical-align: -5px;">construction</span> Maintenance</h2>
+
+        <div class="deployment-section">
+            <h3>Mise à jour du code</h3>
+            <div class="code-block">
+                <pre><code>.\makefile.ps1 start -Pull -Backup
+# -Pull   : git pull --ff-only avant lancement
+# -Backup : sauvegarde uploads/ dans backups/&lt;date&gt;/</code></pre>
+            </div>
+
+            <h3>Re-build du front-end</h3>
+            <div class="code-block">
+                <pre><code>.\makefile.ps1 build-css      # build production
+.\makefile.ps1 watch-css      # recompile auto en dev
+.\makefile.ps1 icons          # re-subset Material Symbols</code></pre>
+            </div>
+
+            <h3>Diagnostic / nettoyage</h3>
+            <div class="code-block">
+                <pre><code>.\makefile.ps1 info           # versions des outils + tailles fichiers
+.\makefile.ps1 tree           # arborescence du projet
+.\makefile.ps1 clean -Force   # __pycache__, *.pyc, uploads, caches</code></pre>
+            </div>
+        </div>
+
+        <h2><span class="material-symbols-outlined" style="vertical-align: -5px;">share</span> Déploiement Linux (alternative)</h2>
+
+        <div class="deployment-section">
+            <h3>Service systemd + Nginx</h3>
+            <div class="code-block">
+                <h4>1. Installation</h4>
+                <pre><code>sudo apt update &amp;&amp; sudo apt install -y python3.11 build-essential nginx git
+curl -LsSf https://astral.sh/uv/install.sh | sh
+sudo git clone &lt;URL&gt; /opt/nemba-report
+cd /opt/nemba-report &amp;&amp; uv sync</code></pre>
+
+                <h4>2. Build du CSS Tailwind (équivalent Linux)</h4>
+                <pre><code>curl -L https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.17/tailwindcss-linux-x64 \
+     -o tools/tailwindcss &amp;&amp; chmod +x tools/tailwindcss
+./tools/tailwindcss -c tailwind.config.js \
+                    -i app/static/css/tailwind.input.css \
+                    -o app/static/css/tailwind.css --minify</code></pre>
+
+                <h4>3. Service systemd</h4>
+                <pre><code># /etc/systemd/system/nemba-report.service
+[Unit]
 Description=NEMBA Report Generator
 After=network.target
 
 [Service]
-Type=notify
+Type=simple
 User=www-data
 Group=www-data
 WorkingDirectory=/opt/nemba-report
-Environment=PATH=/opt/nemba-report/venv/bin
-ExecStart=/opt/nemba-report/venv/bin/gunicorn --bind unix:/run/nemba-report.sock --workers 3 --worker-class uvicorn.workers.UvicornWorker app.main:app
-ExecReload=/bin/kill -s HUP $MAINPID
+ExecStart=/root/.local/bin/uv run uvicorn app.main:app --host 127.0.0.1 --port 8000
 Restart=always
 RestartSec=5
 
 [Install]
 WantedBy=multi-user.target</code></pre>
-            </div>
-            
-            <div class="code-block">
-                <h4>Configuration Nginx :</h4>
-                <pre><code>sudo nano /etc/nginx/sites-available/nemba-report</code></pre>
-                <pre><code>server {
+                <pre><code>sudo systemctl daemon-reload
+sudo systemctl enable --now nemba-report</code></pre>
+
+                <h4>4. Reverse proxy Nginx + SSL Let's Encrypt</h4>
+                <pre><code># /etc/nginx/sites-available/nemba-report
+server {
     listen 80;
     server_name votre-domaine.com;
-    
     client_max_body_size 50M;
-    
+
     location /static/ {
         alias /opt/nemba-report/app/static/;
         expires 1y;
+        add_header Cache-Control "public, immutable";
     }
-    
     location / {
-        proxy_pass http://unix:/run/nemba-report.sock;
+        proxy_pass http://127.0.0.1:8000;
         proxy_set_header Host $host;
         proxy_set_header X-Real-IP $remote_addr;
-        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
         proxy_set_header X-Forwarded-Proto $scheme;
     }
 }</code></pre>
+                <pre><code>sudo ln -s /etc/nginx/sites-available/nemba-report /etc/nginx/sites-enabled/
+sudo nginx -t &amp;&amp; sudo systemctl reload nginx
+sudo certbot --nginx -d votre-domaine.com</code></pre>
             </div>
         </div>
 
-        <div class="deployment-section">
-            <h3>4. Activation et démarrage</h3>
-            <div class="code-block">
-                <pre><code># Activer le site Nginx
-sudo ln -s /etc/nginx/sites-available/nemba-report /etc/nginx/sites-enabled/
-sudo nginx -t
-sudo systemctl reload nginx
-
-# Démarrer le service
-sudo systemctl enable nemba-report
-sudo systemctl start nemba-report
-sudo systemctl status nemba-report</code></pre>
-            </div>
-        </div>
-
-        <h2>☁️ Déploiement sur Render</h2>
+        <h2><span class="material-symbols-outlined" style="vertical-align: -5px;">public</span> Déploiement cloud (Render)</h2>
 
         <div class="deployment-section">
-            <h3>1. Préparation du repository</h3>
-            <div class="step-box">
-                <span class="step-number">1</span>
-                <div class="step-content">
-                    <strong>Créer un fichier render.yaml</strong><br>
-                    Ajoutez ce fichier à la racine de votre projet :
-                </div>
-            </div>
-            
+            <p>Créer <code>render.yaml</code> à la racine puis Render &rarr; New + &rarr; Web Service &rarr; connecter le repo. SSL automatique inclus.</p>
             <div class="code-block">
-                <pre><code># render.yaml
-services:
+                <pre><code>services:
   - type: web
     name: nemba-report
     env: python
     plan: free
-    buildCommand: pip install -r requirements.txt
-    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    buildCommand: |
+      pip install uv
+      uv sync --frozen
+      curl -L https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.17/tailwindcss-linux-x64 -o /tmp/tailwindcss
+      chmod +x /tmp/tailwindcss
+      /tmp/tailwindcss -c tailwind.config.js -i app/static/css/tailwind.input.css -o app/static/css/tailwind.css --minify
+    startCommand: uv run uvicorn app.main:app --host 0.0.0.0 --port $PORT
     envVars:
       - key: PYTHON_VERSION
         value: 3.11.0</code></pre>
             </div>
-        </div>
-
-        <div class="deployment-section">
-            <h3>2. Configuration sur Render</h3>
-            <div class="step-box">
-                <span class="step-number">1</span>
-                <div class="step-content">
-                    <strong>Connecter votre repository</strong><br>
-                    • Allez sur <a href="https://render.com" target="_blank">render.com</a><br>
-                    • Cliquez sur "New +" → "Web Service"<br>
-                    • Connectez votre compte GitHub/GitLab
-                </div>
-            </div>
-            
-            <div class="step-box">
-                <span class="step-number">2</span>
-                <div class="step-content">
-                    <strong>Configurer le service</strong><br>
-                    • Repository : Sélectionnez votre repo<br>
-                    • Branch : main<br>
-                    • Root Directory : laissez vide<br>
-                    • Environment : Python 3
-                </div>
-            </div>
-            
-            <div class="step-box">
-                <span class="step-number">3</span>
-                <div class="step-content">
-                    <strong>Variables d'environnement</strong><br>
-                    • PORT : 10000 (automatique)<br>
-                    • PYTHON_VERSION : 3.11.0<br>
-                    • HOST : 0.0.0.0
-                </div>
-            </div>
-        </div>
-
-        <div class="deployment-section">
-            <h3>3. Commandes de build et démarrage</h3>
-            <div class="code-block">
-                <h4>Build Command :</h4>
-                <pre><code>pip install -r requirements.txt</code></pre>
-                
-                <h4>Start Command :</h4>
-                <pre><code>uvicorn app.main:app --host 0.0.0.0 --port $PORT</code></pre>
-            </div>
-        </div>
-
-        <h2>🔒 Configuration SSL/HTTPS</h2>
-
-        <div class="deployment-section">
-            <h3>Serveur Interne - Let's Encrypt</h3>
-            <div class="code-block">
-                <pre><code># Installation Certbot
-sudo apt install certbot python3-certbot-nginx
-
-# Génération du certificat
-sudo certbot --nginx -d votre-domaine.com
-
-# Renouvellement automatique
-sudo crontab -e
-# Ajouter : 0 12 * * * /usr/bin/certbot renew --quiet</code></pre>
-            </div>
-        </div>
-
-        <div class="deployment-section">
-            <h3>Render - SSL automatique</h3>
             <div class="info-box">
-                <strong>✅ Avantage Render :</strong> Le SSL est automatiquement configuré pour tous les services web. Aucune configuration supplémentaire nécessaire !
+                <strong>Railway / Fly.io :</strong> le <code>Dockerfile</code> du projet fonctionne tel quel, configurer le port 8000 exposé.
             </div>
         </div>
 
-        <h2>📊 Monitoring et Maintenance</h2>
+        <h2><span class="material-symbols-outlined" style="vertical-align: -5px;">admin_panel_settings</span> Sécurité</h2>
 
         <div class="deployment-section">
-            <h3>Serveur Interne</h3>
-            <div class="code-block">
-                <h4>Vérifier le statut :</h4>
-                <pre><code>sudo systemctl status nemba-report
-sudo journalctl -u nemba-report -f</code></pre>
-                
-                <h4>Logs Nginx :</h4>
-                <pre><code>sudo tail -f /var/log/nginx/nemba-report_error.log
-sudo tail -f /var/log/nginx/nemba-report_access.log</code></pre>
-            </div>
+            <ul>
+                <li><strong>Pare-feu Windows</strong> : <code>start</code> propose la création automatique de la règle (UAC requis).</li>
+                <li><strong>HTTPS</strong> : Cloudflare Tunnel fournit TLS automatiquement. Sinon Let's Encrypt côté Nginx.</li>
+                <li><strong><code>.env</code></strong> : ne jamais commit (déjà dans <code>.gitignore</code>).</li>
+                <li><strong><code>SECRET_KEY</code></strong> : auto-généré (32 octets aléatoires) par <code>start</code> si vide.</li>
+                <li><strong>Image Docker</strong> : tourne en utilisateur non-root <code>nemba</code>.</li>
+                <li><strong>Headers</strong> : ajouter via Nginx ou Cloudflare (X-Frame-Options, CSP, etc.).</li>
+            </ul>
         </div>
 
-        <div class="deployment-section">
-            <h3>Render</h3>
-            <div class="info-box">
-                <strong>📈 Monitoring :</strong> Render fournit des métriques automatiques : CPU, RAM, requêtes, temps de réponse. Accessibles dans le dashboard.
-            </div>
-        </div>
-
-        <h2>🔧 Résolution de problèmes</h2>
+        <h2><span class="material-symbols-outlined" style="vertical-align: -5px;">restart_alt</span> Dépannage</h2>
 
         <div class="troubleshooting-box">
-            <h3>Problèmes courants :</h3>
-            
             <div class="problem-section">
-                <strong>🚫 Erreur 502 Bad Gateway :</strong>
-                <ul>
-                    <li>Vérifiez que le service nemba-report est démarré</li>
-                    <li>Contrôlez les permissions du socket Unix</li>
-                    <li>Vérifiez les logs : <code>sudo journalctl -u nemba-report</code></li>
-                </ul>
+                <strong>Port déjà utilisé</strong>
+                <div class="code-block" style="margin-top: 10px;">
+                    <pre><code>Get-NetTCPConnection -LocalPort 8000 | Select-Object OwningProcess
+Stop-Process -Id &lt;PID&gt; -Force
+# Ou changer de port :
+.\makefile.ps1 start -Port 8080</code></pre>
+                </div>
             </div>
 
             <div class="problem-section">
-                <strong>📁 Erreur d'upload :</strong>
-                <ul>
-                    <li>Vérifiez <code>client_max_body_size</code> dans Nginx</li>
-                    <li>Contrôlez les permissions du dossier uploads</li>
-                    <li>Serveur interne : <code>sudo chown -R www-data:www-data /var/lib/nemba-report</code></li>
-                </ul>
+                <strong>Icônes Material Symbols affichées comme texte</strong>
+                <p>Police absente. Lancer :</p>
+                <div class="code-block" style="margin-top: 10px;">
+                    <pre><code>.\makefile.ps1 icons</code></pre>
+                </div>
             </div>
 
             <div class="problem-section">
-                <strong>🐍 Erreur Python :</strong>
-                <ul>
-                    <li>Vérifiez la version Python (3.9+ requis)</li>
-                    <li>Réinstallez les dépendances : <code>pip install -r requirements.txt</code></li>
-                    <li>Vérifiez les variables d'environnement</li>
-                </ul>
+                <strong>CSS non à jour après modification d'un template</strong>
+                <p>Le pre-flight de <code>start</code> détecte automatiquement. Sinon manuellement :</p>
+                <div class="code-block" style="margin-top: 10px;">
+                    <pre><code>.\makefile.ps1 build-css</code></pre>
+                </div>
             </div>
 
             <div class="problem-section">
-                <strong>☁️ Problèmes Render :</strong>
-                <ul>
-                    <li>Vérifiez les logs dans le dashboard Render</li>
-                    <li>Contrôlez les variables d'environnement</li>
-                    <li>Redéployez le service si nécessaire</li>
-                </ul>
+                <strong>Service NSSM ne démarre pas</strong>
+                <div class="code-block" style="margin-top: 10px;">
+                    <pre><code>nssm status nemba-report
+Get-Content logs\nemba-report.err.log -Tail 50</code></pre>
+                </div>
+                <p>Causes typiques : port pris, deps manquantes, <code>.env</code> corrompu.</p>
+            </div>
+
+            <div class="problem-section">
+                <strong>Container Docker crash au démarrage</strong>
+                <div class="code-block" style="margin-top: 10px;">
+                    <pre><code>docker logs nemba-report --tail 100
+docker exec -it nemba-report bash    # debug interactif</code></pre>
+                </div>
+            </div>
+
+            <div class="problem-section">
+                <strong>Cloudflared : authentification échouée</strong>
+                <p>Si pas de compte / domaine Cloudflare :</p>
+                <ol>
+                    <li>Sign up gratuit : <a href="https://dash.cloudflare.com/sign-up" target="_blank">dash.cloudflare.com/sign-up</a></li>
+                    <li>Sites &rarr; Add a site (plan Free)</li>
+                    <li>Pointer les nameservers du domaine vers Cloudflare</li>
+                    <li>Relancer <code>.\makefile.ps1 start</code> &rarr; option Cloudflared &rarr; mode 2</li>
+                </ol>
             </div>
         </div>
 
-        <h2>📞 Support technique</h2>
+        <h2><span class="material-symbols-outlined" style="vertical-align: -5px;">menu_book</span> Référence rapide</h2>
+
+        <div class="deployment-section">
+            <div class="code-block">
+                <pre><code># Démarrage assisté (le plus simple)
+.\makefile.ps1 start
+
+# Production avec backup + git pull
+.\makefile.ps1 start -Profile prod -Pull -Backup
+
+# Mode CI / headless
+.\makefile.ps1 start -NoBrowser -NoFirewall -NoChecks
+
+# Diagnostic seul (sans démarrage)
+.\makefile.ps1 info
+
+# Front-end uniquement
+.\makefile.ps1 build-css
+.\makefile.ps1 watch-css
+
+# Maintenance
+.\makefile.ps1 clean -Force
+.\makefile.ps1 lint
+.\makefile.ps1 format
+
+# Aide complète
+.\makefile.ps1 help</code></pre>
+            </div>
+        </div>
+
+        <h2><span class="material-symbols-outlined" style="vertical-align: -5px;">mail</span> Support</h2>
 
         <div class="contact-box">
-            <strong>🆘 Besoin d'aide pour le déploiement ?</strong><br><br>
-            <strong>📧 Email :</strong> admin@nemba-group.com<br>
-            <strong>📞 Téléphone :</strong> +225 XX XX XX XX<br>
-            <strong>🕒 Horaires :</strong> Lundi - Vendredi, 8h00 - 17h00<br><br>
-            <em>Préparez : logs d'erreur, configuration serveur, et description précise du problème.</em>
+            <strong>Besoin d'aide pour le déploiement ?</strong><br><br>
+            <strong>Email :</strong> admin@nemba-group.com<br>
+            <strong>Horaires :</strong> Lundi - Vendredi, 8h00 - 17h00<br><br>
+            <em>Préparez : sortie de <code>.\makefile.ps1 info</code>, logs (<code>logs/</code>), et description précise du problème.</em>
         </div>
 
         <div class="info-box">
-            <strong>📚 Ressources supplémentaires :</strong><br>
-            • <a href="https://docs.render.com" target="_blank">Documentation Render</a><br>
-            • <a href="https://nginx.org/en/docs/" target="_blank">Documentation Nginx</a><br>
-            • <a href="https://fastapi.tiangolo.com/deployment/" target="_blank">Déploiement FastAPI</a><br>
-            • Guide d'administration système complet
+            <strong>Ressources :</strong><br>
+            &bull; <a href="https://fastapi.tiangolo.com/deployment/" target="_blank">Documentation FastAPI</a><br>
+            &bull; <a href="https://www.reportlab.com/docs/" target="_blank">Documentation ReportLab</a><br>
+            &bull; <a href="https://v3.tailwindcss.com/docs/installation" target="_blank">Documentation Tailwind v3</a><br>
+            &bull; <a href="https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/" target="_blank">Documentation Cloudflare Tunnel</a><br>
+            &bull; <a href="https://nssm.cc/usage" target="_blank">Documentation NSSM</a><br>
+            &bull; <a href="https://docs.docker.com/desktop/" target="_blank">Documentation Docker Desktop</a>
         </div>
     </div>
 </div>
@@ -554,25 +773,146 @@ a:hover {
     }
 }
 
-/* Responsive */
+/* ============================================================
+   RESPONSIVE — Guide de déploiement
+   ============================================================ */
+
+/* Tablette ≤ 1024px : container plus aéré */
+@media (max-width: 1024px) {
+    .deployment-container {
+        margin: 16px;
+        padding: 24px;
+    }
+    .prerequisites-grid {
+        grid-template-columns: 1fr 1fr;
+    }
+    .deployment-content h1 { font-size: 1.7em; }
+}
+
+/* Mobile ≤ 768px : layout vertical, padding compact */
 @media (max-width: 768px) {
+    .deployment-container {
+        padding: 16px;
+        margin: 0;
+        box-shadow: none;
+    }
     .deployment-header {
         flex-direction: column;
         gap: 15px;
         text-align: center;
+        align-items: stretch;
     }
-    
+    .deployment-header h1 {
+        font-size: 1.4em !important;
+        text-align: left;
+        line-height: 1.25;
+    }
     .deployment-nav {
-        justify-content: center;
+        flex-direction: column;
+        gap: 8px;
     }
-    
+    .deployment-nav > a,
+    .deployment-nav > button {
+        width: 100%;
+        min-height: 44px;
+    }
     .prerequisites-grid {
         grid-template-columns: 1fr;
+        gap: 12px;
     }
-    
+    .prereq-card {
+        padding: 14px;
+    }
+    .deployment-section {
+        padding: 14px;
+        margin: 20px 0;
+    }
+    .deployment-content h2 {
+        font-size: 1.2em !important;
+        margin-top: 24px;
+    }
+    .deployment-content h3 {
+        font-size: 1.05em !important;
+        margin-top: 20px;
+    }
+    /* Boxes colorées : padding réduit */
+    .info-box,
+    .warning-box,
+    .tip-box,
+    .troubleshooting-box,
+    .contact-box {
+        padding: 14px;
+        margin: 14px 0;
+        font-size: 14.5px;
+    }
+    /* Code blocks : scrollables horizontalement, police ajustée */
     .code-block {
         font-size: 12px;
+        padding: 12px;
+        margin: 14px 0;
+        overflow-x: auto;
     }
+    .code-block pre {
+        font-size: 11px;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        line-height: 1.5;
+    }
+    .step-box {
+        padding: 14px;
+        gap: 10px;
+    }
+    .step-number {
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+    }
+    /* Listes : moins d'indentation */
+    ul, ol { padding-left: 20px; }
+    li { margin: 6px 0; }
+}
+
+/* Mobile ≤ 480px : ultra-compact, step-box en colonne */
+@media (max-width: 480px) {
+    .deployment-container {
+        padding: 12px;
+    }
+    .deployment-header h1 {
+        font-size: 1.15em !important;
+    }
+    /* Step-box : numéro au-dessus du texte */
+    .step-box {
+        flex-direction: column;
+        gap: 8px;
+        padding: 12px;
+    }
+    .step-number {
+        width: 26px;
+        height: 26px;
+        font-size: 13px;
+    }
+    .info-box,
+    .warning-box,
+    .tip-box,
+    .troubleshooting-box,
+    .contact-box {
+        padding: 12px;
+        margin: 12px 0;
+        font-size: 13.5px;
+    }
+    .code-block {
+        padding: 10px;
+        margin: 12px 0;
+    }
+    .code-block pre {
+        font-size: 10.5px;
+    }
+    .deployment-section {
+        padding: 12px;
+    }
+    .deployment-content h2 { font-size: 1.1em !important; }
+    .deployment-content h3 { font-size: 1em !important; }
+    ul, ol { padding-left: 18px; }
 }
 </style>
 

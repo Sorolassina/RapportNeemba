@@ -1,4 +1,4 @@
-# Guide de Déploiement — NEMBA Report Generator
+# Guide de Déploiement — LiuGong Academy
 
 ## Vue d'ensemble
 
@@ -71,8 +71,8 @@ Et propose ensuite **Cloudflare Tunnel** (Quick ou nommé) pour exposer sur Inte
 powershell -c "irm https://astral.sh/uv/install.ps1 | iex"
 
 # 2. Cloner le projet
-git clone <URL_DU_REPO> nemba-report
-cd nemba-report
+git clone <URL_DU_REPO> liugong-academy
+cd liugong-academy
 
 # 3. Lancement assisté
 .\makefile.ps1 start
@@ -95,10 +95,10 @@ Lancement uvicorn avec `--reload`, ouverture auto du navigateur après ~2s.
 
 ### c) Mode service Windows (NSSM)
 
-Le script crée un service Windows nommé **`nemba-report`** qui :
+Le script crée un service Windows nommé **`liugong-academy`** qui :
 - Démarre automatiquement au boot (`SERVICE_AUTO_START`)
 - Redémarre automatiquement en cas de crash (5 s de délai)
-- Logge dans `logs/nemba-report.out.log` et `logs/nemba-report.err.log`
+- Logge dans `logs/liugong-academy.out.log` et `logs/liugong-academy.err.log`
 - Tourne via `uv run uvicorn app.main:app --host 0.0.0.0 --port 8000`
 
 ```powershell
@@ -106,11 +106,11 @@ Le script crée un service Windows nommé **`nemba-report`** qui :
 # (puis : 2 → o pour confirmer la création)
 
 # Commandes utiles ensuite
-nssm status nemba-report
-nssm restart nemba-report
-nssm stop nemba-report
-nssm remove nemba-report confirm     # désinstaller
-Get-Content logs\nemba-report.out.log -Tail 50 -Wait
+.\makefile.ps1 nssm-status
+.\makefile.ps1 nssm-restart
+.\makefile.ps1 nssm-stop
+.\makefile.ps1 nssm-remove
+Get-Content logs\liugong-academy.out.log -Tail 50 -Wait
 ```
 
 **Pré-requis** : avoir installé NSSM ([https://nssm.cc/download](https://nssm.cc/download))
@@ -127,11 +127,11 @@ avec utilisateur non-root, healthcheck HTTP, et libs cairo/freetype pour matplot
 # Le script propose d'installer Docker Desktop via winget si absent.
 
 # Commandes utiles ensuite
-docker ps -f name=nemba-report
-docker logs -f nemba-report
-docker restart nemba-report
-docker stop nemba-report
-docker rm -f nemba-report             # supprimer le conteneur
+docker ps -f name=liugong-academy
+docker logs -f liugong-academy
+docker restart liugong-academy
+docker stop liugong-academy
+docker rm -f liugong-academy             # supprimer le conteneur
 ```
 
 Le conteneur expose `0.0.0.0:8000` et monte `app/static/uploads/` en volume
@@ -167,7 +167,7 @@ cloudflared service install
 ## 2. Structure des dossiers en runtime
 
 ```
-nemba-report/
+liugong-academy/
 ├── app/
 │   ├── main.py                  # Routes FastAPI
 │   ├── analysis.py              # Lecture Excel + KPIs
@@ -269,8 +269,8 @@ sudo apt update && sudo apt install -y python3.11 python3.11-venv build-essentia
 curl -LsSf https://astral.sh/uv/install.sh | sh
 
 # Cloner et installer
-sudo git clone <URL> /opt/nemba-report
-cd /opt/nemba-report
+sudo git clone <URL> /opt/liugong-academy
+cd /opt/liugong-academy
 uv sync
 
 # Build du CSS Tailwind (équivalent .\scripts\tailwind.ps1 build)
@@ -284,16 +284,16 @@ curl -L https://github.com/tailwindlabs/tailwindcss/releases/download/v3.4.17/ta
 ### b) Service systemd
 
 ```ini
-# /etc/systemd/system/nemba-report.service
+# /etc/systemd/system/liugong-academy.service
 [Unit]
-Description=NEMBA Report Generator
+Description=LiuGong Academy
 After=network.target
 
 [Service]
 Type=simple
 User=www-data
 Group=www-data
-WorkingDirectory=/opt/nemba-report
+WorkingDirectory=/opt/liugong-academy
 ExecStart=/root/.local/bin/uv run uvicorn app.main:app --host 127.0.0.1 --port 8000
 Restart=always
 RestartSec=5
@@ -304,21 +304,21 @@ WantedBy=multi-user.target
 
 ```bash
 sudo systemctl daemon-reload
-sudo systemctl enable --now nemba-report
-sudo systemctl status nemba-report
+sudo systemctl enable --now liugong-academy
+sudo systemctl status liugong-academy
 ```
 
 ### c) Reverse proxy Nginx
 
 ```nginx
-# /etc/nginx/sites-available/nemba-report
+# /etc/nginx/sites-available/liugong-academy
 server {
     listen 80;
     server_name votre-domaine.com;
     client_max_body_size 50M;
 
     location /static/ {
-        alias /opt/nemba-report/app/static/;
+        alias /opt/liugong-academy/app/static/;
         expires 1y;
         add_header Cache-Control "public, immutable";
     }
@@ -334,7 +334,7 @@ server {
 ```
 
 ```bash
-sudo ln -s /etc/nginx/sites-available/nemba-report /etc/nginx/sites-enabled/
+sudo ln -s /etc/nginx/sites-available/liugong-academy /etc/nginx/sites-enabled/
 sudo nginx -t && sudo systemctl reload nginx
 sudo certbot --nginx -d votre-domaine.com   # SSL via Let's Encrypt
 ```
@@ -350,7 +350,7 @@ Créer `render.yaml` à la racine :
 ```yaml
 services:
   - type: web
-    name: nemba-report
+    name: liugong-academy
     env: python
     plan: free
     buildCommand: |
@@ -381,7 +381,7 @@ Le `Dockerfile` du projet fonctionne tel quel. Configurer le port (`8000` expos�
 | **HTTPS** | Cloudflare Tunnel fournit TLS automatiquement, sinon Let's Encrypt |
 | **`.env`** | Jamais commit (déjà dans `.gitignore`) |
 | **`SECRET_KEY`** | Auto-généré par `start` si vide dans `.env` |
-| **User non-root** | Image Docker tourne en `nemba` (UID dédié) |
+| **User non-root** | Image Docker tourne en `liugong` (UID dédié) |
 | **Permissions uploads** | NSSM tourne en LocalSystem ; sur Linux, `www-data` |
 
 ---
@@ -416,16 +416,16 @@ Le pre-flight de `start` détecte automatiquement. Sinon manuellement :
 ### Service NSSM ne démarre pas
 
 ```powershell
-nssm status nemba-report
-Get-Content logs\nemba-report.err.log -Tail 50
+.\makefile.ps1 nssm-status
+Get-Content logs\liugong-academy.err.log -Tail 50
 # Erreurs typiques : port pris, deps manquantes, .env corrompu
 ```
 
 ### Container Docker crash au démarrage
 
 ```powershell
-docker logs nemba-report --tail 100
-docker exec -it nemba-report bash    # debug interactif
+docker logs liugong-academy --tail 100
+docker exec -it liugong-academy bash    # debug interactif
 ```
 
 ### Cloudflared : authentification échouée

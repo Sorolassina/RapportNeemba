@@ -1,10 +1,11 @@
 {% extends "base_v2.html" %}
-{% block title %}Aperçu du rapport – Neemba Academy{% endblock %}
+{% set active_nav = "academie" %}
+{% block title %}Aperçu du rapport – LiuGong Academy{% endblock %}
 
 {% block extra_head %}
 <style>
   /* ============================================================
-     Typographie Neemba Academy appliquée à l'aperçu du rapport
+     Typographie LiuGong Academy appliquée à l'aperçu du rapport
      ============================================================ */
   .page,
   .page p,
@@ -31,20 +32,27 @@
     font-family: 'Material Symbols Outlined' !important;
   }
 
-  /* Cadre de page : bord noir, plus de coins arrondis */
+  /* Cadre de page : coins doux + ombre portée */
   .page {
-    border: 2px solid #000000 !important;
-    border-radius: 0 !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 20px !important;
     background: #ffffff;
     padding: 32px !important;
     margin: 0 auto 24px !important;
     max-width: 1024px;
-    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 8px 26px rgba(11, 44, 110, 0.10);
+    transition: box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .page:hover {
+    box-shadow: 0 14px 34px rgba(11, 44, 110, 0.14);
+  }
+  @media print {
+    .page { border-radius: 0 !important; box-shadow: none !important; }
   }
 
   /* Couverture */
   .cover {
-    border-top: 8px solid #ffcd00 !important;
+    border-top: 8px solid #EC6606 !important;
   }
   .cover .title {
     color: #000000 !important;
@@ -55,7 +63,7 @@
     color: #000000 !important;
     font-style: normal !important;
     font-weight: 600;
-    border-left: 4px solid #ffcd00;
+    border-left: 4px solid #EC6606;
     padding-left: 12px;
     display: inline-block;
     text-transform: none;
@@ -67,9 +75,10 @@
     color: #555555 !important;
   }
 
-  /* Titres de section : barre jaune CAT à gauche */
+  /* Titres de section : barre orange LiuGong à gauche */
   .section > h2 {
-    border-left: 6px solid #ffcd00 !important;
+    border-left: 6px solid #EC6606 !important;
+    border-radius: 4px;
     padding-left: 14px !important;
     margin: 0 0 16px !important;
     font-size: 22px !important;
@@ -80,7 +89,7 @@
     color: #000000;
     font-size: 16px;
     margin-top: 18px;
-    border-bottom: 2px solid #ffcd00;
+    border-bottom: 2px solid #EC6606;
     padding-bottom: 4px;
     display: inline-block;
   }
@@ -108,9 +117,10 @@
 
   /* KPIs */
   .kpis {
-    background: #fff8db !important;
-    border: 1px solid #ffcd00 !important;
-    border-radius: 0 !important;
+    background: #fdeee1 !important;
+    border: 1px solid #EC6606 !important;
+    border-radius: 14px !important;
+    box-shadow: 0 2px 10px rgba(236, 102, 6, 0.10);
   }
   .kpis strong {
     color: #000000;
@@ -118,26 +128,28 @@
 
   /* Charts */
   .chart {
-    border: 1px solid #000000 !important;
-    border-radius: 0 !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 16px !important;
     background: #ffffff !important;
+    box-shadow: 0 2px 10px rgba(11, 44, 110, 0.06);
   }
 
   /* Galerie médias / émargements */
   .gallery img,
   .attendance,
   .trainer-photo {
-    border: 1px solid #000000 !important;
-    border-radius: 0 !important;
+    border: 1px solid #e5e7eb !important;
+    border-radius: 12px !important;
   }
 
   /* Item d'appréciation */
   .evaluation-item {
-    border-left: 4px solid #ffcd00 !important;
-    border-radius: 0 !important;
-    padding: 10px 14px;
+    border-left: 4px solid #EC6606 !important;
+    border-radius: 0 14px 14px 0 !important;
+    padding: 12px 16px;
     background: #fafafa;
     margin: 12px 0;
+    box-shadow: 0 2px 8px rgba(11, 44, 110, 0.05);
   }
   .evaluation-item h3 {
     border-bottom: none !important;
@@ -346,7 +358,7 @@
 <!-- MERCI -->
 <section class="page section centered">
   <h2>Merci</h2>
-  <p>Nous vous remercions pour votre confiance. NEMBA GROUP – Côte d'Ivoire.</p>
+  <p>Nous vous remercions pour votre confiance. LiuGong – Côte d'Ivoire.</p>
 </section>
 
 {% endblock %}

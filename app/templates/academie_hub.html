@@ -1,0 +1,82 @@
+{% extends "base_v2.html" %}
+{% set active_nav = "academie" %}
+{% block title %}Académie – LiuGong Academy{% endblock %}
+
+{% block content %}
+<section class="max-w-max-width-desktop mx-auto px-gutter py-lg">
+
+  <div class="mb-lg border-b-2 border-outline-variant pb-md">
+    <h1 class="font-headline-lg text-headline-lg uppercase text-on-surface">Académie</h1>
+    <p class="text-on-surface-variant font-body-md max-w-2xl">Planification, animation et amélioration continue des formations clients et internes.</p>
+  </div>
+
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-md mb-lg">
+    <div class="stat-kpi bg-surface-container-lowest border border-outline-variant rounded-2xl p-md text-center shadow-soft">
+      <div class="font-headline-md text-2xl font-bold text-primary">{{ nb_planning }}</div>
+      <div class="text-xs uppercase tracking-wide text-on-surface-variant mt-1">Sessions au planning</div>
+    </div>
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-md text-center shadow-soft">
+      <div class="font-headline-md text-2xl font-bold text-primary">{{ nb_evaluations }}</div>
+      <div class="text-xs uppercase tracking-wide text-on-surface-variant mt-1">Évaluations formateur</div>
+    </div>
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-md text-center shadow-soft">
+      <div class="font-headline-md text-2xl font-bold text-primary">{{ nb_questionnaires_actifs }}</div>
+      <div class="text-xs uppercase tracking-wide text-on-surface-variant mt-1">QR codes actifs</div>
+    </div>
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-md text-center shadow-soft">
+      <div class="font-headline-md text-2xl font-bold text-primary">{{ nb_reponses }}</div>
+      <div class="text-xs uppercase tracking-wide text-on-surface-variant mt-1">Réponses stagiaires</div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
+
+    <a href="{{ root_path }}/academie/planning" class="module-card relative bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-soft hover:shadow-lift hover:-translate-y-1 transition-all duration-300 p-lg flex flex-col h-full">
+      <div class="bg-inverse-surface text-white p-base mb-md w-fit rounded-xl">
+        <span class="material-symbols-outlined text-4xl">calendar_month</span>
+      </div>
+      <h3 class="font-headline-md text-headline-md uppercase mb-sm">Planning annuel</h3>
+      <p class="text-on-surface-variant mb-lg flex-grow">Vue d'ensemble des sessions clients et internes planifiées, confirmées ou réalisées dans l'année.</p>
+      <span class="text-primary font-label-bold flex items-center gap-xs">Ouvrir <span class="material-symbols-outlined">arrow_forward</span></span>
+    </a>
+
+    <a href="{{ root_path }}/rapport" class="module-card relative bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-soft hover:shadow-lift hover:-translate-y-1 transition-all duration-300 p-lg flex flex-col h-full">
+      <div class="bg-inverse-surface text-white p-base mb-md w-fit rounded-xl">
+        <span class="material-symbols-outlined text-4xl">description</span>
+      </div>
+      <h3 class="font-headline-md text-headline-md uppercase mb-sm">Sessions & rapports</h3>
+      <p class="text-on-surface-variant mb-lg flex-grow">Saisie d'une session réalisée et génération du rapport de formation PDF (wizard guidé).</p>
+      <span class="text-primary font-label-bold flex items-center gap-xs">Ouvrir <span class="material-symbols-outlined">arrow_forward</span></span>
+    </a>
+
+    <a href="{{ root_path }}/academie/evaluation" class="module-card relative bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-soft hover:shadow-lift hover:-translate-y-1 transition-all duration-300 p-lg flex flex-col h-full">
+      <div class="bg-inverse-surface text-white p-base mb-md w-fit rounded-xl">
+        <span class="material-symbols-outlined text-4xl">rate_review</span>
+      </div>
+      <h3 class="font-headline-md text-headline-md uppercase mb-sm">Évaluation formateur</h3>
+      <p class="text-on-surface-variant mb-lg flex-grow">Votre appréciation à chaud : contenu, pédagogie, logistique, participation des stagiaires.</p>
+      <span class="text-primary font-label-bold flex items-center gap-xs">Ouvrir <span class="material-symbols-outlined">arrow_forward</span></span>
+    </a>
+
+    <a href="{{ root_path }}/academie/questionnaire" class="module-card relative bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-soft hover:shadow-lift hover:-translate-y-1 transition-all duration-300 p-lg flex flex-col h-full">
+      <div class="bg-inverse-surface text-white p-base mb-md w-fit rounded-xl">
+        <span class="material-symbols-outlined text-4xl">qr_code_2</span>
+      </div>
+      <h3 class="font-headline-md text-headline-md uppercase mb-sm">Questionnaire QR</h3>
+      <p class="text-on-surface-variant mb-lg flex-grow">Générez un QR code de satisfaction par session, à faire scanner par les stagiaires en fin de formation.</p>
+      <span class="text-primary font-label-bold flex items-center gap-xs">Ouvrir <span class="material-symbols-outlined">arrow_forward</span></span>
+    </a>
+
+    <a href="{{ root_path }}/academie/statistiques" class="module-card relative bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-soft hover:shadow-lift hover:-translate-y-1 transition-all duration-300 p-lg flex flex-col h-full">
+      <div class="bg-inverse-surface text-white p-base mb-md w-fit rounded-xl">
+        <span class="material-symbols-outlined text-4xl">query_stats</span>
+      </div>
+      <h3 class="font-headline-md text-headline-md uppercase mb-sm">Statistiques & amélioration</h3>
+      <p class="text-on-surface-variant mb-lg flex-grow">Analyse consolidée des réponses QR et plan d'action mensuel issu des retours stagiaires.</p>
+      <span class="text-primary font-label-bold flex items-center gap-xs">Ouvrir <span class="material-symbols-outlined">arrow_forward</span></span>
+    </a>
+
+  </div>
+
+</section>
+{% endblock %}

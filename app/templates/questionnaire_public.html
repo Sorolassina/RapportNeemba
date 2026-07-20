@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<title>Questionnaire de fin de formation – LiuGong Academy</title>
+<link rel="icon" type="image/x-icon" href="{{ url_for('static', path='img/favicon/favicon.ico') }}">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo+Narrow:wght@700&family=IBM+Plex+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: #f7f9fb; font-family: "IBM Plex Sans", sans-serif; color: #101418;
+    padding-bottom: calc(24px + env(safe-area-inset-bottom));
+  }
+  .wrap { max-width: 560px; margin: 0 auto; padding: 20px 18px; }
+  .brand-header { display: flex; justify-content: center; padding: 22px 0 8px; }
+  .brand-header img { height: 44px; width: auto; }
+  .intro { text-align: center; margin-bottom: 20px; }
+  .intro h1 { font-family: "Archivo Narrow", sans-serif; font-size: 20px; text-transform: uppercase; letter-spacing: 0.02em; color: #0b2c6e; margin: 0 0 6px; }
+  .intro p { font-size: 14px; color: #555; margin: 0; }
+  .q-card { background: #fff; border-radius: 16px; padding: 16px 18px; margin-bottom: 14px; box-shadow: 0 2px 10px rgba(11,44,110,0.06); }
+  .q-card h3 { font-size: 14px; margin: 0 0 10px; color: #0b2c6e; font-weight: 600; }
+  .chip-group { display: flex; flex-wrap: wrap; gap: 8px; }
+  .chip-group input { position: absolute; opacity: 0; width: 0; height: 0; }
+  .chip-group label {
+    flex: 1 1 auto; min-width: 68px; text-align: center; padding: 10px 8px; border-radius: 12px;
+    border: 1.5px solid #d4d4d4; font-size: 13px; font-weight: 600; cursor: pointer; color: #444;
+    transition: all 0.2s ease; user-select: none;
+  }
+  .chip-group input:checked + label {
+    background: #EC6606; border-color: #EC6606; color: #ffffff; box-shadow: 0 4px 12px rgba(236,102,6,0.30);
+  }
+  textarea {
+    width: 100%; border: 1.5px solid #d4d4d4; border-radius: 12px; padding: 10px 12px; font-size: 14px;
+    font-family: inherit; resize: vertical; min-height: 70px;
+  }
+  textarea:focus, .chip-group input:focus + label { outline: none; border-color: #EC6606; box-shadow: 0 0 0 4px rgba(236,102,6,0.18); }
+  .submit-btn {
+    width: 100%; background: #EC6606; color: #ffffff; border: none; border-radius: 14px; padding: 15px;
+    font-size: 15px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em; cursor: pointer;
+    box-shadow: 0 6px 18px rgba(236,102,6,0.30); transition: transform 0.15s ease, box-shadow 0.15s ease;
+  }
+  .submit-btn:active { transform: scale(0.97); }
+  .state-card { background: #fff; border-radius: 18px; padding: 36px 24px; text-align: center; box-shadow: 0 2px 10px rgba(11,44,110,0.06); }
+  .state-card .material-symbols-outlined { font-size: 48px; color: #EC6606; }
+  .state-card h2 { font-family: "Archivo Narrow", sans-serif; text-transform: uppercase; color: #0b2c6e; margin: 10px 0 6px; }
+  .state-card p { color: #555; font-size: 14px; margin: 0; }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=block" rel="stylesheet">
+</head>
+<body>
+<div class="wrap">
+  <div class="brand-header">
+    <img src="{{ url_for('static', path='img/branding/logo_LG_complet.png') }}" alt="LiuGong">
+  </div>
+
+  {% if not questionnaire %}
+  <div class="state-card">
+    <span class="material-symbols-outlined">link_off</span>
+    <h2>Questionnaire introuvable</h2>
+    <p>Ce lien n'est plus valide. Merci de vérifier le QR code avec votre formateur.</p>
+  </div>
+
+  {% elif merci %}
+  <div class="state-card">
+    <span class="material-symbols-outlined">check_circle</span>
+    <h2>Merci !</h2>
+    <p>Votre avis a bien été enregistré. Il nous aide à améliorer nos formations LiuGong Academy.</p>
+  </div>
+
+  {% elif not questionnaire.actif %}
+  <div class="state-card">
+    <span class="material-symbols-outlined">schedule</span>
+    <h2>Questionnaire fermé</h2>
+    <p>Ce questionnaire n'accepte plus de réponses pour le moment.</p>
+  </div>
+
+  {% else %}
+  <div class="intro">
+    <h1>{{ questionnaire.titre_formation }}</h1>
+    <p>Votre avis, anonyme, nous aide à améliorer nos prochaines sessions. 2 minutes suffisent.</p>
+  </div>
+
+  <form method="post" action="{{ root_path }}/q/{{ questionnaire.token }}/submit">
+
+    <div class="q-card">
+      <h3>Le contenu de la formation</h3>
+      <div class="chip-group">
+        {% for v, l in [('passable','Passable'),('assez-bien','Assez bien'),('bien','Bien'),('tres-bien','Très bien')] %}
+        <input type="radio" name="note_contenu" id="nc_{{ v }}" value="{{ v }}" required>
+        <label for="nc_{{ v }}">{{ l }}</label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="q-card">
+      <h3>Le formateur & la pédagogie</h3>
+      <div class="chip-group">
+        {% for v, l in [('passable','Passable'),('assez-bien','Assez bien'),('bien','Bien'),('tres-bien','Très bien')] %}
+        <input type="radio" name="note_pedagogie" id="np_{{ v }}" value="{{ v }}" required>
+        <label for="np_{{ v }}">{{ l }}</label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="q-card">
+      <h3>L'organisation & la logistique</h3>
+      <div class="chip-group">
+        {% for v, l in [('passable','Passable'),('assez-bien','Assez bien'),('bien','Bien'),('tres-bien','Très bien')] %}
+        <input type="radio" name="note_logistique" id="nl_{{ v }}" value="{{ v }}" required>
+        <label for="nl_{{ v }}">{{ l }}</label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="q-card">
+      <h3>Utile dans votre travail quotidien ?</h3>
+      <div class="chip-group">
+        {% for v, l in [('non','Non'),('plutot-non','Plutôt non'),('plutot-oui','Plutôt oui'),('oui','Oui')] %}
+        <input type="radio" name="utile_travail" id="ut_{{ v }}" value="{{ v }}" required>
+        <label for="ut_{{ v }}">{{ l }}</label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="q-card">
+      <h3>Recommanderiez-vous cette formation à un collègue ?</h3>
+      <div class="chip-group">
+        {% for v, l in [('non','Non'),('oui','Oui')] %}
+        <input type="radio" name="recommanderiez" id="rc_{{ v }}" value="{{ v }}" required>
+        <label for="rc_{{ v }}">{{ l }}</label>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="q-card">
+      <h3>Ce que vous avez le plus apprécié</h3>
+      <textarea name="points_forts" placeholder="Facultatif"></textarea>
+    </div>
+
+    <div class="q-card">
+      <h3>Vos suggestions d'amélioration</h3>
+      <textarea name="suggestions" placeholder="Facultatif"></textarea>
+    </div>
+
+    <button type="submit" class="submit-btn">Envoyer mes réponses</button>
+  </form>
+  {% endif %}
+</div>
+</body>
+</html>

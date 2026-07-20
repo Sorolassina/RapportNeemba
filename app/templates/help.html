@@ -1,9 +1,9 @@
 {% extends "base_v2.html" %}
-{% block title %}Mode d'emploi – Neemba Academy{% endblock %}
+{% block title %}Mode d'emploi – LiuGong Academy{% endblock %}
 
 {% block extra_head %}
 <style>
-  /* Typo Neemba Academy appliquée au mode d'emploi */
+  /* Typo LiuGong Academy appliquée au mode d'emploi */
   .help-container,
   .help-container input,
   .help-container textarea,
@@ -25,23 +25,29 @@
     letter-spacing: -0.01em;
     text-transform: uppercase;
     color: #000000 !important;
-    border-left-color: #ffcd00 !important;
+    border-left-color: #EC6606 !important;
   }
   .help-container .material-symbols-outlined {
     font-family: 'Material Symbols Outlined' !important;
   }
   .help-container h1 { font-size: 2em; }
   .help-container .help-header {
-    border-bottom: 4px solid #ffcd00 !important;
+    border-bottom: 4px solid #EC6606 !important;
   }
   .help-container .step-number {
     background: #000000 !important;
-    border-radius: 0 !important;
+    border-radius: 9999px !important;
     font-family: "Archivo Narrow", sans-serif;
   }
   .help-container .step-box {
-    border-left: 4px solid #ffcd00 !important;
-    border-radius: 0 !important;
+    border-left: 4px solid #EC6606 !important;
+    border-radius: 14px !important;
+    box-shadow: 0 2px 10px rgba(11, 44, 110, 0.07);
+    transition: transform 0.25s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+  }
+  .help-container .step-box:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(11, 44, 110, 0.12);
   }
   .help-container .info-box,
   .help-container .warning-box,
@@ -49,7 +55,8 @@
   .help-container .troubleshooting-box,
   .help-container .contact-box,
   .help-container .file-type-card {
-    border-radius: 0 !important;
+    border-radius: 14px !important;
+    box-shadow: 0 2px 10px rgba(11, 44, 110, 0.07);
   }
 </style>
 {% endblock %}
@@ -58,15 +65,15 @@
 
 <div class="help-container">
     <div class="help-header">
-        <h1><span class="material-symbols-outlined" style="font-size: 1em; vertical-align: -4px; margin-right: 8px;">menu_book</span>Mode d'emploi &mdash; Neemba Academy</h1>
+        <h1><span class="material-symbols-outlined" style="font-size: 1em; vertical-align: -4px; margin-right: 8px;">menu_book</span>Mode d'emploi &mdash; LiuGong Academy</h1>
         <div class="help-nav">
             <a href="{{ url_for('wizard') }}"
-               class="bg-primary-container text-on-primary-container font-label-bold px-md py-sm rounded uppercase tracking-widest text-label-bold inline-flex items-center justify-center gap-xs hover:opacity-90 active:scale-95 transition-all no-underline">
+               class="bg-primary-container text-on-primary-container font-label-bold px-md py-sm rounded-xl uppercase tracking-widest text-label-bold inline-flex items-center justify-center gap-xs shadow-soft hover:shadow-card hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all duration-300 ease-smooth no-underline">
                 <span class="material-symbols-outlined">arrow_back</span>
                 Retour au rapport
             </a>
             <button onclick="window.print()"
-                    class="bg-inverse-surface text-white font-label-bold px-md py-sm rounded uppercase tracking-widest text-label-bold inline-flex items-center justify-center gap-xs hover:opacity-90 active:scale-95 transition-all">
+                    class="bg-inverse-surface text-white font-label-bold px-md py-sm rounded-xl uppercase tracking-widest text-label-bold inline-flex items-center justify-center gap-xs shadow-soft hover:shadow-card hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all duration-300 ease-smooth">
                 <span class="material-symbols-outlined">print</span>
                 Imprimer
             </button>
@@ -75,7 +82,7 @@
 
     <div class="help-content">
         <div class="info-box">
-            <strong>Objectif :</strong> Ce guide vous accompagne pas à pas dans la création d'un rapport de formation au format PDF sur la plateforme Neemba Academy. Vous y trouverez la description de la navigation, le détail des 11 sections du formulaire, les formats de fichiers acceptés et les bonnes pratiques.
+            <strong>Objectif :</strong> Ce guide vous accompagne pas à pas dans la création d'un rapport de formation au format PDF sur la plateforme LiuGong Academy. Vous y trouverez la description de la navigation, le détail des 11 sections du formulaire, les formats de fichiers acceptés et les bonnes pratiques.
         </div>
 
         <h2><span class="material-symbols-outlined" style="vertical-align: -5px;">home</span> Découvrir l'application</h2>
@@ -86,7 +93,7 @@
             <span class="step-number"><span class="material-symbols-outlined" style="color:#fff;font-size:18px;">home</span></span>
             <div class="step-content">
                 <strong>Accueil</strong><br>
-                Page d'introduction qui présente la plateforme Neemba Academy et les modules à venir (Formations, Budgets, Référentiels, Import / Export, Administration). Lors de votre première visite, une courte animation d'introduction (~4&nbsp;s) est jouée &mdash; vous pouvez l'ignorer avec le bouton <code>Skip</code> ou la touche <code>Esc</code>.
+                Page d'introduction qui présente la plateforme LiuGong Academy et les modules à venir (Formations, Budgets, Référentiels, Import / Export, Administration). Lors de votre première visite, une courte animation d'introduction (~4&nbsp;s) est jouée &mdash; vous pouvez l'ignorer avec le bouton <code>Skip</code> ou la touche <code>Esc</code>.
             </div>
         </div>
 
@@ -101,8 +108,8 @@
         <div class="step-box">
             <span class="step-number"><span class="material-symbols-outlined" style="color:#fff;font-size:18px;">dashboard</span></span>
             <div class="step-content">
-                <strong>Tableaux de bord</strong><br>
-                Dashboard <strong>Power BI</strong> embarqué qui consolide les indicateurs (formations, stagiaires, taux de réussite). Lecture seule.
+                <strong>Tableau de bord</strong><br>
+                Vue d'ensemble avec cartes KPI et graphiques, calculée en direct à partir des données de l'Académie, des Techniciens, du Terrain & SAV et des Ressources.
             </div>
         </div>
 
@@ -145,7 +152,7 @@
             <span class="step-number">4</span>
             <div class="step-content">
                 <strong>Générez votre rapport PDF</strong><br>
-                Cliquez sur le bouton jaune <strong>«&nbsp;Générer le rapport PDF&nbsp;»</strong>. Une animation de génération mécanique s'affiche pendant la création du fichier (quelques secondes), puis le PDF se télécharge automatiquement.
+                Cliquez sur le bouton orange <strong>«&nbsp;Générer le rapport PDF&nbsp;»</strong>. Une animation de génération mécanique s'affiche pendant la création du fichier (quelques secondes), puis le PDF se télécharge automatiquement.
             </div>
         </div>
 
@@ -403,8 +410,8 @@
             <strong>Ressources complémentaires :</strong>
             <ul style="margin-top:8px;">
                 <li><a href="{{ url_for('deployment_page') }}">Guide de déploiement</a> &mdash; pour les administrateurs (installation, NSSM, Docker, Cloudflare Tunnel).</li>
-                <li><a href="{{ url_for('dashboard') }}">Tableaux de bord Power BI</a> &mdash; vue consolidée des indicateurs de formation.</li>
-                <li><a href="{{ url_for('home') }}">Accueil Neemba Academy</a> &mdash; modules à venir et roadmap 2026.</li>
+                <li><a href="{{ url_for('dashboard') }}">Tableau de bord</a> &mdash; vue consolidée des indicateurs de formation.</li>
+                <li><a href="{{ url_for('home') }}">Accueil LiuGong Academy</a> &mdash; modules à venir et roadmap 2026.</li>
             </ul>
         </div>
     </div>

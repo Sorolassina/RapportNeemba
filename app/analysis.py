@@ -69,6 +69,7 @@ def _to_disk_path(web_path: str) -> str:
         # Chemin standard
         os.path.join("app", "static", after_static.replace("/", os.sep)),
         # Chemin depuis le répertoire courant
+        os.path.join("liugong-academy", "app", "static", after_static.replace("/", os.sep)),
         os.path.join("nemba-report", "app", "static", after_static.replace("/", os.sep)),
         # Chemin direct sans app/
         os.path.join("static", after_static.replace("/", os.sep)),
@@ -76,7 +77,7 @@ def _to_disk_path(web_path: str) -> str:
         web_path.lstrip("/"),
         # Chemin sans préfixe ROOT_PATH
         web_path_no_prefix,
-        # Chemin avec nemba-report/
+        os.path.join("liugong-academy", web_path.lstrip("/")),
         os.path.join("nemba-report", web_path.lstrip("/")),
     ]
     

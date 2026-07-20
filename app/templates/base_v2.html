@@ -3,8 +3,8 @@
 <head>
 <meta charset="utf-8"/>
 <meta name="app-root" content="{{ root_path }}">
-<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
-<title>{% block title %}Neemba Academy – Façonner l'Excellence Technique{% endblock %}</title>
+<meta content="width=device-width, initial-scale=1.0, viewport-fit=cover" name="viewport"/>
+<title>{% block title %}LiuGong Academy – Façonner l'Excellence Technique{% endblock %}</title>
 
 {# Favicon — set complet (PWA-ready) #}
 <link rel="icon" type="image/x-icon" href="{{ url_for('static', path='img/favicon/favicon.ico') }}">
@@ -12,7 +12,7 @@
 <link rel="icon" type="image/png" sizes="16x16" href="{{ url_for('static', path='img/favicon/favicon-16x16.png') }}">
 <link rel="apple-touch-icon" sizes="180x180" href="{{ url_for('static', path='img/favicon/apple-touch-icon.png') }}">
 <link rel="manifest" href="{{ url_for('static', path='img/favicon/site.webmanifest') }}">
-<meta name="theme-color" content="#ffcd00">
+<meta name="theme-color" content="#0B2C6E">
 
 {# Polices texte (Google Fonts CDN) #}
 <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -33,6 +33,119 @@
 {# Fallback CDN Google si jamais le fichier local manque #}
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&amp;display=block" rel="stylesheet"/>
 
+{# ------------------ Système Modal + Toast + Confirmation (partagé, style Emil Kowalski) ------------------ #}
+<style>
+  dialog.modal-dialog {
+    border: none;
+    border-radius: 20px;
+    padding: 0;
+    width: min(640px, calc(100vw - 32px));
+    max-height: min(88vh, 760px);
+    overflow: hidden;
+    box-shadow: 0 24px 60px rgba(11,44,110,0.22), 0 4px 14px rgba(11,44,110,0.10);
+    background: #ffffff;
+    color: #101418;
+  }
+  dialog.modal-dialog:not([open]) {
+    display: none;
+  }
+  dialog.modal-dialog::backdrop {
+    background: rgba(11,44,110,0.38);
+    backdrop-filter: blur(2px);
+  }
+  dialog.modal-dialog[open] {
+    display: flex;
+    flex-direction: column;
+    animation: lg-modal-in 0.22s cubic-bezier(0.16,1,0.3,1);
+  }
+  dialog.modal-dialog[open]::backdrop {
+    animation: lg-overlay-in 0.22s ease-out;
+  }
+  dialog.modal-dialog.closing {
+    animation: lg-modal-out 0.15s cubic-bezier(0.4,0,1,1) forwards;
+  }
+  dialog.modal-dialog.closing::backdrop {
+    animation: lg-overlay-out 0.15s ease-in forwards;
+  }
+  @keyframes lg-modal-in {
+    from { opacity: 0; transform: translateY(10px) scale(0.97); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes lg-modal-out {
+    from { opacity: 1; transform: translateY(0) scale(1); }
+    to   { opacity: 0; transform: translateY(6px) scale(0.97); }
+  }
+  @keyframes lg-overlay-in { from { opacity: 0; } to { opacity: 1; } }
+  @keyframes lg-overlay-out { from { opacity: 1; } to { opacity: 0; } }
+
+  .modal-header {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 18px 22px; border-bottom: 1px solid #eceef0; flex-shrink: 0;
+  }
+  .modal-header h3 {
+    font-family: "Archivo Narrow", sans-serif; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.02em; color: #0b2c6e; font-size: 16px; margin: 0;
+  }
+  .modal-close {
+    background: none; border: none; cursor: pointer; color: #777; display: flex;
+    padding: 5px; border-radius: 9999px; transition: background 0.15s, color 0.15s;
+  }
+  .modal-close:hover { background: #f1f3f5; color: #0b2c6e; }
+  .modal-body { padding: 20px 22px 22px; overflow-y: auto; flex: 1; min-height: 0; }
+  dialog.modal-dialog.modal-wide { width: min(760px, calc(100vw - 32px)); }
+
+  .modal-fieldset {
+    border: 1px solid #eceef0; border-radius: 14px; padding: 14px 16px 2px 16px;
+    margin-bottom: 16px; background: #fafbfc;
+  }
+  .modal-fieldset:last-of-type { margin-bottom: 0; }
+  .modal-fieldset-title {
+    display: flex; align-items: center; gap: 6px; font-size: 11px; font-weight: 700;
+    text-transform: uppercase; letter-spacing: 0.05em; color: #0b2c6e; margin: 0 0 12px;
+  }
+  .modal-fieldset-title .material-symbols-outlined { font-size: 16px !important; }
+  .modal-actions { display: flex; gap: 10px; align-items: center; margin-top: 4px; }
+
+  .confirm-modal { width: min(380px, calc(100vw - 32px)); }
+  .confirm-body { text-align: center; padding: 30px 24px 24px; }
+  .confirm-icon { font-size: 42px !important; color: #93000a; margin-bottom: 8px; }
+  .confirm-body p { font-size: 14.5px; color: #333; margin: 4px 0 22px; line-height: 1.4; }
+  .confirm-actions { display: flex; gap: 10px; justify-content: center; }
+  .btn.danger { background: #93000a; color: #fff; border-color: #93000a; }
+  .btn.danger:hover { background: #7a0008; box-shadow: 0 10px 24px rgba(147,0,10,0.28); }
+
+  .toast-region {
+    position: fixed; bottom: 16px; right: 16px; z-index: 300;
+    display: flex; flex-direction: column-reverse; gap: 8px;
+    max-width: calc(100vw - 32px);
+  }
+  .toast {
+    background: #ffffff; border: 1px solid #e4e6e8; border-left: 4px solid #0b2c6e;
+    border-radius: 14px; padding: 12px 16px; box-shadow: 0 12px 32px rgba(11,44,110,0.16);
+    display: flex; align-items: center; gap: 10px; width: 320px; max-width: calc(100vw - 32px);
+    font-family: "IBM Plex Sans", sans-serif; font-size: 13.5px; color: #1a1a1a;
+    animation: lg-toast-in 0.28s cubic-bezier(0.16,1,0.3,1);
+  }
+  .toast.leaving { animation: lg-toast-out 0.18s ease-in forwards; }
+  .toast .toast-icon { font-size: 20px !important; flex-shrink: 0; }
+  .toast.success { border-left-color: #146c3a; }
+  .toast.success .toast-icon { color: #146c3a; }
+  .toast.error { border-left-color: #93000a; }
+  .toast.error .toast-icon { color: #93000a; }
+  .toast.info .toast-icon { color: #0b2c6e; }
+  @keyframes lg-toast-in {
+    from { opacity: 0; transform: translateY(12px) scale(0.95); }
+    to   { opacity: 1; transform: translateY(0) scale(1); }
+  }
+  @keyframes lg-toast-out {
+    to { opacity: 0; transform: translateX(60px); }
+  }
+  @media (max-width: 640px) {
+    .toast-region { left: 16px; right: 16px; bottom: calc(5.5rem + env(safe-area-inset-bottom)); }
+    .toast { width: 100%; }
+  }
+</style>
+
 {# Tailwind compilé en local (build via tools\tailwindcss.exe — voir README) #}
 <link rel="stylesheet" href="{{ url_for('static', path='css/tailwind.css') }}?v={{ asset_v('css/tailwind.css') }}">
 
@@ -41,71 +154,90 @@
 
 {% block extra_head %}{% endblock %}
 </head>
-<body class="bg-background text-on-surface font-body-md overflow-x-hidden">
+<body class="bg-background text-on-surface font-body-md overflow-x-hidden pb-[calc(5.5rem+env(safe-area-inset-bottom))] md:pb-0">
 
 {# ------------------ TopNavBar ------------------ #}
-<header class="bg-surface-container-lowest border-b-4 border-primary docked full-width top-0 sticky z-50">
-<nav class="flex justify-between items-center px-gutter py-sm max-w-max-width-desktop mx-auto w-full gap-sm">
-<a class="flex items-center gap-base shrink-0" href="{{ root_path }}/home" aria-label="Neemba Academy - Accueil">
-<img alt="Neemba Academy" class="h-10 sm:h-12 w-auto object-contain" src="{{ url_for('static', path='img/branding/nemba-academy_logo.png') }}"/>
+<header class="bg-surface-container-lowest docked full-width top-0 sticky z-50 border-b border-outline-variant shadow-soft md:shadow-none md:border-b-4 md:border-primary">
+<nav class="flex justify-center sm:justify-between items-center px-gutter py-sm max-w-max-width-desktop mx-auto w-full gap-sm">
+<a class="flex items-center gap-base shrink-0" href="{{ root_path }}/home" aria-label="LiuGong - Accueil">
+<img alt="LiuGong" class="h-10 sm:h-12 w-auto object-contain" src="{{ url_for('static', path='img/branding/logo_LG_complet.png') }}"/>
 </a>
 
 {# Menu desktop / tablette ≥ 768px #}
 <div class="hidden md:flex items-center gap-md lg:gap-lg">
 <a class="font-label-bold text-label-bold {% if active_nav == 'home' %}text-on-surface border-b-4 border-primary pb-1{% else %}text-on-surface hover:border-b-4 hover:border-primary pb-1{% endif %} transition-colors" href="{{ root_path }}/home">Accueil</a>
-<a class="font-label-bold text-label-bold {% if active_nav == 'rapport' %}text-on-surface border-b-4 border-primary pb-1{% else %}text-on-surface hover:border-b-4 hover:border-primary pb-1{% endif %} transition-colors" href="{{ root_path }}/rapport">Rapport</a>
-<a class="font-label-bold text-label-bold {% if active_nav == 'dashboard' %}text-on-surface border-b-4 border-primary pb-1{% else %}text-on-surface hover:border-b-4 hover:border-primary pb-1{% endif %} transition-colors" href="{{ root_path }}/dashboard">Tableaux de bord</a>
+<a class="font-label-bold text-label-bold {% if active_nav == 'dashboard' %}text-on-surface border-b-4 border-primary pb-1{% else %}text-on-surface hover:border-b-4 hover:border-primary pb-1{% endif %} transition-colors" href="{{ root_path }}/dashboard">Tableau de bord</a>
+<a class="font-label-bold text-label-bold {% if active_nav == 'academie' %}text-on-surface border-b-4 border-primary pb-1{% else %}text-on-surface hover:border-b-4 hover:border-primary pb-1{% endif %} transition-colors" href="{{ root_path }}/academie">Académie</a>
+<a class="font-label-bold text-label-bold {% if active_nav == 'techniciens' %}text-on-surface border-b-4 border-primary pb-1{% else %}text-on-surface hover:border-b-4 hover:border-primary pb-1{% endif %} transition-colors" href="{{ root_path }}/techniciens">Techniciens</a>
+<a class="font-label-bold text-label-bold {% if active_nav == 'terrain' %}text-on-surface border-b-4 border-primary pb-1{% else %}text-on-surface hover:border-b-4 hover:border-primary pb-1{% endif %} transition-colors" href="{{ root_path }}/terrain">Terrain & SAV</a>
+<a class="font-label-bold text-label-bold {% if active_nav == 'ressources' %}text-on-surface border-b-4 border-primary pb-1{% else %}text-on-surface hover:border-b-4 hover:border-primary pb-1{% endif %} transition-colors" href="{{ root_path }}/ressources">Ressources</a>
+<a class="font-label-bold text-label-bold {% if active_nav == 'rapports' %}text-on-surface border-b-4 border-primary pb-1{% else %}text-on-surface hover:border-b-4 hover:border-primary pb-1{% endif %} transition-colors" href="{{ root_path }}/rapports">Rapports</a>
 </div>
 
-<a class="hidden sm:flex items-center shrink-0" href="https://neemba.com" target="_blank" rel="noopener" aria-label="Neemba - Site officiel">
-<img alt="Neemba" class="h-10 sm:h-12 w-auto object-contain" src="{{ url_for('static', path='img/branding/nemba_logo.jpg') }}"/>
+<a class="hidden sm:flex items-center shrink-0" href="https://www.liugong.com" target="_blank" rel="noopener" aria-label="LiuGong - Site officiel">
+<img alt="LiuGong" class="h-10 sm:h-12 w-auto object-contain" src="{{ url_for('static', path='img/branding/logo_LG_reduit.png') }}"/>
 </a>
+</nav>
+</header>
 
-{# Bouton hamburger mobile < 768px #}
-<button type="button"
-        id="mobile-menu-toggle"
-        class="md:hidden flex items-center justify-center w-10 h-10 border-2 border-on-surface text-on-surface hover:bg-on-surface hover:text-white transition-colors"
-        aria-label="Ouvrir le menu"
-        aria-expanded="false"
-        aria-controls="mobile-menu">
-<span class="material-symbols-outlined" id="mobile-menu-icon">menu</span>
+{# ------------------ Bottom TabBar (mobile < 768px) ------------------ #}
+<nav class="mobile-tabbar md:hidden fixed bottom-0 inset-x-0 z-50 bg-surface-container-lowest border-t border-outline-variant rounded-t-2xl shadow-lift flex items-stretch justify-around px-xs"
+     style="padding-bottom: env(safe-area-inset-bottom);"
+     aria-label="Navigation principale">
+<a href="{{ root_path }}/home"
+   class="flex-1 flex flex-col items-center justify-center gap-0.5 my-xs py-1.5 rounded-xl transition-all duration-300 ease-smooth active:scale-90 {% if active_nav == 'home' %}text-on-primary-container bg-primary-tint{% else %}text-on-surface-variant{% endif %}">
+<span class="material-symbols-outlined" style="font-size: 20px;">home</span>
+<span class="text-[10px] font-label-bold uppercase tracking-wide">Accueil</span>
+</a>
+<a href="{{ root_path }}/academie"
+   class="flex-1 flex flex-col items-center justify-center gap-0.5 my-xs py-1.5 rounded-xl transition-all duration-300 ease-smooth active:scale-90 {% if active_nav == 'academie' %}text-on-primary-container bg-primary-tint{% else %}text-on-surface-variant{% endif %}">
+<span class="material-symbols-outlined" style="font-size: 20px;">school</span>
+<span class="text-[10px] font-label-bold uppercase tracking-wide">Académie</span>
+</a>
+<a href="{{ root_path }}/techniciens"
+   class="flex-1 flex flex-col items-center justify-center gap-0.5 my-xs py-1.5 rounded-xl transition-all duration-300 ease-smooth active:scale-90 {% if active_nav == 'techniciens' %}text-on-primary-container bg-primary-tint{% else %}text-on-surface-variant{% endif %}">
+<span class="material-symbols-outlined" style="font-size: 20px;">engineering</span>
+<span class="text-[10px] font-label-bold uppercase tracking-wide">Techs</span>
+</a>
+<a href="{{ root_path }}/terrain"
+   class="flex-1 flex flex-col items-center justify-center gap-0.5 my-xs py-1.5 rounded-xl transition-all duration-300 ease-smooth active:scale-90 {% if active_nav == 'terrain' %}text-on-primary-container bg-primary-tint{% else %}text-on-surface-variant{% endif %}">
+<span class="material-symbols-outlined" style="font-size: 20px;">build</span>
+<span class="text-[10px] font-label-bold uppercase tracking-wide">Terrain</span>
+</a>
+<button type="button" onclick="toggleMoreMenu()" id="tabbar-more-btn" aria-haspopup="true" aria-expanded="false"
+   class="flex-1 flex flex-col items-center justify-center gap-0.5 my-xs py-1.5 rounded-xl transition-all duration-300 ease-smooth active:scale-90 {% if active_nav in ['dashboard', 'ressources', 'rapports'] %}text-on-primary-container bg-primary-tint{% else %}text-on-surface-variant{% endif %}">
+<span class="material-symbols-outlined" style="font-size: 20px;">more_horiz</span>
+<span class="text-[10px] font-label-bold uppercase tracking-wide">Plus</span>
 </button>
 </nav>
 
-{# Menu mobile (déroulant) #}
-<div id="mobile-menu" class="md:hidden hidden bg-surface-container-lowest border-t-2 border-on-surface">
-<a class="block px-gutter py-md font-label-bold text-label-bold uppercase {% if active_nav == 'home' %}bg-primary-container text-on-primary-container border-l-4 border-on-surface{% else %}text-on-surface hover:bg-primary-container hover:text-on-primary-container border-l-4 border-transparent hover:border-on-surface{% endif %} transition-colors" href="{{ root_path }}/home">
-  <span class="material-symbols-outlined align-middle mr-sm" style="font-size: 20px;">home</span>
-  Accueil
+{# ------------------ Menu "Plus" (mobile) : Tableaux de bord, Ressources ------------------ #}
+<div id="tabbar-more-sheet" class="md:hidden fixed inset-0 z-40 hidden" role="dialog" aria-label="Plus d'options" onclick="if(event.target===this) toggleMoreMenu()">
+<div class="absolute inset-0 bg-black/40"></div>
+<div class="absolute inset-x-3 bg-surface-container-lowest rounded-2xl shadow-lift p-xs" style="bottom: calc(4.75rem + env(safe-area-inset-bottom));">
+<a href="{{ root_path }}/dashboard" class="flex items-center gap-sm px-md py-sm rounded-xl hover:bg-primary-tint transition-colors {% if active_nav == 'dashboard' %}text-on-primary-container bg-primary-tint{% else %}text-on-surface{% endif %}">
+<span class="material-symbols-outlined">dashboard</span>
+<span class="font-label-bold">Tableau de bord</span>
 </a>
-<a class="block px-gutter py-md font-label-bold text-label-bold uppercase {% if active_nav == 'rapport' %}bg-primary-container text-on-primary-container border-l-4 border-on-surface{% else %}text-on-surface hover:bg-primary-container hover:text-on-primary-container border-l-4 border-transparent hover:border-on-surface{% endif %} transition-colors" href="{{ root_path }}/rapport">
-  <span class="material-symbols-outlined align-middle mr-sm" style="font-size: 20px;">description</span>
-  Rapport
+<a href="{{ root_path }}/ressources" class="flex items-center gap-sm px-md py-sm rounded-xl hover:bg-primary-tint transition-colors {% if active_nav == 'ressources' %}text-on-primary-container bg-primary-tint{% else %}text-on-surface{% endif %}">
+<span class="material-symbols-outlined">folder</span>
+<span class="font-label-bold">Ressources</span>
 </a>
-<a class="block px-gutter py-md font-label-bold text-label-bold uppercase {% if active_nav == 'dashboard' %}bg-primary-container text-on-primary-container border-l-4 border-on-surface{% else %}text-on-surface hover:bg-primary-container hover:text-on-primary-container border-l-4 border-transparent hover:border-on-surface{% endif %} transition-colors" href="{{ root_path }}/dashboard">
-  <span class="material-symbols-outlined align-middle mr-sm" style="font-size: 20px;">dashboard</span>
-  Tableaux de bord
+<a href="{{ root_path }}/rapports" class="flex items-center gap-sm px-md py-sm rounded-xl hover:bg-primary-tint transition-colors {% if active_nav == 'rapports' %}text-on-primary-container bg-primary-tint{% else %}text-on-surface{% endif %}">
+<span class="material-symbols-outlined">summarize</span>
+<span class="font-label-bold">Rapports & Pilotage</span>
 </a>
 </div>
-</header>
-
+</div>
 <script>
-  /* Toggle menu hamburger mobile */
-  (function () {
-    const btn = document.getElementById('mobile-menu-toggle');
-    const menu = document.getElementById('mobile-menu');
-    const icon = document.getElementById('mobile-menu-icon');
-    if (!btn || !menu) return;
-    btn.addEventListener('click', () => {
-      const isOpen = !menu.classList.contains('hidden');
-      menu.classList.toggle('hidden');
-      btn.setAttribute('aria-expanded', !isOpen ? 'true' : 'false');
-      btn.setAttribute('aria-label', !isOpen ? 'Fermer le menu' : 'Ouvrir le menu');
-      if (icon) icon.textContent = !isOpen ? 'close' : 'menu';
-    });
-  })();
+function toggleMoreMenu() {
+  var sheet = document.getElementById('tabbar-more-sheet');
+  var btn = document.getElementById('tabbar-more-btn');
+  var isHidden = sheet.classList.contains('hidden');
+  sheet.classList.toggle('hidden');
+  btn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+}
 </script>
-
 
 {# ------------------ Contenu de page ------------------ #}
 <main>
@@ -117,7 +249,7 @@
 <div class="max-w-max-width-desktop mx-auto px-gutter py-lg">
 <div class="flex flex-col md:flex-row justify-between items-start gap-lg mb-lg">
 <div class="max-w-xs">
-<span class="font-headline-lg text-headline-lg text-primary-fixed block mb-base uppercase font-bold">Neemba</span>
+<span class="font-headline-lg text-headline-lg text-primary-fixed block mb-base uppercase font-bold">LiuGong</span>
 <p class="text-surface-variant font-body-md opacity-80">
     Partenaire de votre performance. Leader de la distribution de solutions d'équipement en Afrique de l'Ouest.
 </p>
@@ -137,7 +269,7 @@
 </div>
 </div>
 <div class="border-t border-outline-variant pt-md flex flex-col md:flex-row justify-between items-center gap-md">
-<p class="text-surface-variant text-body-md opacity-80">© {{ current_year or 2026 }} Neemba. Tous droits réservés.</p>
+<p class="text-surface-variant text-body-md opacity-80">© {{ current_year or 2026 }} LiuGong. Tous droits réservés.</p>
 <div class="flex gap-md">
 <span class="material-symbols-outlined text-surface-variant cursor-pointer hover:text-primary-container">public</span>
 <span class="material-symbols-outlined text-surface-variant cursor-pointer hover:text-primary-container">mail</span>
@@ -146,6 +278,125 @@
 </div>
 </div>
 </footer>
+
+{# ------------------ Modale de confirmation de suppression (partagée) ------------------ #}
+<dialog id="confirm-modal" class="modal-dialog confirm-modal">
+  <div class="confirm-body">
+    <span class="material-symbols-outlined confirm-icon">warning</span>
+    <p id="confirm-modal-text">Confirmer la suppression ? Cette action est irréversible.</p>
+    <div class="confirm-actions">
+      <button type="button" class="btn ghost" onclick="closeModal('confirm-modal')">Annuler</button>
+      <button type="button" id="confirm-modal-yes" class="btn danger">Supprimer</button>
+    </div>
+  </div>
+</dialog>
+
+{# ------------------ Toast (style sonner / Emil Kowalski) ------------------ #}
+<div id="toast-region" class="toast-region" aria-live="polite" aria-atomic="false"></div>
+
+<script>
+  // ---- Modal (native <dialog>) : ouverture / fermeture animée, clic overlay, touche Échap ----
+  function openModal(id) {
+    var d = document.getElementById(id);
+    if (!d) return;
+    // Ferme toute autre modale déjà ouverte pour éviter d'empiler plusieurs <dialog> natives
+    document.querySelectorAll('dialog.modal-dialog[open]').forEach(function (other) {
+      if (other !== d) {
+        other.classList.remove('closing');
+        if (other.open) other.close();
+      }
+    });
+    d.classList.remove('closing');
+    if (typeof d.showModal === 'function') { d.showModal(); }
+  }
+  function closeModal(id) {
+    var d = document.getElementById(id);
+    if (!d || !d.open) return;
+    d.classList.add('closing');
+    setTimeout(function () {
+      d.close();
+      d.classList.remove('closing');
+    }, 150);
+  }
+
+  // ---- Confirmation de suppression réutilisable : onsubmit="return confirmDelete(this, 'message')" ----
+  var _lgPendingDeleteForm = null;
+  function confirmDelete(form, message) {
+    _lgPendingDeleteForm = form;
+    var textEl = document.getElementById('confirm-modal-text');
+    if (textEl) textEl.textContent = message || 'Confirmer la suppression ? Cette action est irréversible.';
+    openModal('confirm-modal');
+    return false;
+  }
+
+  // ---- Toast ----
+  function showToast(message, type) {
+    type = type || 'success';
+    var region = document.getElementById('toast-region');
+    if (!region || !message) return;
+    var icon = type === 'success' ? 'check_circle' : (type === 'error' ? 'error' : 'info');
+    var el = document.createElement('div');
+    el.className = 'toast ' + type;
+    var iconSpan = document.createElement('span');
+    iconSpan.className = 'material-symbols-outlined toast-icon';
+    iconSpan.textContent = icon;
+    var textSpan = document.createElement('span');
+    textSpan.textContent = message;
+    el.appendChild(iconSpan);
+    el.appendChild(textSpan);
+    region.appendChild(el);
+    setTimeout(function () {
+      el.classList.add('leaving');
+      setTimeout(function () { el.remove(); }, 200);
+    }, 3800);
+  }
+
+  document.addEventListener('DOMContentLoaded', function () {
+    // Fermeture par clic sur l'overlay + touche Échap animée, pour toutes les dialog de la page
+    document.querySelectorAll('dialog.modal-dialog').forEach(function (d) {
+      d.addEventListener('click', function (e) { if (e.target === d) closeModal(d.id); });
+      d.addEventListener('cancel', function (e) { e.preventDefault(); closeModal(d.id); });
+    });
+    // Ouverture automatique des modales marquées data-autoopen (cas d'une édition ?edit=xxx)
+    document.querySelectorAll('dialog.modal-dialog[data-autoopen="1"]').forEach(function (d) {
+      openModal(d.id);
+      // À la fermeture, on retire les paramètres ?edit... de l'URL pour ne pas rouvrir
+      // la modale au retour arrière ou à un rechargement de page.
+      d.addEventListener('close', function () {
+        var p = new URLSearchParams(window.location.search);
+        var changed = false;
+        Array.from(p.keys()).forEach(function (k) {
+          if (k.indexOf('edit') === 0) { p.delete(k); changed = true; }
+        });
+        if (changed) {
+          var qs = p.toString();
+          window.history.replaceState({}, '', window.location.pathname + (qs ? '?' + qs : '') + window.location.hash);
+        }
+      });
+    });
+    // Confirmation de suppression : clic sur "Supprimer"
+    var yesBtn = document.getElementById('confirm-modal-yes');
+    if (yesBtn) {
+      yesBtn.addEventListener('click', function () {
+        var f = _lgPendingDeleteForm;
+        _lgPendingDeleteForm = null;
+        closeModal('confirm-modal');
+        if (f) f.submit();
+      });
+    }
+    // Toast déclenché depuis le serveur via ?toast=...&toast_type=... après un redirect
+    var params = new URLSearchParams(window.location.search);
+    var msg = params.get('toast');
+    if (msg) {
+      showToast(msg, params.get('toast_type') || 'success');
+      params.delete('toast');
+      params.delete('toast_type');
+      var qs = params.toString();
+      var newUrl = window.location.pathname + (qs ? '?' + qs : '') + window.location.hash;
+      window.history.replaceState({}, '', newUrl);
+    }
+  });
+</script>
 
 {# JS legacy (utilisé par wizard) #}
 <script src="{{ url_for('static', path='js/app.js') }}?v={{ asset_v('js/app.js') }}"></script>

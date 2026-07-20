@@ -1,0 +1,422 @@
+{% extends "base_v2.html" %}
+{% set active_nav = "academie" %}
+{% block title %}Planning annuel de formation – LiuGong Academy{% endblock %}
+
+{% block extra_head %}
+<style>
+  .planning-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+  .planning-table thead th {
+    text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em;
+    color: #555555; padding: 0 14px 4px; font-family: "IBM Plex Sans", sans-serif;
+  }
+  .planning-table tbody tr {
+    background: #ffffff; box-shadow: 0 2px 8px rgba(11, 44, 110, 0.06);
+    transition: box-shadow 0.25s cubic-bezier(0.4,0,0.2,1), transform 0.25s cubic-bezier(0.4,0,0.2,1);
+  }
+  .planning-table tbody tr:hover { box-shadow: 0 8px 18px rgba(11, 44, 110, 0.10); transform: translateY(-1px); }
+  .planning-table td { padding: 12px 14px; font-size: 14px; vertical-align: middle; }
+  .planning-table td:first-child { border-radius: 12px 0 0 12px; }
+  .planning-table td:last-child { border-radius: 0 12px 12px 0; }
+  .month-sep td { background: transparent !important; box-shadow: none !important; padding: 18px 14px 4px !important; }
+  .month-sep .month-label {
+    font-family: "Archivo Narrow", sans-serif; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.05em; color: #0b2c6e; font-size: 13px;
+    border-left: 4px solid #EC6606; padding-left: 10px;
+  }
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 9999px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .status-planifie { background: #e0e3e5; color: #454f59; }
+  .status-confirme { background: #fdeee1; color: #a34400; }
+  .status-realise { background: #dcf5e6; color: #146c3a; }
+  .status-annule { background: #ffdad6; color: #93000a; }
+  .type-pill {
+    display: inline-flex; padding: 3px 9px; border-radius: 8px; font-size: 11px; font-weight: 600;
+  }
+  .type-client { background: #d6e2f5; color: #0b2c6e; }
+  .type-interne { background: #efeae2; color: #4a4232; }
+
+  .gantt-alert {
+    background: #fff2f1; border: 1.5px solid #ffb4ab; border-radius: 12px; padding: 12px 16px;
+    margin-bottom: 14px; font-size: 13px; color: #93000a;
+  }
+  .gantt-alert-title { display: flex; align-items: center; gap: 6px; font-weight: 700; margin-bottom: 6px; }
+  .gantt-alert ul { margin: 4px 0 0; padding-left: 20px; }
+  .gantt-alert li { margin-bottom: 3px; }
+
+  .gantt-toolbar { display: flex; justify-content: space-between; align-items: flex-start; flex-wrap: wrap; gap: 12px; margin-bottom: 10px; }
+  .gantt-scale-toggle { display: inline-flex; background: #eef0f2; border-radius: 9999px; padding: 3px; gap: 2px; flex-wrap: wrap; }
+  .gantt-scale-btn {
+    padding: 7px 14px; border-radius: 9999px; font-size: 12px; font-weight: 700; color: #454f59;
+    text-decoration: none; white-space: nowrap; transition: background 0.2s, color 0.2s;
+  }
+  .gantt-scale-btn.active { background: #0b2c6e; color: #fff; }
+  .gantt-scale-btn:hover:not(.active) { background: #e0e3e5; }
+
+  .gantt-legend { display: flex; flex-wrap: wrap; align-items: center; gap: 14px; font-size: 12px; color: #555; margin-bottom: 12px; padding-bottom: 10px; border-bottom: 1px solid #eef0f2; }
+  .gantt-legend span { display: inline-flex; align-items: center; gap: 4px; }
+  .gantt-legend-today { color: #e24b4a; font-weight: 700; }
+  .gantt-dot { width: 10px; height: 10px; border-radius: 50%; display: inline-block; flex-shrink: 0; }
+  .gantt-ml-auto { margin-left: auto; }
+
+  .gantt-scroll { overflow-x: auto; border: 1px solid #eef0f2; border-radius: 14px; }
+  .gantt-table { display: flex; flex-direction: column; }
+  .gantt-row { display: flex; align-items: stretch; border-bottom: 1px solid #f1f2f4; }
+  .gantt-row:last-child { border-bottom: none; }
+  .gantt-cell-left {
+    position: sticky; left: 0; z-index: 3; background: #fff; width: 240px; min-width: 240px; flex-shrink: 0;
+    padding: 9px 14px; display: flex; align-items: center; gap: 8px; box-shadow: 2px 0 6px rgba(11,44,110,0.05);
+  }
+  .gantt-cell-timeline { position: relative; flex: 1; min-height: 38px; }
+
+  .gantt-header-row { position: sticky; top: 0; z-index: 4; background: #fff; }
+  .gantt-header-left { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #777; font-weight: 700; }
+  .gantt-period-col {
+    position: absolute; top: 0; bottom: 0; border-left: 1px solid #eef0f2; padding: 9px 0 0 8px;
+    font-size: 11px; font-weight: 700; color: #555; text-transform: uppercase;
+  }
+
+  .gantt-group-row { cursor: pointer; background: #f7f8fa; user-select: none; }
+  .gantt-group-row:hover { background: #eef0f2; }
+  .gantt-chevron { font-size: 18px !important; color: #555; transition: transform 0.2s; }
+  .gantt-group-row.collapsed .gantt-chevron { transform: rotate(-90deg); }
+
+  .gantt-item-row { min-height: 46px; }
+  .gantt-item-left { flex-direction: column; align-items: flex-start; gap: 1px; padding-top: 7px; padding-bottom: 7px; }
+  .gantt-item-title { font-size: 13px; font-weight: 600; color: #1a1a1a; text-decoration: none; }
+  .gantt-item-title:hover { text-decoration: underline; }
+  .gantt-item-sub { font-size: 11px; color: #8a8f98; text-transform: uppercase; letter-spacing: 0.03em; }
+
+  .gantt-gridline { position: absolute; top: 0; bottom: 0; width: 1px; background: #f1f2f4; }
+  .gantt-today-line { position: absolute; top: 0; bottom: 0; width: 0; border-left: 2px dashed #e24b4a; z-index: 2; }
+  .gantt-today-tag {
+    position: absolute; top: -1px; transform: translateX(-50%); background: #e24b4a; color: #fff; font-size: 10px;
+    font-weight: 700; padding: 2px 7px; border-radius: 6px; white-space: nowrap; z-index: 5;
+  }
+
+  .gantt-pill {
+    position: absolute; top: 50%; transform: translateY(-50%); height: 22px; min-width: 22px; border-radius: 9999px;
+    background: #fff; border: 2px solid #9aa0a6; display: flex; align-items: center; padding: 0 5px; gap: 3px;
+    text-decoration: none; box-shadow: 0 1px 3px rgba(11,44,110,0.10); transition: box-shadow 0.2s, transform 0.2s;
+  }
+  .gantt-pill:hover { box-shadow: 0 4px 10px rgba(11,44,110,0.20); transform: translateY(-50%) translateY(-1px); z-index: 6; }
+  .gantt-pill-dot { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+  .gantt-pill-conflict { box-shadow: 0 0 0 3px rgba(226,75,74,0.28); }
+  .gantt-conflict-badge {
+    position: absolute; top: -6px; right: -6px; width: 15px; height: 15px; border-radius: 50%; background: #e24b4a;
+    color: #fff; font-size: 10px; font-weight: 800; display: flex; align-items: center; justify-content: center;
+    line-height: 1; z-index: 7;
+  }
+  .gantt-retard-icon { font-size: 13px !important; color: #e24b4a; position: absolute; top: -16px; left: 0; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="max-w-max-width-desktop mx-auto px-gutter py-lg">
+
+  <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-sm mb-lg border-b-2 border-outline-variant pb-md">
+    <div>
+      <p class="text-on-surface-variant font-label-bold text-xs uppercase tracking-widest mb-1">
+        <a href="{{ root_path }}/academie" class="hover:text-primary-container transition-colors">Académie</a>
+        <span class="mx-1">/</span> Planning annuel
+      </p>
+      <h1 class="font-headline-lg text-headline-lg uppercase text-on-surface">Planning annuel de formation</h1>
+      <p class="text-on-surface-variant font-body-md max-w-2xl">Sessions clients et internes, planifiées, confirmées ou réalisées dans l'année.</p>
+    </div>
+    <button type="button" class="btn primary" onclick="openModal('modal-planning')">
+      <span class="material-symbols-outlined" style="font-size:18px; vertical-align:-4px;">add</span>
+      Ajouter une session
+    </button>
+  </div>
+
+  <!-- Modale : formulaire ajout / édition -->
+  <dialog id="modal-planning" class="modal-dialog modal-wide" {% if edit_item %}data-autoopen="1"{% endif %}>
+    <div class="modal-header">
+      <h3>{% if edit_item %}Modifier la session{% else %}Ajouter une session{% endif %}</h3>
+      <button type="button" class="modal-close" onclick="closeModal('modal-planning')" aria-label="Fermer">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form method="post" action="{{ root_path }}/academie/planning/save">
+        {% if edit_item %}<input type="hidden" name="id" value="{{ edit_item.id }}">{% endif %}
+
+        <div class="modal-fieldset">
+          <div class="modal-fieldset-title"><span class="material-symbols-outlined">school</span>Formation</div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+            <div class="field md:col-span-2">
+              <label for="titre">Intitulé de la formation</label>
+              <input id="titre" name="titre" type="text" required value="{{ edit_item.titre if edit_item else '' }}" placeholder="Ex : Hydraulique niveau 2">
+            </div>
+            <div class="field">
+              <label for="type_session">Type</label>
+              <select id="type_session" name="type_session" style="padding:10px 12px; border:1.5px solid #d4d4d4; border-radius:12px; font-size:14px;">
+                <option value="client" {% if edit_item and edit_item.type_session == 'client' %}selected{% endif %}>Client (concessionnaire)</option>
+                <option value="interne" {% if edit_item and edit_item.type_session == 'interne' %}selected{% endif %}>Interne (LiuGong)</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-fieldset">
+          <div class="modal-fieldset-title"><span class="material-symbols-outlined">location_on</span>Client & lieu</div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+            <div class="field">
+              <label for="client_nom">Client / Concessionnaire (si applicable)</label>
+              <input id="client_nom" name="client_nom" type="text" value="{{ edit_item.client_nom if edit_item else '' }}" placeholder="Ex : SOCADA">
+            </div>
+            <div class="field">
+              <label for="lieu">Lieu</label>
+              <input id="lieu" name="lieu" type="text" value="{{ edit_item.lieu if edit_item else '' }}" placeholder="Ex : Abidjan">
+            </div>
+            <div class="field">
+              <label for="formateur">Formateur</label>
+              <input id="formateur" name="formateur" type="text" value="{{ edit_item.formateur if edit_item else '' }}">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-fieldset">
+          <div class="modal-fieldset-title"><span class="material-symbols-outlined">event</span>Planification</div>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-md">
+            <div class="field">
+              <label for="date_debut">Date de début</label>
+              <input id="date_debut" name="date_debut" type="date" required value="{{ edit_item.date_debut if edit_item else '' }}">
+            </div>
+            <div class="field">
+              <label for="date_fin">Date de fin</label>
+              <input id="date_fin" name="date_fin" type="date" value="{{ edit_item.date_fin if edit_item else '' }}">
+            </div>
+            <div class="field">
+              <label for="participants_prevus">Participants prévus</label>
+              <input id="participants_prevus" name="participants_prevus" type="number" min="0" value="{{ edit_item.participants_prevus if edit_item else '' }}">
+            </div>
+            <div class="field">
+              <label for="statut">Statut</label>
+              <select id="statut" name="statut" style="padding:10px 12px; border:1.5px solid #d4d4d4; border-radius:12px; font-size:14px;">
+                {% for s in ['planifie','confirme','realise','annule'] %}
+                <option value="{{ s }}" {% if edit_item and edit_item.statut == s %}selected{% elif not edit_item and s == 'planifie' %}selected{% endif %}>
+                  {{ {'planifie':'Planifié','confirme':'Confirmé','realise':'Réalisé','annule':'Annulé'}[s] }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-fieldset">
+          <div class="modal-fieldset-title"><span class="material-symbols-outlined">edit_note</span>Notes</div>
+          <div class="field">
+            <textarea id="notes" name="notes" rows="2" placeholder="Précisions logistiques, prérequis...">{{ edit_item.notes if edit_item else '' }}</textarea>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="submit" class="btn primary">
+            {% if edit_item %}Enregistrer les modifications{% else %}Ajouter au planning{% endif %}
+          </button>
+          <button type="button" class="btn ghost" onclick="closeModal('modal-planning')">Annuler</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <!-- Vue Gantt : chronogramme des sessions, détection des chevauchements -->
+  <div class="card mt-lg">
+    <div class="gantt-toolbar">
+      <div>
+        <h2 class="font-headline-md text-headline-md uppercase text-on-surface m-0">Vue Gantt</h2>
+        <p class="text-xs text-on-surface-variant m-0 mt-1">Chronogramme des sessions par type — repérez les chevauchements.</p>
+      </div>
+      <div class="gantt-scale-toggle">
+        {% for key, label in gantt.granularites %}
+        <a href="{{ root_path }}/academie/planning?granularite={{ key }}" class="gantt-scale-btn {% if key == gantt.granularite %}active{% endif %}">{{ label }}</a>
+        {% endfor %}
+      </div>
+    </div>
+
+    <div class="gantt-legend">
+      <span><span class="gantt-dot" style="background:#1D9E75;"></span>Réalisé</span>
+      <span><span class="gantt-dot" style="background:#378ADD;"></span>Confirmé</span>
+      <span><span class="gantt-dot" style="background:#9aa0a6;"></span>Planifié</span>
+      <span><span class="gantt-dot" style="background:#b0413e;"></span>Annulé</span>
+      <span><span class="gantt-dot" style="background:#e24b4a;"></span>En retard</span>
+      <span class="gantt-legend-today">— Aujourd'hui</span>
+      <span><span class="material-symbols-outlined" style="font-size:14px; color:#e24b4a;">warning</span>Chevauchement</span>
+      <button type="button" class="btn small ghost gantt-ml-auto" id="gantt-toggle-all" data-state="expanded" onclick="toggleAllGanttGroups(this)">
+        <span class="material-symbols-outlined" style="font-size:16px;">unfold_less</span> Tout replier
+      </button>
+    </div>
+
+    {% if gantt.conflits %}
+    <div class="gantt-alert">
+      <div class="gantt-alert-title">
+        <span class="material-symbols-outlined" style="font-size:18px;">warning</span>
+        {{ gantt.conflits|length }} chevauchement{{ 's' if gantt.conflits|length > 1 else '' }} détecté{{ 's' if gantt.conflits|length > 1 else '' }}
+      </div>
+      <ul>
+        {% for c in gantt.conflits %}
+        <li>« {{ c.a_titre }} » ({{ c.a_dates }}) chevauche « {{ c.b_titre }} » ({{ c.b_dates }})</li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endif %}
+
+    {% if gantt.total_sessions == 0 %}
+    <p class="text-on-surface-variant text-sm py-md">Aucune session datée à afficher.</p>
+    {% else %}
+    <div class="gantt-scroll">
+      <div class="gantt-table" style="min-width: {{ 240 + gantt.periodes|length * 100 }}px;">
+
+        <!-- En-tête : colonnes de la période -->
+        <div class="gantt-row gantt-header-row">
+          <div class="gantt-cell-left gantt-header-left">Session</div>
+          <div class="gantt-cell-timeline">
+            {% for p in gantt.periodes %}
+            <div class="gantt-period-col" style="left: {{ p.left_pct }}%; width: {{ p.width_pct }}%;">{{ p.label }}</div>
+            {% endfor %}
+            {% if gantt.today_left_pct is not none %}
+            <div class="gantt-today-tag" style="left: {{ gantt.today_left_pct }}%;">Aujourd'hui</div>
+            {% endif %}
+          </div>
+        </div>
+
+        {% for g in gantt.groupes %}
+        <div class="gantt-row gantt-group-row" onclick="toggleGanttGroup('{{ g.key }}', this)">
+          <div class="gantt-cell-left">
+            <span class="material-symbols-outlined gantt-chevron">expand_more</span>
+            <span class="gantt-dot" style="background:{{ g.dot_color }};"></span>
+            <span class="font-label-bold">{{ g.label }}</span>
+            <span class="text-xs text-on-surface-variant">· {{ g.count }}</span>
+          </div>
+          <div class="gantt-cell-timeline">
+            {% for p in gantt.periodes %}<div class="gantt-gridline" style="left: {{ p.left_pct }}%;"></div>{% endfor %}
+            {% if gantt.today_left_pct is not none %}<div class="gantt-today-line" style="left: {{ gantt.today_left_pct }}%;"></div>{% endif %}
+          </div>
+        </div>
+
+        <div class="gantt-group-body" id="group-body-{{ g.key }}">
+          {% if not g.sessions %}
+          <div class="gantt-row gantt-item-row">
+            <div class="gantt-cell-left"><span class="text-xs text-on-surface-variant">Aucune session sur cette période</span></div>
+            <div class="gantt-cell-timeline">
+              {% for p in gantt.periodes %}<div class="gantt-gridline" style="left: {{ p.left_pct }}%;"></div>{% endfor %}
+              {% if gantt.today_left_pct is not none %}<div class="gantt-today-line" style="left: {{ gantt.today_left_pct }}%;"></div>{% endif %}
+            </div>
+          </div>
+          {% endif %}
+          {% for it in g.sessions %}
+          <div class="gantt-row gantt-item-row">
+            <div class="gantt-cell-left gantt-item-left">
+              <a href="{{ root_path }}/academie/planning?edit={{ it.id }}" class="gantt-item-title">{{ it.titre }}</a>
+              <span class="gantt-item-sub">{{ it.formateur or '—' }}</span>
+            </div>
+            <div class="gantt-cell-timeline">
+              {% for p in gantt.periodes %}<div class="gantt-gridline" style="left: {{ p.left_pct }}%;"></div>{% endfor %}
+              {% if gantt.today_left_pct is not none %}<div class="gantt-today-line" style="left: {{ gantt.today_left_pct }}%;"></div>{% endif %}
+              <a href="{{ root_path }}/academie/planning?edit={{ it.id }}"
+                 class="gantt-pill {% if it.conflit %}gantt-pill-conflict{% endif %}"
+                 style="left: {{ it.left_pct }}%; width: {{ it.width_pct }}%; border-color: {{ it.statut_color }};"
+                 title="{{ it.titre }} — {{ it.statut_label }} — {{ it.date_debut }}{% if it.date_fin != it.date_debut %} → {{ it.date_fin }}{% endif %}{% if it.conflit %} — Chevauche : {{ it.conflit_avec|join(', ') }}{% endif %}">
+                {% if it.en_retard %}<span class="material-symbols-outlined gantt-retard-icon">warning</span>{% endif %}
+                <span class="gantt-pill-dot" style="background:{{ it.statut_color }};"></span>
+                {% if it.conflit %}<span class="gantt-conflict-badge">!</span>{% endif %}
+              </a>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+        {% endfor %}
+
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <!-- Liste des sessions -->
+  <div class="mt-lg">
+    {% if not items %}
+    <div class="card text-center py-xl">
+      <span class="material-symbols-outlined text-4xl text-on-surface-variant">event_available</span>
+      <p class="text-on-surface-variant mt-sm">Aucune session planifiée pour le moment.</p>
+    </div>
+    {% else %}
+    <table class="planning-table">
+      <thead>
+        <tr>
+          <th>Formation</th>
+          <th>Type</th>
+          <th>Formateur / Lieu</th>
+          <th>Dates</th>
+          <th>Participants</th>
+          <th>Statut</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% set ns = namespace(last_month="") %}
+        {% for it in items %}
+          {% set month_label = it.date_debut[:7] if it.date_debut else "Sans date" %}
+          {% if month_label != ns.last_month %}
+          <tr class="month-sep"><td colspan="7"><span class="month-label">{{ month_label }}</span></td></tr>
+          {% set ns.last_month = month_label %}
+          {% endif %}
+          <tr>
+            <td>
+              <span class="font-label-bold text-on-surface">{{ it.titre }}</span>
+              {% if it.notes %}<br><span class="text-xs text-on-surface-variant">{{ it.notes[:60] }}{% if it.notes|length > 60 %}…{% endif %}</span>{% endif %}
+            </td>
+            <td>
+              <span class="type-pill type-{{ it.type_session }}">{{ 'Client' if it.type_session == 'client' else 'Interne' }}</span>
+              {% if it.client_nom %}<br><span class="text-xs text-on-surface-variant">{{ it.client_nom }}</span>{% endif %}
+            </td>
+            <td>{{ it.formateur or '—' }}{% if it.lieu %}<br><span class="text-xs text-on-surface-variant">{{ it.lieu }}</span>{% endif %}</td>
+            <td>{{ it.date_debut or '—' }}{% if it.date_fin and it.date_fin != it.date_debut %} → {{ it.date_fin }}{% endif %}</td>
+            <td>{{ it.participants_prevus or '—' }}</td>
+            <td>
+              <span class="status-pill status-{{ it.statut }}">
+                {{ {'planifie':'Planifié','confirme':'Confirmé','realise':'Réalisé','annule':'Annulé'}.get(it.statut, it.statut) }}
+              </span>
+            </td>
+            <td class="whitespace-nowrap">
+              <a href="{{ root_path }}/academie/planning?edit={{ it.id }}" class="btn small ghost" aria-label="Modifier">
+                <span class="material-symbols-outlined" style="font-size:16px;">edit</span>
+              </a>
+              <form method="post" action="{{ root_path }}/academie/planning/{{ it.id }}/delete" style="display:inline;" onsubmit="return confirmDelete(this, 'Supprimer la session « {{ it.titre }} » du planning ?')">
+                <button type="submit" class="btn small ghost" aria-label="Supprimer">
+                  <span class="material-symbols-outlined" style="font-size:16px;">delete</span>
+                </button>
+              </form>
+            </td>
+          </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+  </div>
+
+</section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+  function toggleGanttGroup(key, rowEl) {
+    const body = document.getElementById('group-body-' + key);
+    if (!body) return;
+    const hidden = body.style.display === 'none';
+    body.style.display = hidden ? '' : 'none';
+    rowEl.classList.toggle('collapsed', !hidden);
+  }
+
+  function toggleAllGanttGroups(btn) {
+    const expanded = btn.dataset.state !== 'collapsed';
+    document.querySelectorAll('.gantt-group-body').forEach(function (b) { b.style.display = expanded ? 'none' : ''; });
+    document.querySelectorAll('.gantt-group-row').forEach(function (r) { r.classList.toggle('collapsed', expanded); });
+    btn.dataset.state = expanded ? 'collapsed' : 'expanded';
+    btn.innerHTML = expanded
+      ? '<span class="material-symbols-outlined" style="font-size:16px;">unfold_more</span> Tout déplier'
+      : '<span class="material-symbols-outlined" style="font-size:16px;">unfold_less</span> Tout replier';
+  }
+</script>
+{% endblock %}

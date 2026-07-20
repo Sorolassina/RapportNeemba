@@ -1,0 +1,159 @@
+{% extends "base_v2.html" %}
+{% set active_nav = "techniciens" %}
+{% block title %}Techniciens – LiuGong Academy{% endblock %}
+
+{% block extra_head %}
+<style>
+  .tech-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+  .tech-table thead th {
+    text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em;
+    color: #555555; padding: 0 14px 4px; font-family: "IBM Plex Sans", sans-serif;
+  }
+  .tech-table tbody tr {
+    background: #ffffff; box-shadow: 0 2px 8px rgba(11, 44, 110, 0.06); cursor: pointer;
+    transition: box-shadow 0.25s cubic-bezier(0.4,0,0.2,1), transform 0.25s cubic-bezier(0.4,0,0.2,1);
+  }
+  .tech-table tbody tr:hover { box-shadow: 0 8px 18px rgba(11, 44, 110, 0.10); transform: translateY(-1px); }
+  .tech-table td { padding: 12px 14px; font-size: 14px; vertical-align: middle; }
+  .tech-table td:first-child { border-radius: 12px 0 0 12px; }
+  .tech-table td:last-child { border-radius: 0 12px 12px 0; }
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 9999px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .status-candidat { background: #e0e3e5; color: #454f59; }
+  .status-en_integration { background: #fdeee1; color: #a34400; }
+  .status-actif { background: #dcf5e6; color: #146c3a; }
+  .status-inactif { background: #ffdad6; color: #93000a; }
+  .status-sorti { background: #e0e3e5; color: #2c2c2a; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="max-w-max-width-desktop mx-auto px-gutter py-lg">
+
+  <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-sm mb-lg border-b-2 border-outline-variant pb-md">
+    <div>
+      <h1 class="font-headline-lg text-headline-lg uppercase text-on-surface">Techniciens</h1>
+      <p class="text-on-surface-variant font-body-md max-w-2xl">Recrutement, intégration des 6 premiers mois et suivi dans la durée — un profil unique par technicien.</p>
+    </div>
+    <button type="button" class="btn primary" onclick="openModal('modal-technicien')">
+      <span class="material-symbols-outlined" style="font-size:18px; vertical-align:-4px;">add</span>
+      Nouveau technicien
+    </button>
+  </div>
+
+  <!-- Modale : nouveau technicien -->
+  <dialog id="modal-technicien" class="modal-dialog modal-wide">
+    <div class="modal-header">
+      <h3>Nouveau technicien</h3>
+      <button type="button" class="modal-close" onclick="closeModal('modal-technicien')" aria-label="Fermer">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form method="post" action="{{ root_path }}/techniciens/save">
+        <div class="modal-fieldset">
+          <div class="modal-fieldset-title"><span class="material-symbols-outlined">badge</span>Identité</div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+            <div class="field">
+              <label for="nom">Nom</label>
+              <input id="nom" name="nom" type="text" required>
+            </div>
+            <div class="field">
+              <label for="prenom">Prénom</label>
+              <input id="prenom" name="prenom" type="text" required>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-fieldset">
+          <div class="modal-fieldset-title"><span class="material-symbols-outlined">work</span>Poste & contact</div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+            <div class="field">
+              <label for="concessionnaire">Concessionnaire / structure</label>
+              <input id="concessionnaire" name="concessionnaire" type="text" placeholder="Ex : SOCADA, ou LiuGong (interne)">
+            </div>
+            <div class="field">
+              <label for="poste">Poste visé</label>
+              <input id="poste" name="poste" type="text" placeholder="Ex : Technicien hydraulique">
+            </div>
+            <div class="field">
+              <label for="telephone">Téléphone</label>
+              <input id="telephone" name="telephone" type="text">
+            </div>
+            <div class="field">
+              <label for="date_embauche">Date d'embauche / d'entrée</label>
+              <input id="date_embauche" name="date_embauche" type="date">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-fieldset">
+          <div class="modal-fieldset-title"><span class="material-symbols-outlined">assignment_ind</span>Statut & notes</div>
+          <div class="field">
+            <label for="statut">Statut</label>
+            <select id="statut" name="statut" style="padding:10px 12px; border:1.5px solid #d4d4d4; border-radius:12px; font-size:14px; max-width:280px;">
+              {% for s in ['candidat','en_integration','actif','inactif','sorti'] %}
+              <option value="{{ s }}" {% if s == 'candidat' %}selected{% endif %}>
+                {{ {'candidat':'Candidat','en_integration':'En intégration','actif':'Actif','inactif':'Inactif','sorti':'Sorti'}[s] }}
+              </option>
+              {% endfor %}
+            </select>
+          </div>
+          <div class="field">
+            <label for="notes">Notes</label>
+            <textarea id="notes" name="notes" rows="2"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="submit" class="btn primary">Ajouter le technicien</button>
+          <button type="button" class="btn ghost" onclick="closeModal('modal-technicien')">Annuler</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <div class="mt-lg">
+    {% if not items %}
+    <div class="card text-center py-xl">
+      <span class="material-symbols-outlined text-4xl text-on-surface-variant">engineering</span>
+      <p class="text-on-surface-variant mt-sm">Aucun technicien enregistré pour le moment.</p>
+    </div>
+    {% else %}
+    <table class="tech-table">
+      <thead>
+        <tr>
+          <th>Technicien</th>
+          <th>Concessionnaire</th>
+          <th>Poste</th>
+          <th>Entrée</th>
+          <th>Statut</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for it in items %}
+        <tr onclick="window.location='{{ root_path }}/techniciens/{{ it.id }}'">
+          <td><span class="font-label-bold text-on-surface">{{ it.nom }} {{ it.prenom }}</span></td>
+          <td>{{ it.concessionnaire or '—' }}</td>
+          <td>{{ it.poste or '—' }}</td>
+          <td>{{ it.date_embauche or '—' }}</td>
+          <td>
+            <span class="status-pill status-{{ it.statut }}">
+              {{ {'candidat':'Candidat','en_integration':'En intégration','actif':'Actif','inactif':'Inactif','sorti':'Sorti'}.get(it.statut, it.statut) }}
+            </span>
+          </td>
+          <td class="whitespace-nowrap">
+            <a href="{{ root_path }}/techniciens/{{ it.id }}" class="btn small ghost" onclick="event.stopPropagation();">Ouvrir</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+  </div>
+
+</section>
+{% endblock %}

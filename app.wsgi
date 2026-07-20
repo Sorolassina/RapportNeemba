@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-WSGI Configuration pour NEMBA Report Generator
+WSGI Configuration pour LiuGong Academy
 Déploiement avec Apache + mod_wsgi
 """
 

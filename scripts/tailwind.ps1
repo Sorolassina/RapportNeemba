@@ -1,5 +1,5 @@
 # =============================================================================
-# Script de build / watch Tailwind CSS pour NEMBA Report.
+# Script de build / watch Tailwind CSS pour LiuGong Academy.
 #
 # Usage :
 #   .\scripts\tailwind.ps1 install     # Télécharge le binaire si absent

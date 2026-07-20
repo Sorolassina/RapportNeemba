@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Neemba Academy</title>
+<title>LiuGong Academy</title>
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -64,7 +64,7 @@
     height: 28px;
     background-image: repeating-linear-gradient(
       45deg,
-      #ffcd00 0 22px,
+      #EC6606 0 22px,
       #000000 22px 44px
     );
     z-index: 4;
@@ -79,8 +79,8 @@
     position: absolute;
     inset: 0;
     background-image:
-      linear-gradient(to right, rgba(255, 205, 0, 0.07) 1px, transparent 1px),
-      linear-gradient(to bottom, rgba(255, 205, 0, 0.07) 1px, transparent 1px);
+      linear-gradient(to right, rgba(236, 102, 6, 0.07) 1px, transparent 1px),
+      linear-gradient(to bottom, rgba(236, 102, 6, 0.07) 1px, transparent 1px);
     background-size: 56px 56px;
     opacity: 0;
     animation: grid-in 1s 0.4s ease-out forwards;
@@ -96,7 +96,7 @@
     top: 50%; left: 50%;
     width: 800px; height: 800px;
     transform: translate(-50%, -50%) scale(0);
-    background: radial-gradient(circle, rgba(255, 205, 0, 0.18) 0%, transparent 60%);
+    background: radial-gradient(circle, rgba(236, 102, 6, 0.18) 0%, transparent 60%);
     border-radius: 50%;
     z-index: 2;
     animation: halo-pulse 5s 0.5s ease-out forwards;
@@ -111,7 +111,7 @@
   .gear {
     position: absolute;
     fill: none;
-    stroke: #ffcd00;
+    stroke: #EC6606;
     stroke-width: 1.2;
     opacity: 0;
     z-index: 2;
@@ -132,9 +132,9 @@
   .particle {
     position: absolute;
     width: 4px; height: 4px;
-    background: #ffcd00;
+    background: #EC6606;
     border-radius: 50%;
-    box-shadow: 0 0 6px #ffcd00;
+    box-shadow: 0 0 6px #EC6606;
     z-index: 3;
     opacity: 0;
     animation: particle-float var(--dur, 8s) var(--delay, 0s) ease-out infinite;
@@ -166,7 +166,7 @@
     border: 2px solid #1f1f1f;
     box-shadow:
       0 0 0 4px #000,
-      0 30px 100px rgba(255, 205, 0, 0.10),
+      0 30px 100px rgba(236, 102, 6, 0.10),
       inset 0 1px 0 rgba(255, 255, 255, 0.05);
     transform: scale(0.85) rotate(-1deg);
     opacity: 0;
@@ -185,7 +185,7 @@
     height: 12px;
     background-image: repeating-linear-gradient(
       45deg,
-      #ffcd00 0 14px,
+      #EC6606 0 14px,
       #000 14px 28px
     );
   }
@@ -212,7 +212,7 @@
   .id-tag {
     font-family: "IBM Plex Mono", "IBM Plex Sans", monospace;
     font-size: 10px;
-    color: #ffcd00;
+    color: #EC6606;
     letter-spacing: 0.32em;
     text-transform: uppercase;
     text-align: center;
@@ -253,8 +253,8 @@
     left: -3px;
     width: 4px;
     height: 100%;
-    background: linear-gradient(to bottom, transparent, #ffcd00 20%, #fff200 50%, #ffcd00 80%, transparent);
-    box-shadow: 0 0 20px #ffcd00, 0 0 40px rgba(255, 205, 0, 0.6);
+    background: linear-gradient(to bottom, transparent, #EC6606 20%, #FF8A3D 50%, #EC6606 80%, transparent);
+    box-shadow: 0 0 20px #EC6606, 0 0 40px rgba(236, 102, 6, 0.6);
     opacity: 0;
     animation: laser-sweep 1s 1.2s ease-out forwards;
   }
@@ -277,7 +277,7 @@
     animation: fade-up 0.6s 1.8s ease-out forwards;
   }
   .title .accent {
-    color: #ffcd00;
+    color: #EC6606;
   }
 
   .subtitle {
@@ -312,8 +312,8 @@
     position: absolute;
     inset: 0;
     width: 0%;
-    background: linear-gradient(to right, #ffcd00 0%, #fff200 50%, #ffcd00 100%);
-    box-shadow: 0 0 10px rgba(255, 205, 0, 0.7);
+    background: linear-gradient(to right, #EC6606 0%, #FF8A3D 50%, #EC6606 100%);
+    box-shadow: 0 0 10px rgba(236, 102, 6, 0.7);
     animation: progress-fill 2.6s 1.4s cubic-bezier(0.7, 0, 0.3, 1) forwards;
   }
   .progress-tick {
@@ -333,7 +333,7 @@
     justify-content: space-between;
     font-family: "IBM Plex Mono", monospace;
     font-size: 11px;
-    color: #ffcd00;
+    color: #EC6606;
     letter-spacing: 0.18em;
     text-transform: uppercase;
     opacity: 0;
@@ -351,9 +351,9 @@
   .meta .dot {
     display: inline-block;
     width: 6px; height: 6px;
-    background: #ffcd00;
+    background: #EC6606;
     border-radius: 50%;
-    box-shadow: 0 0 6px #ffcd00;
+    box-shadow: 0 0 6px #EC6606;
     animation: blink 1s ease-in-out infinite;
   }
   @keyframes blink {
@@ -379,7 +379,7 @@
     animation: fade-up 0.6s 2.4s ease-out forwards;
   }
   .ticker .pulse {
-    color: #ffcd00;
+    color: #EC6606;
     animation: blink 1s ease-in-out infinite;
   }
 
@@ -405,8 +405,8 @@
   }
   .skip:hover {
     color: #000;
-    background: #ffcd00;
-    border-color: #ffcd00;
+    background: #EC6606;
+    border-color: #EC6606;
   }
 
   /* ============================================================
@@ -568,16 +568,16 @@
       <span class="rivet bl"></span>
       <span class="rivet br"></span>
 
-      <div class="id-tag">Système Neemba · Édition 2026</div>
+      <div class="id-tag">Système LiuGong · Édition 2026</div>
 
       <div class="logo-wrap">
         <img class="logo"
-             src="{{ url_for('static', path='img/branding/nemba-academy_logo.png') }}"
-             alt="Neemba Academy"/>
+             src="{{ url_for('static', path='img/branding/logo_LG_complet.png') }}"
+             alt="LiuGong"/>
         <span class="laser"></span>
       </div>
 
-      <h1 class="title">Neemba <span class="accent">Academy</span></h1>
+      <h1 class="title">LiuGong <span class="accent">Academy</span></h1>
       <p class="subtitle">Excellence Technique &middot; Afrique</p>
 
       <div class="progress">
@@ -647,3 +647,4 @@
 
 </body>
 </html>
+          

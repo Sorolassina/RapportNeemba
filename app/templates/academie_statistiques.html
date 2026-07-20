@@ -1,0 +1,134 @@
+{% extends "base_v2.html" %}
+{% set active_nav = "academie" %}
+{% block title %}Statistiques – LiuGong Academy{% endblock %}
+
+{% block extra_head %}
+<style>
+  .stat-kpi { background: #f3f8ff; border: 1px solid #dbeafe; border-radius: 14px; padding: 16px; text-align: center; }
+  .stat-kpi .value { font-family: "Archivo Narrow", sans-serif; font-size: 28px; font-weight: 700; color: #0b2c6e; }
+  .stat-kpi .label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: #555; margin-top: 2px; }
+  .bar-row { margin-bottom: 8px; }
+  .bar-row .bar-label { display: flex; justify-content: space-between; font-size: 12px; color: #444; margin-bottom: 3px; }
+  .bar-track { background: #eceef0; border-radius: 8px; height: 10px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 8px; transition: width 0.4s ease; }
+  .fill-passable { background: #e24b4a; }
+  .fill-assez-bien { background: #EC6606; }
+  .fill-bien { background: #378ADD; }
+  .fill-tres-bien { background: #1D9E75; }
+  .fill-non { background: #e24b4a; }
+  .fill-plutot-non { background: #EC6606; }
+  .fill-plutot-oui { background: #378ADD; }
+  .fill-oui { background: #1D9E75; }
+  .comment-card { background: #fff; border-left: 4px solid #EC6606; border-radius: 0 12px 12px 0; padding: 10px 14px; margin-bottom: 8px; box-shadow: 0 2px 8px rgba(11,44,110,0.05); }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="max-w-max-width-desktop mx-auto px-gutter py-lg">
+
+  <div class="mb-lg border-b-2 border-outline-variant pb-md">
+    <p class="text-on-surface-variant font-label-bold text-xs uppercase tracking-widest mb-1">
+      <a href="{{ root_path }}/academie" class="hover:text-primary-container transition-colors">Académie</a>
+      <span class="mx-1">/</span> Évaluation & satisfaction
+    </p>
+    <h1 class="font-headline-lg text-headline-lg uppercase text-on-surface">Statistiques & propositions d'amélioration</h1>
+    {% if selected_q %}
+    <p class="text-on-surface-variant font-body-md">Session : <strong>{{ selected_q.titre_formation }}</strong> — <a href="{{ root_path }}/academie/statistiques" class="text-primary-container hover:underline">voir toutes les sessions</a></p>
+    {% else %}
+    <p class="text-on-surface-variant font-body-md max-w-2xl">Vue consolidée de toutes les réponses aux questionnaires QR code.</p>
+    {% endif %}
+  </div>
+
+  {% if stats.total == 0 %}
+  <div class="card text-center py-xl">
+    <span class="material-symbols-outlined text-4xl text-on-surface-variant">query_stats</span>
+    <p class="text-on-surface-variant mt-sm">Aucune réponse pour le moment.</p>
+  </div>
+  {% else %}
+
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-md mb-lg">
+    <div class="stat-kpi"><div class="value">{{ stats.total }}</div><div class="label">Réponses</div></div>
+    <div class="stat-kpi"><div class="value">{{ stats.taux_satisfaction }}%</div><div class="label">Satisfaction (bien+)</div></div>
+    <div class="stat-kpi"><div class="value">{{ stats.taux_recommandation }}%</div><div class="label">Recommandent</div></div>
+    <div class="stat-kpi"><div class="value">{{ stats.utile_travail.pct.oui }}%</div><div class="label">Utile au quotidien</div></div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-md mb-lg">
+    {% for key, lbl in [('note_contenu','Contenu'), ('note_pedagogie','Formateur & pédagogie'), ('note_logistique','Logistique')] %}
+    <div class="card">
+      <h3 class="font-label-bold text-on-surface uppercase text-sm mb-sm">{{ lbl }}</h3>
+      {% for v, l in [('passable','Passable'),('assez-bien','Assez bien'),('bien','Bien'),('tres-bien','Très bien')] %}
+      <div class="bar-row">
+        <div class="bar-label"><span>{{ l }}</span><span>{{ stats[key].pct[v] }}%</span></div>
+        <div class="bar-track"><div class="bar-fill fill-{{ v }}" style="width: {{ stats[key].pct[v] }}%;"></div></div>
+      </div>
+      {% endfor %}
+    </div>
+    {% endfor %}
+  </div>
+
+  {% if stats.trend|length > 1 %}
+  <div class="card mb-lg">
+    <h3 class="font-label-bold text-on-surface uppercase text-sm mb-sm">Tendance mensuelle du taux de satisfaction</h3>
+    {% for t in stats.trend %}
+    <div class="bar-row">
+      <div class="bar-label"><span>{{ t.mois }} ({{ t.nb }} réponse{{ 's' if t.nb != 1 else '' }})</span><span>{{ t.taux_satisfaction }}%</span></div>
+      <div class="bar-track"><div class="bar-fill fill-tres-bien" style="width: {{ t.taux_satisfaction }}%;"></div></div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% if stats.commentaires %}
+  <div class="card mb-lg">
+    <h3 class="font-label-bold text-on-surface uppercase text-sm mb-sm">Derniers commentaires libres</h3>
+    {% for c in stats.commentaires %}
+    <div class="comment-card">
+      {% if c.points_forts %}<p class="text-sm m-0 mb-1"><strong>Apprécié :</strong> {{ c.points_forts }}</p>{% endif %}
+      {% if c.suggestions %}<p class="text-sm m-0"><strong>Suggestion :</strong> {{ c.suggestions }}</p>{% endif %}
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+  {% endif %}
+
+  <div class="card">
+    <div class="flex items-center justify-between flex-wrap gap-sm">
+      <h3 class="font-label-bold text-on-surface uppercase text-sm mb-0">Plan d'action du mois</h3>
+      <button type="button" class="btn small ghost" onclick="openModal('modal-plan-action')">
+        <span class="material-symbols-outlined" style="font-size:16px;">edit</span>
+        {% if plan %}Modifier{% else %}Rédiger{% endif %} le plan
+      </button>
+    </div>
+    <p class="text-xs text-on-surface-variant mt-sm mb-0">{{ plan.texte if plan else 'Aucun plan d\'action rédigé pour ce mois.' }}</p>
+  </div>
+
+  <!-- Modale : plan d'action -->
+  <dialog id="modal-plan-action" class="modal-dialog">
+    <div class="modal-header">
+      <h3>{% if plan %}Modifier{% else %}Rédiger{% endif %} le plan d'action</h3>
+      <button type="button" class="modal-close" onclick="closeModal('modal-plan-action')" aria-label="Fermer">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form method="post" action="{{ root_path }}/academie/statistiques/plan-action" class="flex flex-col gap-sm">
+        <div class="field" style="max-width: 200px;">
+          <label for="mois">Mois</label>
+          <input id="mois" name="mois" type="month" value="{{ current_mois }}">
+        </div>
+        <div class="field">
+          <label for="texte">Actions décidées</label>
+          <textarea id="texte" name="texte" rows="4">{{ plan.texte if plan else '' }}</textarea>
+        </div>
+        <div class="flex gap-sm items-center">
+          <button type="submit" class="btn primary">Enregistrer le plan d'action</button>
+          <button type="button" class="btn ghost" onclick="closeModal('modal-plan-action')">Annuler</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+</section>
+{% endblock %}

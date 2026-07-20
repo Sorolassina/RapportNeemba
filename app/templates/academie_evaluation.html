@@ -1,0 +1,168 @@
+{% extends "base_v2.html" %}
+{% set active_nav = "academie" %}
+{% block title %}Évaluation de la formation – LiuGong Academy{% endblock %}
+
+{% block extra_head %}
+<style>
+  .eval-card {
+    background: #fff; border-radius: 16px; padding: 18px 20px; margin-bottom: 14px;
+    box-shadow: 0 2px 10px rgba(11, 44, 110, 0.06);
+    border-left: 4px solid #EC6606;
+    transition: box-shadow 0.25s cubic-bezier(0.4,0,0.2,1), transform 0.25s cubic-bezier(0.4,0,0.2,1);
+  }
+  .eval-card:hover { box-shadow: 0 10px 22px rgba(11, 44, 110, 0.10); transform: translateY(-1px); }
+  .eval-badges { display: flex; flex-wrap: wrap; gap: 6px; margin: 8px 0 10px; }
+  .eval-badge {
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;
+    padding: 4px 10px; border-radius: 9999px; background: #fdeee1; color: #a34400;
+  }
+  .eval-badge.note-passable { background: #ffdad6; color: #93000a; }
+  .eval-badge.note-assez-bien { background: #fdeee1; color: #a34400; }
+  .eval-badge.note-bien { background: #d6e2f5; color: #0b2c6e; }
+  .eval-badge.note-tres-bien { background: #dcf5e6; color: #146c3a; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="max-w-max-width-desktop mx-auto px-gutter py-lg">
+
+  <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-sm mb-lg border-b-2 border-outline-variant pb-md">
+    <div>
+      <p class="text-on-surface-variant font-label-bold text-xs uppercase tracking-widest mb-1">
+        <a href="{{ root_path }}/academie" class="hover:text-primary-container transition-colors">Académie</a>
+        <span class="mx-1">/</span> Évaluation & satisfaction
+      </p>
+      <h1 class="font-headline-lg text-headline-lg uppercase text-on-surface">Fiche d'évaluation de la formation</h1>
+      <p class="text-on-surface-variant font-body-md max-w-2xl">Votre appréciation, à chaud, juste après la session : contenu, pédagogie, logistique, participation.</p>
+    </div>
+    <button type="button" class="btn primary" onclick="openModal('modal-evaluation')">
+      <span class="material-symbols-outlined" style="font-size:18px; vertical-align:-4px;">add</span>
+      Nouvelle évaluation
+    </button>
+  </div>
+
+  <!-- Modale : formulaire ajout / édition -->
+  <dialog id="modal-evaluation" class="modal-dialog modal-wide" {% if edit_item %}data-autoopen="1"{% endif %}>
+    <div class="modal-header">
+      <h3>{% if edit_item %}Modifier l'évaluation{% else %}Nouvelle évaluation{% endif %}</h3>
+      <button type="button" class="modal-close" onclick="closeModal('modal-evaluation')" aria-label="Fermer">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form method="post" action="{{ root_path }}/academie/evaluation/save">
+        {% if edit_item %}<input type="hidden" name="id" value="{{ edit_item.id }}">{% endif %}
+
+        <div class="modal-fieldset">
+          <div class="modal-fieldset-title"><span class="material-symbols-outlined">event_available</span>Session concernée</div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+            <div class="field md:col-span-2">
+              <label for="planning_id">Session liée (planning)</label>
+              <select id="planning_id" name="planning_id" style="padding:10px 12px; border:1.5px solid #d4d4d4; border-radius:12px; font-size:14px;">
+                <option value="">Aucune / hors planning</option>
+                {% for p in planning_items %}
+                <option value="{{ p.id }}" {% if edit_item and edit_item.planning_id == p.id %}selected{% endif %}>
+                  {{ p.date_debut }} — {{ p.titre }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="field">
+              <label for="date">Date de l'évaluation</label>
+              <input id="date" name="date" type="date" required value="{{ edit_item.date if edit_item else '' }}">
+            </div>
+            <div class="field md:col-span-3">
+              <label for="titre_formation">Intitulé de la formation</label>
+              <input id="titre_formation" name="titre_formation" type="text" required value="{{ edit_item.titre_formation if edit_item else '' }}">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-fieldset">
+          <div class="modal-fieldset-title"><span class="material-symbols-outlined">star</span>Évaluation</div>
+          <div class="evaluation-sections" style="margin-bottom:0;">
+            {% for key, lbl in [('note_contenu','Contenu & programme'), ('note_pedagogie','Pédagogie du formateur'), ('note_logistique','Logistique & moyens'), ('note_participation','Participation des stagiaires')] %}
+            <div class="evaluation-section">
+              <h3>{{ lbl }}</h3>
+              <div class="rating-selector">
+                <label>Note :</label>
+                <select name="{{ key }}" class="rating-select">
+                  <option value="">Sélectionner une note</option>
+                  <option value="passable" {% if edit_item and edit_item[key] == 'passable' %}selected{% endif %}>Passable</option>
+                  <option value="assez-bien" {% if edit_item and edit_item[key] == 'assez-bien' %}selected{% endif %}>Assez bien</option>
+                  <option value="bien" {% if edit_item and edit_item[key] == 'bien' %}selected{% endif %}>Bien</option>
+                  <option value="tres-bien" {% if edit_item and edit_item[key] == 'tres-bien' %}selected{% endif %}>Très bien</option>
+                </select>
+              </div>
+            </div>
+            {% endfor %}
+          </div>
+        </div>
+
+        <div class="modal-fieldset">
+          <div class="modal-fieldset-title"><span class="material-symbols-outlined">edit_note</span>Retour détaillé</div>
+          <div class="field">
+            <label for="points_forts">Points forts</label>
+            <textarea id="points_forts" name="points_forts" rows="2">{{ edit_item.points_forts if edit_item else '' }}</textarea>
+          </div>
+          <div class="field">
+            <label for="points_ameliorer">Points à améliorer</label>
+            <textarea id="points_ameliorer" name="points_ameliorer" rows="2">{{ edit_item.points_ameliorer if edit_item else '' }}</textarea>
+          </div>
+          <div class="field">
+            <label for="recommandations">Recommandations pour la prochaine session</label>
+            <textarea id="recommandations" name="recommandations" rows="2">{{ edit_item.recommandations if edit_item else '' }}</textarea>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="submit" class="btn primary">
+            {% if edit_item %}Enregistrer les modifications{% else %}Enregistrer l'évaluation{% endif %}
+          </button>
+          <button type="button" class="btn ghost" onclick="closeModal('modal-evaluation')">Annuler</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <div class="mt-lg">
+    <h2 class="font-headline-md text-headline-md uppercase text-on-surface mb-md">Historique</h2>
+    {% if not items %}
+    <div class="card text-center py-xl">
+      <span class="material-symbols-outlined text-4xl text-on-surface-variant">rate_review</span>
+      <p class="text-on-surface-variant mt-sm">Aucune évaluation enregistrée pour le moment.</p>
+    </div>
+    {% else %}
+    {% for it in items %}
+    <div class="eval-card">
+      <div class="flex justify-between items-start gap-sm">
+        <div>
+          <h3 class="font-label-bold text-on-surface m-0">{{ it.titre_formation }}</h3>
+          <p class="text-xs text-on-surface-variant m-0">{{ it.date }}</p>
+        </div>
+        <div class="flex gap-xs shrink-0">
+          <a href="{{ root_path }}/academie/evaluation?edit={{ it.id }}" class="btn small ghost" aria-label="Modifier">
+            <span class="material-symbols-outlined" style="font-size:16px;">edit</span>
+          </a>
+          <form method="post" action="{{ root_path }}/academie/evaluation/{{ it.id }}/delete" onsubmit="return confirmDelete(this, 'Supprimer cette évaluation ?')">
+            <button type="submit" class="btn small ghost" aria-label="Supprimer">
+              <span class="material-symbols-outlined" style="font-size:16px;">delete</span>
+            </button>
+          </form>
+        </div>
+      </div>
+      <div class="eval-badges">
+        {% for key, lbl in [('note_contenu','Contenu'), ('note_pedagogie','Pédagogie'), ('note_logistique','Logistique'), ('note_participation','Participation')] %}
+          {% if it[key] %}<span class="eval-badge note-{{ it[key] }}">{{ lbl }} : {{ it[key]|replace('-', ' ') }}</span>{% endif %}
+        {% endfor %}
+      </div>
+      {% if it.points_forts %}<p class="text-sm text-on-surface mb-1"><strong>Points forts :</strong> {{ it.points_forts }}</p>{% endif %}
+      {% if it.points_ameliorer %}<p class="text-sm text-on-surface mb-1"><strong>À améliorer :</strong> {{ it.points_ameliorer }}</p>{% endif %}
+      {% if it.recommandations %}<p class="text-sm text-on-surface m-0"><strong>Recommandations :</strong> {{ it.recommandations }}</p>{% endif %}
+    </div>
+    {% endfor %}
+    {% endif %}
+  </div>
+
+</section>
+{% endblock %}

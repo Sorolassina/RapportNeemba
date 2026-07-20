@@ -1,0 +1,159 @@
+{% extends "base_v2.html" %}
+{% set active_nav = "terrain" %}
+{% block title %}Audit des besoins trimestriel – LiuGong Academy{% endblock %}
+
+{% block extra_head %}
+<style>
+  .audit-card {
+    background: #fff; border-radius: 16px; padding: 16px 20px; margin-bottom: 14px;
+    box-shadow: 0 2px 10px rgba(11, 44, 110, 0.06);
+    border-left: 4px solid #EC6606;
+    transition: box-shadow 0.25s cubic-bezier(0.4,0,0.2,1), transform 0.25s cubic-bezier(0.4,0,0.2,1);
+  }
+  .audit-card:hover { box-shadow: 0 10px 22px rgba(11, 44, 110, 0.10); transform: translateY(-1px); }
+  .trimestre-heading {
+    font-family: "Archivo Narrow", sans-serif; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.05em; color: #0b2c6e; font-size: 14px; margin: 18px 0 8px;
+  }
+  .urgence-pill { font-size: 11px; font-weight: 700; text-transform: uppercase; padding: 4px 10px; border-radius: 9999px; }
+  .urgence-faible { background: #dcf5e6; color: #146c3a; }
+  .urgence-moyen { background: #fdeee1; color: #a34400; }
+  .urgence-eleve { background: #ffdad6; color: #93000a; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="max-w-max-width-desktop mx-auto px-gutter py-lg">
+
+  <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-sm mb-lg border-b-2 border-outline-variant pb-md">
+    <div>
+      <p class="text-on-surface-variant font-label-bold text-xs uppercase tracking-widest mb-1">
+        <a href="{{ root_path }}/terrain" class="hover:text-primary-container transition-colors">Terrain & SAV</a>
+        <span class="mx-1">/</span> Audit des besoins trimestriel
+      </p>
+      <h1 class="font-headline-lg text-headline-lg uppercase text-on-surface">Audit des besoins trimestriel</h1>
+      <p class="text-on-surface-variant font-body-md max-w-2xl">Appelez chaque concessionnaire, posez des questions sur leurs pannes et besoins, et consignez l'analyse ici.</p>
+    </div>
+    <button type="button" class="btn primary" onclick="openModal('modal-audit')">
+      <span class="material-symbols-outlined" style="font-size:18px; vertical-align:-4px;">add</span>
+      Nouvel audit
+    </button>
+  </div>
+
+  <!-- Modale : formulaire ajout / édition -->
+  <dialog id="modal-audit" class="modal-dialog modal-wide" {% if edit_item %}data-autoopen="1"{% endif %}>
+    <div class="modal-header">
+      <h3>{% if edit_item %}Modifier l'audit{% else %}Nouvel audit{% endif %}</h3>
+      <button type="button" class="modal-close" onclick="closeModal('modal-audit')" aria-label="Fermer">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form method="post" action="{{ root_path }}/terrain/audit-besoins/save">
+        {% if edit_item %}<input type="hidden" name="id" value="{{ edit_item.id }}">{% endif %}
+
+        <div class="modal-fieldset">
+          <div class="modal-fieldset-title"><span class="material-symbols-outlined">call</span>Contexte de l'appel</div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+            <div class="field">
+              <label for="trimestre">Trimestre</label>
+              <input id="trimestre" name="trimestre" type="text" required placeholder="Ex : 2026-T3" value="{{ edit_item.trimestre if edit_item else '' }}">
+            </div>
+            <div class="field">
+              <label for="date_appel">Date de l'appel</label>
+              <input id="date_appel" name="date_appel" type="date" required value="{{ edit_item.date_appel if edit_item else '' }}">
+            </div>
+            <div class="field">
+              <label for="niveau_urgence">Niveau d'urgence</label>
+              <select id="niveau_urgence" name="niveau_urgence" style="padding:10px 12px; border:1.5px solid #d4d4d4; border-radius:12px; font-size:14px;">
+                {% for u in ['faible','moyen','eleve'] %}
+                <option value="{{ u }}" {% if edit_item and edit_item.niveau_urgence == u %}selected{% elif not edit_item and u == 'moyen' %}selected{% endif %}>
+                  {{ {'faible':'Faible','moyen':'Moyen','eleve':'Élevé'}[u] }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-fieldset">
+          <div class="modal-fieldset-title"><span class="material-symbols-outlined">person</span>Interlocuteur</div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+            <div class="field">
+              <label for="concessionnaire">Concessionnaire</label>
+              <input id="concessionnaire" name="concessionnaire" type="text" required value="{{ edit_item.concessionnaire if edit_item else '' }}">
+            </div>
+            <div class="field md:col-span-2">
+              <label for="interlocuteur">Interlocuteur (nom, fonction)</label>
+              <input id="interlocuteur" name="interlocuteur" type="text" value="{{ edit_item.interlocuteur if edit_item else '' }}">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-fieldset">
+          <div class="modal-fieldset-title"><span class="material-symbols-outlined">fact_check</span>Constats</div>
+          <div class="field">
+            <label for="pannes_recurrentes">Pannes récurrentes signalées</label>
+            <textarea id="pannes_recurrentes" name="pannes_recurrentes" rows="2">{{ edit_item.pannes_recurrentes if edit_item else '' }}</textarea>
+          </div>
+          <div class="field">
+            <label for="besoins_formation_identifies">Besoins de formation identifiés</label>
+            <textarea id="besoins_formation_identifies" name="besoins_formation_identifies" rows="2">{{ edit_item.besoins_formation_identifies if edit_item else '' }}</textarea>
+          </div>
+          <div class="field">
+            <label for="suivi_prevu">Suivi prévu</label>
+            <input id="suivi_prevu" name="suivi_prevu" type="text" placeholder="Ex : proposer session hydraulique T4" value="{{ edit_item.suivi_prevu if edit_item else '' }}">
+          </div>
+          <div class="field">
+            <label for="commentaire">Commentaire</label>
+            <textarea id="commentaire" name="commentaire" rows="2">{{ edit_item.commentaire if edit_item else '' }}</textarea>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="submit" class="btn primary">
+            {% if edit_item %}Enregistrer les modifications{% else %}Enregistrer l'audit{% endif %}
+          </button>
+          <button type="button" class="btn ghost" onclick="closeModal('modal-audit')">Annuler</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <div class="mt-lg">
+    {% if not items %}
+    <div class="card text-center py-xl">
+      <span class="material-symbols-outlined text-4xl text-on-surface-variant">call</span>
+      <p class="text-on-surface-variant mt-sm">Aucun audit enregistré pour le moment.</p>
+    </div>
+    {% else %}
+    {% set ns = namespace(last_trim="") %}
+    {% for it in items %}
+      {% if it.trimestre != ns.last_trim %}
+      <div class="trimestre-heading">{{ it.trimestre or 'Sans trimestre' }}</div>
+      {% set ns.last_trim = it.trimestre %}
+      {% endif %}
+      <div class="audit-card">
+        <div class="flex justify-between items-start gap-sm">
+          <div>
+            <h3 class="font-label-bold text-on-surface m-0">{{ it.concessionnaire }}</h3>
+            <p class="text-xs text-on-surface-variant m-0">{{ it.date_appel }}{% if it.interlocuteur %} — {{ it.interlocuteur }}{% endif %}</p>
+          </div>
+          <div class="flex gap-xs items-center shrink-0">
+            <span class="urgence-pill urgence-{{ it.niveau_urgence }}">{{ {'faible':'Faible','moyen':'Moyen','eleve':'Élevé'}.get(it.niveau_urgence, it.niveau_urgence) }}</span>
+            <a href="{{ root_path }}/terrain/audit-besoins?edit={{ it.id }}" class="btn small ghost" aria-label="Modifier"><span class="material-symbols-outlined" style="font-size:16px;">edit</span></a>
+            <form method="post" action="{{ root_path }}/terrain/audit-besoins/{{ it.id }}/delete" onsubmit="return confirmDelete(this, 'Supprimer cet audit ?')">
+              <button type="submit" class="btn small ghost" aria-label="Supprimer"><span class="material-symbols-outlined" style="font-size:16px;">delete</span></button>
+            </form>
+          </div>
+        </div>
+        {% if it.pannes_recurrentes %}<p class="text-sm mt-1 mb-1"><strong>Pannes récurrentes :</strong> {{ it.pannes_recurrentes }}</p>{% endif %}
+        {% if it.besoins_formation_identifies %}<p class="text-sm mb-1"><strong>Besoins formation :</strong> {{ it.besoins_formation_identifies }}</p>{% endif %}
+        {% if it.suivi_prevu %}<p class="text-sm m-0"><strong>Suivi prévu :</strong> {{ it.suivi_prevu }}</p>{% endif %}
+      </div>
+    {% endfor %}
+    {% endif %}
+  </div>
+
+</section>
+{% endblock %}

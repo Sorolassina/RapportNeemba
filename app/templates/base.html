@@ -4,21 +4,21 @@
   <meta charset="utf-8">
   <meta name="app-root" content="{{ request.scope.get('root_path','') }}">
   <!--<meta name="viewport" content="width=device-width, initial-scale=1">-->
-  <title>{{ title or "NEEMBA GROUP – Générateur de rapports" }}</title>
+  <title>{{ title or "LiuGong – Générateur de rapports" }}</title>
 
   {# ✅ CSS avec url_for pour respecter root_path #}
   <link rel="stylesheet" href="{{ url_for('static', path='css/style.css') }}?v={{ asset_version }}">
 
   {# ✅ Favicon dynamique avec url_for #}
-  <link rel="icon" href="{{ url_for('static', path='img/branding/nemba_logo.svg') }}">
+  <link rel="icon" href="{{ url_for('static', path='img/favicon/favicon.ico') }}">
 </head>
 <body>
   <header class="site-header">
     <div class="brand">
       {# ✅ Logo via url_for #}
-      <img src="{{ url_for('static', path='img/branding/nemba_logo.png') }}" alt="NEEMBA" />
+      <img src="{{ url_for('static', path='img/branding/logo_LG_complet.png') }}" alt="LiuGong" />
       <div class="brand-text">
-        <strong>NEEMBA GROUP</strong>
+        <strong>LiuGong</strong>
         <span>Générateur de rapports de formation</span>
       </div>
     </div>
@@ -29,7 +29,7 @@
   </main>
 
   <footer class="site-footer">
-    <span>© {{ current_year or 2025 }} NEEMBA GROUP – Côte d'Ivoire (Traoré Ibrahim P.)</span>
+    <span>© {{ current_year or 2025 }} LiuGong – Côte d'Ivoire (Traoré Ibrahim P.)</span>
   </footer>
 
   {# ✅ JS avec url_for et versioning (paramètre dynamique possible) #}

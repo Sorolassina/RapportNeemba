@@ -31,7 +31,7 @@ LND = {
     "footer_bot_mm": 7,     # pied de page
     "logo_inset_mm": 12,    # marge latérale logos
     "logo_h_mm": 12,        # hauteur logos
-    "brand_y_mm": 30,       # Y du 'Neemba Academy' (depuis le haut)
+    "brand_y_mm": 30,       # Y du 'LiuGong Academy' (depuis le haut)
     "dots_y_mm": 36,        # Y des 3 pastilles (depuis le haut)
     "title_y_mm": 115,      # (utilisé pour la couverture)
     "subtitle_y_mm": 70,    # (utilisé pour la couverture)
@@ -40,14 +40,14 @@ LND = {
     "spectrum_lr_mm": 12    # marges gauche/droite de la barre
 }
 
-# Couleurs UI
+# Couleurs UI — teintées identité LiuGong (navy #0B2C6E / orange #EC6606)
 COLORS = {
     "panel_bg":  "#F7F8FA",
     "panel_bd":  "#E5E7EB",
     "muted":     "#6B7280",
-    "title":     "#2b2f38",
-    "chip_bg":   "#EEF2FF",
-    "chip_txt":  "#1F2937",
+    "title":     "#12203D",
+    "chip_bg":   "#E9EDF5",
+    "chip_txt":  "#1B2A47",
 }
 DEV_GRID = False  # mettre True pour afficher une grille de calibration (mm)
 
@@ -194,7 +194,7 @@ def _resolve_image_for_reportlab(src_path: str | None, session_dir: str) -> str:
     - Si SVG: convertit en PNG (si cairosvg dispo), sinon fallback vers un logo PNG.
     - Retourne toujours un chemin lisible par reportlab.
     """
-    fallback = os.path.join("app", "static", "img", "branding", "nemba_logo.jpg")
+    fallback = os.path.join("app", "static", "img", "branding", "logo_LG_reduit.png")
     p = _web_to_disk(src_path) if src_path else None
     if not p or not os.path.exists(p):
         return fallback
@@ -315,22 +315,22 @@ def _draw_grid_mm(c: canvas.Canvas, step_mm=5):
         c.setStrokeColor(HexColor("#e5e7eb") if (y//step_mm)%2 else HexColor("#cfd4dc"))
         c.line(0, py, W, py)
 
-def _draw_header_footer_text(c: canvas.Canvas, page_num=None, text_top="Rapport de formation Neemba",
+def _draw_header_footer_text(c: canvas.Canvas, page_num=None, text_top="Rapport de formation LiuGong",
                              text_left="Confidentiel", text_mid=None, top_mm=7, bot_mm=7):
     """Texte d’en-tête/pied (au-dessus/au-dessous du style graphique)."""
     W, H = c._pagesize
-    _draw_text(c, W/2.0, H - _pt(top_mm), text_top, size=9, color="#2b2f38", font=FONT_TEXT, center=True)
+    _draw_text(c, W/2.0, H - _pt(top_mm), text_top, size=9, color="#12203D", font=FONT_TEXT, center=True)
     _draw_text(c, _pt(8), _pt(bot_mm), text_left, size=9, color="#555", font=FONT_TEXT)
     if text_mid:
         _draw_text(c, W/2.0, _pt(bot_mm), text_mid, size=9, color="#555", font=FONT_TEXT, center=True)
     if page_num is not None:
         _draw_text(c, W - _pt(20), _pt(bot_mm), f"Page {page_num}", size=9, color="#555", font=FONT_TEXT)
 
-def _brand_header(c: canvas.Canvas, ctx: dict, metrics: dict, brand_size=22,label="Neemba Academy"):
-    """Dessine logos gauche/droite + 'Neemba Academy' + 3 pastilles (paysage)."""
+def _brand_header(c: canvas.Canvas, ctx: dict, metrics: dict, brand_size=22,label="LiuGong Academy"):
+    """Dessine logos gauche/droite + 'LiuGong Academy' + 3 pastilles (paysage)."""
     W, H = c._pagesize
-    left_src  = ctx.get("cover", {}).get("logo_left_path") or "/static/img/branding/nemba_logo.png"
-    right_src = ctx.get("cover", {}).get("logo_right_path") or ctx.get("client", {}).get("logo_path") or "/static/img/branding/nemba_logo.jpg"
+    left_src  = ctx.get("cover", {}).get("logo_left_path") or "/static/img/branding/logo_LG_reduit.png"
+    right_src = ctx.get("cover", {}).get("logo_right_path") or ctx.get("client", {}).get("logo_path") or "/static/img/branding/logo_LG_reduit.png"
     session_dir = os.path.join(ROOT, ctx.get("_sid","_"))
     left_logo  = _resolve_image_for_reportlab(left_src,  session_dir)
     right_logo = _resolve_image_for_reportlab(right_src, session_dir)
@@ -348,7 +348,7 @@ def _brand_header(c: canvas.Canvas, ctx: dict, metrics: dict, brand_size=22,labe
 
     # marque + 3 pastilles
     _draw_text(c, W/2.0, H - _pt(metrics["brand_y_mm"]), label,
-               size=brand_size, color="#2b2f38", font=FONT_TITLE, center=True)
+               size=brand_size, color="#12203D", font=FONT_TITLE, center=True)
     _draw_three_dots(c, W/2.0, H - _pt(metrics["dots_y_mm"]))
 
 def _spectrum_footer(c: canvas.Canvas, metrics: dict):
@@ -376,7 +376,7 @@ def _neumo_panel(c, x, y, w, h, title=None):
     c.setLineWidth(0.6)
     c.roundRect(x, y-h, w, h, rad, stroke=1, fill=1)
     if title:
-        _draw_text(c, x + _pt(6), y - _pt(8), title.upper(), size=12, color="#2b2f38", font=FONT_TITLE)
+        _draw_text(c, x + _pt(6), y - _pt(8), title.upper(), size=12, color="#12203D", font=FONT_TITLE)
 
 def _draw_kv(c, x, y, w, label, value, lab_w_mm=28, gap_mm=2, line_h_mm=7, size=11):
     """Ligne 'Label : Valeur' avec wrap automatique. Retourne le nouveau y."""
@@ -413,7 +413,7 @@ def _draw_chip(c, x, y, text, padx_mm=3.5, pady_mm=1.8):
     padx = _pt(padx_mm); pady = _pt(pady_mm)
     txt_w = c.stringWidth(text, FONT_TEXT, 10)
     w = txt_w + 2*padx; h = _pt(6)
-    c.setFillColor(HexColor("#EEF2FF"))
+    c.setFillColor(HexColor("#E9EDF5"))
     c.setStrokeColor(HexColor("#E5E7EB"))
     c.setLineWidth(0.6)
     try:
@@ -502,9 +502,9 @@ def _draw_value(c, x, y, w, text, size=12, color="#111827", font=FONT_TEXT, line
 # ========================= CLASSE PRINCIPALE =========================
 class NembaReportLab:
     """
-    Générateur PDF NEMBA (ReportLab), imitation précise :
+    Générateur PDF LiuGong (ReportLab), imitation précise :
     - TOUTES les pages en A4 paysage au design de la couverture :
-      logos extrémités, 'Neemba Academy' + pastilles, barre dégradée en bas,
+      logos extrémités, 'LiuGong Academy' + pastilles, barre dégradée en bas,
       en-tête/pied uniformes.
     """
     def __init__(self, sid: str, out_path: str):
@@ -519,7 +519,7 @@ class NembaReportLab:
         self.today = datetime.date.today().strftime("%d/%m/%Y")
 
     # ------------- DÉMARRER UNE PAGE PAYSAGE -------------
-    def _start_landscape(self, page_num, brand_size=22, brand_label="Neemba Academy"):
+    def _start_landscape(self, page_num, brand_size=22, brand_label="LiuGong Academy"):
         self.c.setPageSize(landscape(A4))
         self.W, self.H = self.c._pagesize
         if DEV_GRID: _draw_grid_mm(self.c)
@@ -553,7 +553,7 @@ class NembaReportLab:
         else:
             title_font_size = 35
         _draw_text(c, W/2.0, H - _pt(LND["title_y_mm"] -35), title,
-                       size=title_font_size, color="#3b424c",  font=FONT_TITLE, center=True)
+                       size=title_font_size, color="#12203D",  font=FONT_TITLE, center=True)
 
        
         # Titre de la formation (si fourni)
@@ -579,14 +579,14 @@ class NembaReportLab:
                 
                 # Dessiner les deux lignes
                 _draw_text(c, W/2.0, H - _pt(LND["title_y_mm"] - 10), line1,
-                    size=font_size, color="#fdcb18", font=FONT_TITLE, center=True)
+                    size=font_size, color="#EC6606", font=FONT_TITLE, center=True)
                 _draw_text(c, W/2.0, H - _pt(LND["title_y_mm"] + 15), line2,
-                    size=font_size, color="#fdcb18", font=FONT_TITLE, center=True)
+                    size=font_size, color="#EC6606", font=FONT_TITLE, center=True)
             else:
                 # Texte court : une seule ligne avec taille maximale
                 font_size = 72
                 _draw_text(c, W/2.0, H - _pt(LND["title_y_mm"]), training_title,
-                    size=font_size, color="#fdcb18", font=FONT_TITLE, center=True)
+                    size=font_size, color="#EC6606", font=FONT_TITLE, center=True)
         
             
         
@@ -2439,7 +2439,7 @@ Cette formation constitue une étape importante dans le développement professio
         
         STRUCTURE :
         - Message "Merci" centré en grand (38pt)
-        - Signature "Neemba Academy" en dessous (18pt)
+        - Signature "LiuGong Academy" en dessous (18pt)
         - Style épuré et professionnel
         
         PAGE : Page de clôture du rapport
@@ -2447,7 +2447,7 @@ Cette formation constitue une étape importante dans le développement professio
         self._start_landscape(n)
         W, H = self.W, self.H
         _draw_text(self.c, W/2.0, H/2.0, "Merci", size=38, font=FONT_TITLE, center=True)
-        _draw_text(self.c, W/2.0, H/2.0 - _pt(10), "Neemba Academy", size=18, color="#2b2f38", font=FONT_TEXT, center=True)
+        _draw_text(self.c, W/2.0, H/2.0 - _pt(10), "LiuGong Academy", size=18, color="#12203D", font=FONT_TEXT, center=True)
         self.c.showPage()
 
     # ---------- Build ----------
@@ -2644,6 +2644,5 @@ def generate_reportlab(sid: str) -> str:
         print(f"DEBUG - ERREUR lors de la génération du PDF: {e}")
         import traceback
         traceback.print_exc()
-        raise e
-    
+
     return out_pdf

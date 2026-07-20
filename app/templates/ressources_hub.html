@@ -1,0 +1,162 @@
+{% extends "base_v2.html" %}
+{% set active_nav = "ressources" %}
+{% block title %}Médiathèque – LiuGong Academy{% endblock %}
+
+{% block extra_head %}
+<style>
+  .res-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 14px; }
+  .res-card {
+    background: #fff; border-radius: 16px; padding: 16px; box-shadow: 0 2px 10px rgba(11,44,110,0.06);
+    display: flex; flex-direction: column; gap: 8px;
+    transition: box-shadow 0.25s cubic-bezier(0.4,0,0.2,1), transform 0.25s cubic-bezier(0.4,0,0.2,1);
+  }
+  .res-card:hover { box-shadow: 0 10px 22px rgba(11,44,110,0.10); transform: translateY(-2px); }
+  .res-icon {
+    width: 44px; height: 44px; border-radius: 12px; background: #0b2c6e; color: #fff;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .res-badges { display: flex; flex-wrap: wrap; gap: 5px; }
+  .res-badge { font-size: 10.5px; font-weight: 700; text-transform: uppercase; padding: 3px 8px; border-radius: 8px; }
+  .badge-cat { background: #d6e2f5; color: #0b2c6e; }
+  .badge-niveau { background: #fdeee1; color: #a34400; }
+  .badge-type { background: #e0e3e5; color: #454f59; }
+  .filter-pill {
+    display: inline-flex; align-items: center; padding: 6px 14px; border-radius: 9999px; font-size: 12px;
+    font-weight: 600; border: 1.5px solid #d4d4d4; color: #444; transition: all 0.2s ease;
+  }
+  .filter-pill:hover { border-color: #EC6606; }
+  .filter-pill.active { background: #EC6606; border-color: #EC6606; color: #fff; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="max-w-max-width-desktop mx-auto px-gutter py-lg">
+
+  <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-sm mb-lg border-b-2 border-outline-variant pb-md">
+    <div>
+      <h1 class="font-headline-lg text-headline-lg uppercase text-on-surface">Médiathèque</h1>
+      <p class="text-on-surface-variant font-body-md max-w-2xl">Vos supports de formation, centralisés et classés par thème technique.</p>
+    </div>
+    <button type="button" class="btn primary" onclick="openModal('modal-ressource')">
+      <span class="material-symbols-outlined" style="font-size:18px; vertical-align:-4px;">upload_file</span>
+      Ajouter un support
+    </button>
+  </div>
+
+  <!-- Modale : ajouter un support -->
+  <dialog id="modal-ressource" class="modal-dialog modal-wide">
+    <div class="modal-header">
+      <h3>Ajouter un support</h3>
+      <button type="button" class="modal-close" onclick="closeModal('modal-ressource')" aria-label="Fermer">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form method="post" action="{{ root_path }}/ressources/upload" enctype="multipart/form-data">
+
+        <div class="modal-fieldset">
+          <div class="modal-fieldset-title"><span class="material-symbols-outlined">upload_file</span>Support</div>
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+            <div class="field">
+              <label for="titre">Titre</label>
+              <input id="titre" name="titre" type="text" required placeholder="Ex : Manuel hydraulique niveau 2">
+            </div>
+            <div class="field">
+              <label for="fichier">Fichier</label>
+              <input id="fichier" name="fichier" type="file" required>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-fieldset">
+          <div class="modal-fieldset-title"><span class="material-symbols-outlined">sell</span>Classification</div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+            <div class="field">
+              <label for="categorie">Thème</label>
+              <select id="categorie" name="categorie" style="padding:10px 12px; border:1.5px solid #d4d4d4; border-radius:12px; font-size:14px;">
+                {% for c in categories %}
+                <option value="{{ c }}">{{ categorie_labels[c] }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="field">
+              <label for="niveau">Niveau</label>
+              <select id="niveau" name="niveau" style="padding:10px 12px; border:1.5px solid #d4d4d4; border-radius:12px; font-size:14px;">
+                {% for n in niveaux %}
+                <option value="{{ n }}">{{ niveau_labels[n] }}</option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="field">
+              <label for="type_formation">Formation</label>
+              <select id="type_formation" name="type_formation" style="padding:10px 12px; border:1.5px solid #d4d4d4; border-radius:12px; font-size:14px;">
+                <option value="client">Client</option>
+                <option value="interne">Interne</option>
+                <option value="les_deux">Les deux</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-fieldset">
+          <div class="modal-fieldset-title"><span class="material-symbols-outlined">description</span>Description</div>
+          <div class="field">
+            <textarea id="description" name="description" rows="2"></textarea>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="submit" class="btn primary">
+            <span class="material-symbols-outlined" style="font-size:18px; vertical-align:-4px;">upload_file</span>
+            Ajouter à la médiathèque
+          </button>
+          <button type="button" class="btn ghost" onclick="closeModal('modal-ressource')">Annuler</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <div class="mt-lg mb-md flex flex-wrap gap-xs">
+    <a href="{{ root_path }}/ressources" class="filter-pill {% if not current_categorie %}active{% endif %}">Toutes ({{ total }})</a>
+    {% for c in categories %}
+    <a href="{{ root_path }}/ressources?categorie={{ c }}" class="filter-pill {% if current_categorie == c %}active{% endif %}">{{ categorie_labels[c] }}</a>
+    {% endfor %}
+  </div>
+
+  {% if not items %}
+  <div class="card text-center py-xl">
+    <span class="material-symbols-outlined text-4xl text-on-surface-variant">folder_open</span>
+    <p class="text-on-surface-variant mt-sm">Aucun support {% if current_categorie %}dans ce thème{% else %}pour le moment{% endif %}.</p>
+  </div>
+  {% else %}
+  <div class="res-grid">
+    {% for it in items %}
+    <div class="res-card">
+      <div class="flex items-start justify-between gap-sm">
+        <div class="res-icon">
+          <span class="material-symbols-outlined">{{ it.icon }}</span>
+        </div>
+        <form method="post" action="{{ root_path }}/ressources/{{ it.id }}/delete" onsubmit="return confirmDelete(this, 'Supprimer ce support ?')">
+          <button type="submit" class="btn small ghost" aria-label="Supprimer"><span class="material-symbols-outlined" style="font-size:16px;">delete</span></button>
+        </form>
+      </div>
+      <h3 class="font-label-bold text-on-surface m-0">{{ it.titre }}</h3>
+      {% if it.description %}<p class="text-xs text-on-surface-variant m-0">{{ it.description[:80] }}{% if it.description|length > 80 %}…{% endif %}</p>{% endif %}
+      <div class="res-badges">
+        <span class="res-badge badge-cat">{{ categorie_labels.get(it.categorie, it.categorie) }}</span>
+        {% if it.niveau %}<span class="res-badge badge-niveau">{{ niveau_labels.get(it.niveau, it.niveau) }}</span>{% endif %}
+        {% if it.type_formation %}<span class="res-badge badge-type">{{ {'client':'Client','interne':'Interne','les_deux':'Client + interne'}.get(it.type_formation, it.type_formation) }}</span>{% endif %}
+      </div>
+      <div class="flex items-center justify-between mt-1">
+        <span class="text-xs text-on-surface-variant">{{ it.taille_str }}</span>
+        <a href="{{ root_path }}{{ it.fichier_url }}" target="_blank" class="btn small ghost">
+          <span class="material-symbols-outlined" style="font-size:16px;">download</span> Ouvrir
+        </a>
+      </div>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+
+</section>
+{% endblock %}

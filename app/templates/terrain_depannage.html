@@ -1,0 +1,218 @@
+{% extends "base_v2.html" %}
+{% set active_nav = "terrain" %}
+{% block title %}Rapports de dépannage – LiuGong Academy{% endblock %}
+
+{% block extra_head %}
+<style>
+  .dep-table { width: 100%; border-collapse: separate; border-spacing: 0 8px; }
+  .dep-table thead th {
+    text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 0.06em;
+    color: #555555; padding: 0 14px 4px; font-family: "IBM Plex Sans", sans-serif;
+  }
+  .dep-table tbody tr {
+    background: #ffffff; box-shadow: 0 2px 8px rgba(11, 44, 110, 0.06);
+    transition: box-shadow 0.25s cubic-bezier(0.4,0,0.2,1), transform 0.25s cubic-bezier(0.4,0,0.2,1);
+  }
+  .dep-table tbody tr:hover { box-shadow: 0 8px 18px rgba(11, 44, 110, 0.10); transform: translateY(-1px); }
+  .dep-table td { padding: 12px 14px; font-size: 14px; vertical-align: top; }
+  .dep-table td:first-child { border-radius: 12px 0 0 12px; }
+  .dep-table td:last-child { border-radius: 0 12px 12px 0; }
+  .status-pill {
+    display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 9999px;
+    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+  }
+  .status-resolu { background: #dcf5e6; color: #146c3a; }
+  .status-en_cours { background: #fdeee1; color: #a34400; }
+  .status-necessite_piece { background: #ffdad6; color: #93000a; }
+  .sys-pill { background: #d6e2f5; color: #0b2c6e; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 8px; display: inline-block; }
+  .formation-flag { background: #fdeee1; color: #a34400; font-size: 11px; font-weight: 700; padding: 3px 9px; border-radius: 8px; display: inline-flex; align-items: center; gap: 3px; margin-top: 4px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="max-w-max-width-desktop mx-auto px-gutter py-lg">
+
+  <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-sm mb-lg border-b-2 border-outline-variant pb-md">
+    <div>
+      <p class="text-on-surface-variant font-label-bold text-xs uppercase tracking-widest mb-1">
+        <a href="{{ root_path }}/terrain" class="hover:text-primary-container transition-colors">Terrain & SAV</a>
+        <span class="mx-1">/</span> Rapports de dépannage
+      </p>
+      <h1 class="font-headline-lg text-headline-lg uppercase text-on-surface">Fiche de rapport de dépannage</h1>
+      <p class="text-on-surface-variant font-body-md max-w-2xl">Chaque intervention terrain enregistrée ici alimente l'analyse des pannes récurrentes et les besoins de formation.</p>
+    </div>
+    <button type="button" class="btn primary" onclick="openModal('modal-depannage')">
+      <span class="material-symbols-outlined" style="font-size:18px; vertical-align:-4px;">add</span>
+      Nouvelle intervention
+    </button>
+  </div>
+
+  <!-- Modale : formulaire ajout / édition -->
+  <dialog id="modal-depannage" class="modal-dialog modal-wide" {% if edit_item %}data-autoopen="1"{% endif %}>
+    <div class="modal-header">
+      <h3>{% if edit_item %}Modifier l'intervention{% else %}Nouvelle intervention{% endif %}</h3>
+      <button type="button" class="modal-close" onclick="closeModal('modal-depannage')" aria-label="Fermer">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form method="post" action="{{ root_path }}/terrain/depannage/save">
+        {% if edit_item %}<input type="hidden" name="id" value="{{ edit_item.id }}">{% endif %}
+
+        <div class="modal-fieldset">
+          <div class="modal-fieldset-title"><span class="material-symbols-outlined">event</span>Intervention</div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+            <div class="field">
+              <label for="date">Date de l'intervention</label>
+              <input id="date" name="date" type="date" required value="{{ edit_item.date if edit_item else '' }}">
+            </div>
+            <div class="field">
+              <label for="concessionnaire">Concessionnaire / client</label>
+              <input id="concessionnaire" name="concessionnaire" type="text" required value="{{ edit_item.concessionnaire if edit_item else '' }}">
+            </div>
+            <div class="field">
+              <label for="technicien_intervenant">Technicien intervenant</label>
+              <input id="technicien_intervenant" name="technicien_intervenant" type="text" value="{{ edit_item.technicien_intervenant if edit_item else '' }}">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-fieldset">
+          <div class="modal-fieldset-title"><span class="material-symbols-outlined">precision_manufacturing</span>Engin concerné</div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+            <div class="field">
+              <label for="engin">Engin (modèle)</label>
+              <input id="engin" name="engin" type="text" placeholder="Ex : LiuGong 856H" value="{{ edit_item.engin if edit_item else '' }}">
+            </div>
+            <div class="field">
+              <label for="numero_serie">Numéro de série</label>
+              <input id="numero_serie" name="numero_serie" type="text" value="{{ edit_item.numero_serie if edit_item else '' }}">
+            </div>
+            <div class="field">
+              <label for="systeme_concerne">Système concerné</label>
+              <select id="systeme_concerne" name="systeme_concerne" style="padding:10px 12px; border:1.5px solid #d4d4d4; border-radius:12px; font-size:14px;">
+                {% for s in ['hydraulique','moteur','electrique','transmission','train_roulement','climatisation','autre'] %}
+                <option value="{{ s }}" {% if edit_item and edit_item.systeme_concerne == s %}selected{% endif %}>
+                  {{ {'hydraulique':'Hydraulique','moteur':'Moteur','electrique':'Électrique','transmission':'Transmission','train_roulement':'Train roulant','climatisation':'Climatisation','autre':'Autre'}[s] }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-fieldset">
+          <div class="modal-fieldset-title"><span class="material-symbols-outlined">troubleshoot</span>Diagnostic</div>
+          <div class="field">
+            <label for="description_panne">Description de la panne / symptômes</label>
+            <textarea id="description_panne" name="description_panne" rows="2">{{ edit_item.description_panne if edit_item else '' }}</textarea>
+          </div>
+          <div class="field">
+            <label for="diagnostic">Diagnostic (cause identifiée)</label>
+            <textarea id="diagnostic" name="diagnostic" rows="2">{{ edit_item.diagnostic if edit_item else '' }}</textarea>
+          </div>
+          <div class="field">
+            <label for="intervention_realisee">Intervention réalisée</label>
+            <textarea id="intervention_realisee" name="intervention_realisee" rows="2">{{ edit_item.intervention_realisee if edit_item else '' }}</textarea>
+          </div>
+        </div>
+
+        <div class="modal-fieldset">
+          <div class="modal-fieldset-title"><span class="material-symbols-outlined">construction</span>Pièces & durée</div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+            <div class="field md:col-span-2">
+              <label for="pieces_remplacees">Pièces remplacées</label>
+              <input id="pieces_remplacees" name="pieces_remplacees" type="text" value="{{ edit_item.pieces_remplacees if edit_item else '' }}">
+            </div>
+            <div class="field">
+              <label for="duree_heures">Durée (heures)</label>
+              <input id="duree_heures" name="duree_heures" type="number" min="0" step="0.5" value="{{ edit_item.duree_heures if edit_item else '' }}">
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-fieldset">
+          <div class="modal-fieldset-title"><span class="material-symbols-outlined">flag</span>Statut & suivi</div>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+            <div class="field">
+              <label for="statut">Statut</label>
+              <select id="statut" name="statut" style="padding:10px 12px; border:1.5px solid #d4d4d4; border-radius:12px; font-size:14px;">
+                {% for s in ['resolu','en_cours','necessite_piece'] %}
+                <option value="{{ s }}" {% if edit_item and edit_item.statut == s %}selected{% elif not edit_item and s == 'resolu' %}selected{% endif %}>
+                  {{ {'resolu':'Résolu','en_cours':'En cours','necessite_piece':'Nécessite pièce'}[s] }}
+                </option>
+                {% endfor %}
+              </select>
+            </div>
+            <div class="field flex flex-row items-center gap-sm md:col-span-2" style="margin-top: 22px;">
+              <input id="necessite_formation" name="necessite_formation" type="checkbox" value="1" style="width:18px; height:18px;" {% if edit_item and edit_item.necessite_formation %}checked{% endif %}>
+              <label for="necessite_formation" class="m-0">Cette panne révèle un besoin de formation</label>
+            </div>
+          </div>
+          <div class="field">
+            <label for="notes">Notes</label>
+            <textarea id="notes" name="notes" rows="2">{{ edit_item.notes if edit_item else '' }}</textarea>
+          </div>
+        </div>
+
+        <div class="modal-actions">
+          <button type="submit" class="btn primary">
+            {% if edit_item %}Enregistrer les modifications{% else %}Enregistrer l'intervention{% endif %}
+          </button>
+          <button type="button" class="btn ghost" onclick="closeModal('modal-depannage')">Annuler</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  <div class="mt-lg">
+    {% if not items %}
+    <div class="card text-center py-xl">
+      <span class="material-symbols-outlined text-4xl text-on-surface-variant">build</span>
+      <p class="text-on-surface-variant mt-sm">Aucune intervention enregistrée pour le moment.</p>
+    </div>
+    {% else %}
+    <table class="dep-table">
+      <thead>
+        <tr>
+          <th>Date</th>
+          <th>Concessionnaire / Engin</th>
+          <th>Système</th>
+          <th>Diagnostic</th>
+          <th>Statut</th>
+          <th></th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for it in items %}
+        <tr>
+          <td>{{ it.date }}<br><span class="text-xs text-on-surface-variant">{{ it.technicien_intervenant or '—' }}</span></td>
+          <td>
+            <span class="font-label-bold text-on-surface">{{ it.concessionnaire }}</span>
+            {% if it.engin %}<br><span class="text-xs text-on-surface-variant">{{ it.engin }}{% if it.numero_serie %} — {{ it.numero_serie }}{% endif %}</span>{% endif %}
+          </td>
+          <td><span class="sys-pill">{{ {'hydraulique':'Hydraulique','moteur':'Moteur','electrique':'Électrique','transmission':'Transmission','train_roulement':'Train roulant','climatisation':'Climatisation','autre':'Autre'}.get(it.systeme_concerne, it.systeme_concerne) }}</span></td>
+          <td style="max-width: 280px;">
+            {{ (it.diagnostic or it.description_panne or '')[:90] }}{% if (it.diagnostic or it.description_panne or '')|length > 90 %}…{% endif %}
+            {% if it.necessite_formation %}<br><span class="formation-flag"><span class="material-symbols-outlined" style="font-size:13px;">school</span>Besoin formation</span>{% endif %}
+          </td>
+          <td>
+            <span class="status-pill status-{{ it.statut }}">
+              {{ {'resolu':'Résolu','en_cours':'En cours','necessite_piece':'Nécessite pièce'}.get(it.statut, it.statut) }}
+            </span>
+          </td>
+          <td class="whitespace-nowrap">
+            <a href="{{ root_path }}/terrain/depannage?edit={{ it.id }}" class="btn small ghost" aria-label="Modifier"><span class="material-symbols-outlined" style="font-size:16px;">edit</span></a>
+            <form method="post" action="{{ root_path }}/terrain/depannage/{{ it.id }}/delete" style="display:inline;" onsubmit="return confirmDelete(this, 'Supprimer cette fiche ?')">
+              <button type="submit" class="btn small ghost" aria-label="Supprimer"><span class="material-symbols-outlined" style="font-size:16px;">delete</span></button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+  </div>
+
+</section>
+{% endblock %}

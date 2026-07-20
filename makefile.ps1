@@ -1,5 +1,5 @@
 # =============================================================================
-# makefile.ps1 — Task runner PowerShell pour NEMBA Report.
+# makefile.ps1 — Task runner PowerShell pour LiuGong Academy.
 #
 # Usage :
 #   .\makefile.ps1                   # Affiche l'aide
@@ -14,6 +14,8 @@
 #   .\makefile.ps1 build-css         # CSS production (minifié)
 #   .\makefile.ps1 icons             # Subset Material Symbols
 #   .\makefile.ps1 clean -Force      # Nettoie caches + uploads
+#   .\makefile.ps1 nssm-install      # Service Windows NSSM
+#   .\makefile.ps1 nssm-status       # Statut du service
 # =============================================================================
 
 [CmdletBinding(PositionalBinding = $false)]
@@ -40,6 +42,11 @@ param(
 
 $ErrorActionPreference = 'Stop'
 $ProjectRoot = $PSScriptRoot
+$NssmServiceName = 'liugong-academy'
+$DockerImageName = 'liugong-academy:latest'
+$DockerContainerName = 'liugong-academy'
+$AppDisplayName = 'LiuGong Academy'
+$AppServiceDescription = "Plateforme FastAPI LiuGong Academy - Façonner l'Excellence Technique."
 Set-Location $ProjectRoot
 
 # ----------------------------------------------------------------------------
@@ -65,6 +72,30 @@ function Assert-Uv {
 function Test-CommandAvailable {
     param([string]$Name)
     return $null -ne (Get-Command $Name -ErrorAction SilentlyContinue)
+}
+
+function Test-NssmAvailable {
+    if (-not (Test-CommandAvailable 'nssm')) {
+        Write-Err2 "nssm.exe introuvable dans le PATH."
+        Write-Info2 "  Installer : https://nssm.cc/download"
+        return $false
+    }
+    return $true
+}
+
+function Assert-Nssm {
+    if (-not (Test-NssmAvailable)) { exit 1 }
+}
+
+function Test-NssmServiceRegistered {
+    param([string]$ServiceName = $NssmServiceName)
+    $status = ((& nssm status $ServiceName 2>$null) | Out-String).Trim()
+    return ($LASTEXITCODE -eq 0 -and $status)
+}
+
+function Get-NssmServiceStatus {
+    param([string]$ServiceName = $NssmServiceName)
+    return ((& nssm status $ServiceName 2>$null) | Out-String).Trim()
 }
 
 # ----------------------------------------------------------------------------
@@ -257,7 +288,7 @@ function Test-GitClean {
 function Add-FirewallRule {
     param([int]$VPort)
 
-    $ruleName = "NEMBA-Report-$VPort"
+    $ruleName = "LiuGong-Academy-$VPort"
     try {
         $existing = Get-NetFirewallRule -DisplayName $ruleName -ErrorAction SilentlyContinue
         if ($existing) { return [PSCustomObject]@{ Ok = $true; Existed = $true } }
@@ -362,16 +393,16 @@ function Show-LaunchSummary {
     Write-Info2 "Commandes utiles :"
     switch ($Mode) {
         'NSSM' {
-            Write-Info2 "  Statut    : nssm status nemba-report"
-            Write-Info2 "  Restart   : nssm restart nemba-report"
-            Write-Info2 "  Stop      : nssm stop nemba-report"
-            Write-Info2 "  Logs      : Get-Content logs\nemba-report.out.log -Tail 50 -Wait"
+            Write-Info2 "  Statut    : .\makefile.ps1 nssm-status"
+            Write-Info2 "  Restart   : .\makefile.ps1 nssm-restart"
+            Write-Info2 "  Stop      : .\makefile.ps1 nssm-stop"
+            Write-Info2 "  Logs      : Get-Content logs\$NssmServiceName.out.log -Tail 50 -Wait"
         }
         'Docker' {
-            Write-Info2 "  Statut    : docker ps -f name=nemba-report"
-            Write-Info2 "  Logs      : docker logs -f nemba-report"
-            Write-Info2 "  Restart   : docker restart nemba-report"
-            Write-Info2 "  Stop      : docker stop nemba-report"
+            Write-Info2 "  Statut    : docker ps -f name=$DockerContainerName"
+            Write-Info2 "  Logs      : docker logs -f $DockerContainerName"
+            Write-Info2 "  Restart   : docker restart $DockerContainerName"
+            Write-Info2 "  Stop      : docker stop $DockerContainerName"
         }
         default {
             Write-Info2 "  Arret     : Ctrl+C dans cette fenetre"
@@ -467,7 +498,7 @@ function Test-ToolsUpdate {
 function Show-Help {
     Write-Host @'
 
-  NEMBA REPORT - Task Runner
+  LIUGONG ACADEMY - Task Runner
   ===========================
 
   Usage : .\makefile.ps1 <task> [options]
@@ -536,10 +567,18 @@ function Show-Help {
                   Demande confirmation, utiliser -Force pour passer outre.
     tree          Affiche l'arborescence du projet (profondeur 2).
     info          Affiche les versions des outils (uv, python, tailwind).
-    nssm-remove   Stoppe et supprime le service NSSM 'nemba-report'
-                  (utile si le service est en Paused / Disabled / casse).
-                  Necessite un terminal en mode administrateur.
     help          Affiche cette aide (par defaut).
+
+  SERVICE NSSM (Windows)
+  ----------------------
+    nssm-install  Cree ou recree le service 'liugong-academy' (uv + uvicorn).
+                  Options: -Port 8000
+    nssm-start    Demarre le service s'il est arrete.
+    nssm-stop     Arrete le service.
+    nssm-restart  Redemarre le service (ou recree si etat casse).
+    nssm-status   Affiche le statut NSSM + Windows + chemins des logs.
+    nssm-remove   Stoppe et supprime le service (desinstallation).
+                  Necessite un terminal en mode administrateur si echec.
 
   EXEMPLES
   --------
@@ -552,6 +591,10 @@ function Show-Help {
     .\makefile.ps1 serve -BindHost 0.0.0.0 -Port 8000
     .\makefile.ps1 watch-css
     .\makefile.ps1 clean -Force
+    .\makefile.ps1 nssm-install -Port 8000
+    .\makefile.ps1 nssm-status
+    .\makefile.ps1 nssm-restart
+    .\makefile.ps1 nssm-remove
 
 '@ -ForegroundColor White
 }
@@ -561,7 +604,7 @@ function Show-Help {
 # ----------------------------------------------------------------------------
 
 function Task-Install {
-    Write-Title "Installation NEMBA Report"
+    Write-Title "Installation LiuGong Academy"
     Assert-Uv
 
     Write-Step "1/3 Synchronisation des dependances Python (uv sync)..."
@@ -890,14 +933,9 @@ function Start-DevLocal {
 function Start-NssmMode {
     Write-Title "Lancement en service NSSM"
 
-    if (-not (Test-CommandAvailable 'nssm')) {
-        Write-Err2 "nssm.exe introuvable dans le PATH."
-        Write-Info2 "  Installer : https://nssm.cc/download"
-        Write-Info2 "  Puis ajouter le dossier au PATH systeme."
-        return
-    }
+    if (-not (Test-NssmAvailable)) { return }
 
-    $serviceName = 'nemba-report'
+    $serviceName = $NssmServiceName
     Write-Info2 "Nom du service : $serviceName"
 
     # Detection si service existe
@@ -952,18 +990,18 @@ function Start-NssmMode {
 
     Write-Host ""
     Write-Info2 "Acceder au service :"
-    Write-Info2 "  Etat       : nssm status $serviceName"
-    Write-Info2 "  Logs       : Get-Content logs\nemba-report.out.log -Tail 50 -Wait"
-    Write-Info2 "  Stop       : nssm stop $serviceName"
-    Write-Info2 "  Restart    : nssm restart $serviceName"
-    Write-Info2 "  Recreer    : .\makefile.ps1 nssm-remove + .\makefile.ps1 start"
-    Write-Info2 "  Desinstall : nssm remove $serviceName confirm"
+    Write-Info2 "  Etat       : .\makefile.ps1 nssm-status"
+    Write-Info2 "  Logs       : Get-Content logs\$NssmServiceName.out.log -Tail 50 -Wait"
+    Write-Info2 "  Stop       : .\makefile.ps1 nssm-stop"
+    Write-Info2 "  Restart    : .\makefile.ps1 nssm-restart"
+    Write-Info2 "  Recreer    : .\makefile.ps1 nssm-install"
+    Write-Info2 "  Desinstall : .\makefile.ps1 nssm-remove"
 }
 
 function Install-NssmService {
     <#
     .SYNOPSIS
-    Cree (ou recree) le service NSSM 'nemba-report' de zero.
+    Cree (ou recree) le service NSSM 'liugong-academy' de zero.
     .DESCRIPTION
     Strategie : toujours supprimer le service existant (s'il y en a un) avant
     de le recreer. C'est plus fiable que `nssm set ...` en place car cela
@@ -1048,8 +1086,8 @@ function Install-NssmService {
     & nssm set $ServiceName AppThrottle      60000 | Out-Null
     & nssm set $ServiceName AppExit Default Restart | Out-Null
 
-    & nssm set $ServiceName DisplayName    "NEMBA Report Generator" | Out-Null
-    & nssm set $ServiceName Description    "Plateforme FastAPI de generation de rapports de formation Neemba." | Out-Null
+    & nssm set $ServiceName DisplayName    $AppDisplayName | Out-Null
+    & nssm set $ServiceName Description    $AppServiceDescription | Out-Null
 
     # 6. Demarrage et polling du statut (jusqu'a SERVICE_RUNNING ou timeout 30s)
     & nssm start $ServiceName 2>&1 | Out-Null
@@ -1073,15 +1111,11 @@ function Install-NssmService {
 }
 
 function Remove-NssmService {
-    param([string]$ServiceName = 'nemba-report')
+    param([string]$ServiceName = $NssmServiceName)
 
     Write-Title "Suppression du service NSSM '$ServiceName'"
 
-    if (-not (Test-CommandAvailable 'nssm')) {
-        Write-Err2 "nssm.exe introuvable dans le PATH."
-        Write-Info2 "  Installez NSSM (https://nssm.cc/download) ou ajoutez-le au PATH."
-        return
-    }
+    if (-not (Test-NssmAvailable)) { return }
 
     $svc = Get-Service -Name $ServiceName -ErrorAction SilentlyContinue
     if (-not $svc) {
@@ -1102,8 +1136,131 @@ function Remove-NssmService {
         Write-Ok "Service '$ServiceName' supprime."
     } else {
         Write-Err2 "Echec : le service est toujours present (statut=$($svc.Status))."
-        Write-Info2 "  Tentez en mode admin : nssm remove $ServiceName confirm"
+        Write-Info2 "  Tentez en mode admin : .\makefile.ps1 nssm-remove"
     }
+}
+
+function Task-NssmStatus {
+    param([string]$ServiceName = $NssmServiceName)
+
+    Assert-Nssm
+    Write-Title "Statut NSSM - $ServiceName"
+
+    if (-not (Test-NssmServiceRegistered $ServiceName)) {
+        Write-Warn "Service '$ServiceName' absent ou non enregistre dans NSSM."
+        Write-Info2 "  Creer : .\makefile.ps1 nssm-install"
+        return
+    }
+
+    $status = Get-NssmServiceStatus $ServiceName
+    Write-Ok "NSSM : $status"
+    $svc = Get-Service -Name $ServiceName -ErrorAction SilentlyContinue
+    if ($svc) { Write-Info2 "Windows : $($svc.Status)" }
+    Write-Info2 "URL  : http://localhost:$Port/"
+    Write-Info2 "Logs : logs\$ServiceName.out.log"
+    Write-Info2 "       logs\$ServiceName.err.log"
+}
+
+function Task-NssmStart {
+    param([string]$ServiceName = $NssmServiceName)
+
+    Assert-Nssm
+    Write-Title "Demarrage NSSM - $ServiceName"
+
+    if (-not (Test-NssmServiceRegistered $ServiceName)) {
+        Write-Err2 "Service '$ServiceName' introuvable."
+        Write-Info2 "  Creer : .\makefile.ps1 nssm-install"
+        exit 1
+    }
+
+    $before = Get-NssmServiceStatus $ServiceName
+    if ($before -eq 'SERVICE_RUNNING') {
+        Write-Ok "Service deja en cours d'execution."
+        return
+    }
+
+    Write-Step "Demarrage..."
+    & nssm start $ServiceName 2>&1 | Out-Null
+    Start-Sleep -Seconds 2
+    $after = Get-NssmServiceStatus $ServiceName
+    if ($after -eq 'SERVICE_RUNNING') {
+        Write-Ok "Service demarre (statut : $after)"
+        Write-Info2 "URL : http://localhost:$Port/"
+    } else {
+        Write-Warn "Statut apres demarrage : $after"
+        Write-Info2 "  Verifiez : .\makefile.ps1 nssm-status"
+        Write-Info2 "  Logs     : Get-Content logs\$ServiceName.err.log -Tail 50"
+        exit 1
+    }
+}
+
+function Task-NssmStop {
+    param([string]$ServiceName = $NssmServiceName)
+
+    Assert-Nssm
+    Write-Title "Arret NSSM - $ServiceName"
+
+    if (-not (Test-NssmServiceRegistered $ServiceName)) {
+        Write-Warn "Service '$ServiceName' absent, rien a faire."
+        return
+    }
+
+    $before = Get-NssmServiceStatus $ServiceName
+    if ($before -eq 'SERVICE_STOPPED') {
+        Write-Ok "Service deja arrete."
+        return
+    }
+
+    Write-Step "Arret..."
+    & nssm stop $ServiceName 2>&1 | Out-Null
+    Start-Sleep -Seconds 2
+    $after = Get-NssmServiceStatus $ServiceName
+    if ($after -eq 'SERVICE_STOPPED') {
+        Write-Ok "Service arrete."
+    } else {
+        Write-Warn "Statut apres arret : $after"
+    }
+}
+
+function Task-NssmRestart {
+    param([string]$ServiceName = $NssmServiceName)
+
+    Assert-Nssm
+    Write-Title "Redemarrage NSSM - $ServiceName"
+
+    if (-not (Test-NssmServiceRegistered $ServiceName)) {
+        Write-Err2 "Service '$ServiceName' introuvable."
+        Write-Info2 "  Creer : .\makefile.ps1 nssm-install"
+        exit 1
+    }
+
+    $before = Get-NssmServiceStatus $ServiceName
+    $brokenStates = @('SERVICE_PAUSED', 'SERVICE_PAUSE_PENDING', 'SERVICE_DISABLED')
+    if ($brokenStates -contains $before) {
+        Write-Warn "Service en etat '$before' - recreation via nssm-install..."
+        Assert-Uv
+        Install-NssmService -ServiceName $ServiceName
+        return
+    }
+
+    Write-Step "Redemarrage..."
+    & nssm restart $ServiceName 2>&1 | Out-Null
+    Start-Sleep -Seconds 2
+    $after = Get-NssmServiceStatus $ServiceName
+    if ($after -eq 'SERVICE_RUNNING') {
+        Write-Ok "Service redemarre (statut : $after)"
+        Write-Info2 "URL : http://localhost:$Port/"
+    } else {
+        Write-Warn "Redemarrage echoue (statut : $after). Recreation..."
+        Assert-Uv
+        Install-NssmService -ServiceName $ServiceName
+    }
+}
+
+function Task-NssmInstall {
+    Assert-Uv
+    Assert-Nssm
+    Install-NssmService -ServiceName $NssmServiceName
 }
 
 function Test-DockerReady {
@@ -1194,8 +1351,8 @@ function Start-DockerMode {
         return
     }
 
-    $imageName  = 'nemba-report:latest'
-    $container  = 'nemba-report'
+    $imageName  = $DockerImageName
+    $container  = $DockerContainerName
 
     # Image deja construite ?
     $imgExists = (& docker images -q $imageName 2>$null)
@@ -1376,7 +1533,7 @@ function Start-NamedTunnel {
     }
 
     # ---- 2/4 : nom du tunnel ----
-    $tunnelName = Read-Host "Nom du tunnel (ex: nemba-report)"
+    $tunnelName = Read-Host "Nom du tunnel (ex: liugong-academy)"
     if ([string]::IsNullOrWhiteSpace($tunnelName)) { Write-Err2 "Nom vide, abandon."; return }
 
     $existing = & cloudflared tunnel list 2>$null | Select-String -Pattern "\b$([regex]::Escape($tunnelName))\b"
@@ -1390,7 +1547,7 @@ function Start-NamedTunnel {
     }
 
     # ---- 3/4 : DNS ----
-    $hostname = Read-Host "Hostname public (ex: rapport.neemba.com)"
+    $hostname = Read-Host "Hostname public (ex: academy.liugong.com)"
     if ([string]::IsNullOrWhiteSpace($hostname)) { Write-Err2 "Hostname vide, abandon."; return }
 
     Write-Step "3/4 Configuration de la route DNS..."
@@ -1559,7 +1716,7 @@ function Task-Start {
                 Write-Ok "Service repond sur le port $Port"
                 Open-AppInBrowser -VPort $Port
             } else {
-                Write-Warn "Pas de reponse - voir logs : Get-Content logs\nemba-report.err.log -Tail 50"
+                Write-Warn "Pas de reponse - voir logs : Get-Content logs\$NssmServiceName.err.log -Tail 50"
             }
             if ($tunnelChoice -eq 'o') { Start-CloudflaredTunnel -VPort $Port }
             $tunnelLabel = if ($tunnelChoice -eq 'o') { 'oui' } else { '' }
@@ -1574,7 +1731,7 @@ function Task-Start {
                 Write-Ok "Container repond sur le port $Port"
                 Open-AppInBrowser -VPort $Port
             } else {
-                Write-Warn "Pas de reponse - voir logs : docker logs nemba-report --tail 50"
+                Write-Warn "Pas de reponse - voir logs : docker logs $DockerContainerName --tail 50"
             }
             if ($tunnelChoice -eq 'o') { Start-CloudflaredTunnel -VPort $Port }
             $tunnelLabel = if ($tunnelChoice -eq 'o') { 'oui' } else { '' }
@@ -1662,9 +1819,31 @@ switch ($Task.ToLower()) {
     'tree'       { Task-Tree }
     'info'       { Task-Info }
 
-    'nssm-remove'  { Remove-NssmService }
-    'nssm_remove'  { Remove-NssmService }
-    'remove-nssm'  { Remove-NssmService }
+    'nssm-install'   { Task-NssmInstall }
+    'nssm_install'   { Task-NssmInstall }
+    'install-nssm'   { Task-NssmInstall }
+    'nssm-recreate'  { Task-NssmInstall }
+    'nssm_recreate'  { Task-NssmInstall }
+
+    'nssm-start'     { Task-NssmStart }
+    'nssm_start'     { Task-NssmStart }
+    'start-nssm'     { Task-NssmStart }
+
+    'nssm-stop'      { Task-NssmStop }
+    'nssm_stop'      { Task-NssmStop }
+    'stop-nssm'      { Task-NssmStop }
+
+    'nssm-restart'   { Task-NssmRestart }
+    'nssm_restart'   { Task-NssmRestart }
+    'restart-nssm'   { Task-NssmRestart }
+
+    'nssm-status'    { Task-NssmStatus }
+    'nssm_status'    { Task-NssmStatus }
+    'status-nssm'    { Task-NssmStatus }
+
+    'nssm-remove'    { Remove-NssmService }
+    'nssm_remove'    { Remove-NssmService }
+    'remove-nssm'    { Remove-NssmService }
 
     default {
         Write-Err2 "Tache inconnue : '$Task'"

@@ -1,7 +1,7 @@
 {
-  "name": "Neemba Academy",
-  "short_name": "Neemba",
-  "description": "Plateforme Neemba Academy — façonner l'excellence technique.",
+  "name": "LiuGong Academy",
+  "short_name": "LiuGong",
+  "description": "Plateforme LiuGong Academy — façonner l'excellence technique.",
   "icons": [
     {
       "src": "./android-chrome-192x192.png",
@@ -14,8 +14,8 @@
       "type": "image/png"
     }
   ],
-  "theme_color": "#ffcd00",
-  "background_color": "#000000",
+  "theme_color": "#0b2c6e",
+  "background_color": "#0b2c6e",
   "display": "standalone",
   "start_url": "../../../home"
 }

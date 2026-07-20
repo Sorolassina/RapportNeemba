@@ -549,7 +549,7 @@ async function generatePdf(){
     }
 
     const contentDisposition = res.headers.get('content-disposition');
-    let filename = 'rapport_nemba.pdf';
+    let filename = 'rapport_liugong.pdf';
     if (contentDisposition) {
       const m = contentDisposition.match(/filename="?([^"]+)"?/);
       if (m) filename = m[1];

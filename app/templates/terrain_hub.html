@@ -1,0 +1,76 @@
+{% extends "base_v2.html" %}
+{% set active_nav = "terrain" %}
+{% block title %}Terrain & SAV – LiuGong Academy{% endblock %}
+
+{% block extra_head %}
+<style>
+  .bar-row { margin-bottom: 8px; }
+  .bar-row .bar-label { display: flex; justify-content: space-between; font-size: 12px; color: #444; margin-bottom: 3px; }
+  .bar-track { background: #eceef0; border-radius: 8px; height: 10px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 8px; background: #EC6606; transition: width 0.4s ease; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="max-w-max-width-desktop mx-auto px-gutter py-lg">
+
+  <div class="mb-lg border-b-2 border-outline-variant pb-md">
+    <h1 class="font-headline-lg text-headline-lg uppercase text-on-surface">Terrain & SAV</h1>
+    <p class="text-on-surface-variant font-body-md max-w-2xl">La voix du terrain : les pannes remontées par les concessionnaires révèlent vos prochains besoins de formation.</p>
+  </div>
+
+  <div class="grid grid-cols-2 md:grid-cols-3 gap-md mb-lg">
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-md text-center shadow-soft">
+      <div class="font-headline-md text-2xl font-bold text-primary">{{ nb_depannages }}</div>
+      <div class="text-xs uppercase tracking-wide text-on-surface-variant mt-1">Rapports de dépannage</div>
+    </div>
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-md text-center shadow-soft">
+      <div class="font-headline-md text-2xl font-bold text-primary">{{ nb_audits }}</div>
+      <div class="text-xs uppercase tracking-wide text-on-surface-variant mt-1">Audits trimestriels</div>
+    </div>
+    <div class="bg-surface-container-lowest border border-outline-variant rounded-2xl p-md text-center shadow-soft">
+      <div class="font-headline-md text-2xl font-bold text-primary">{{ nb_besoin_formation }}</div>
+      <div class="text-xs uppercase tracking-wide text-on-surface-variant mt-1">Pannes signalant un besoin de formation</div>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-md mb-lg">
+
+    <a href="{{ root_path }}/terrain/depannage" class="module-card relative bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-soft hover:shadow-lift hover:-translate-y-1 transition-all duration-300 p-lg flex flex-col h-full">
+      <div class="bg-inverse-surface text-white p-base mb-md w-fit rounded-xl">
+        <span class="material-symbols-outlined text-4xl">build</span>
+      </div>
+      <h3 class="font-headline-md text-headline-md uppercase mb-sm">Rapports de dépannage</h3>
+      <p class="text-on-surface-variant mb-lg flex-grow">Enregistrez chaque intervention terrain : engin, panne, diagnostic, système concerné.</p>
+      <span class="text-primary font-label-bold flex items-center gap-xs">Ouvrir <span class="material-symbols-outlined">arrow_forward</span></span>
+    </a>
+
+    <a href="{{ root_path }}/terrain/audit-besoins" class="module-card relative bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-soft hover:shadow-lift hover:-translate-y-1 transition-all duration-300 p-lg flex flex-col h-full">
+      <div class="bg-inverse-surface text-white p-base mb-md w-fit rounded-xl">
+        <span class="material-symbols-outlined text-4xl">call</span>
+      </div>
+      <h3 class="font-headline-md text-headline-md uppercase mb-sm">Audit des besoins trimestriel</h3>
+      <p class="text-on-surface-variant mb-lg flex-grow">Appels concessionnaires : pannes récurrentes, besoins de formation, niveau d'urgence.</p>
+      <span class="text-primary font-label-bold flex items-center gap-xs">Ouvrir <span class="material-symbols-outlined">arrow_forward</span></span>
+    </a>
+
+  </div>
+
+  {% if repartition %}
+  <div class="card">
+    <h2 class="font-headline-md text-headline-md uppercase text-on-surface mb-sm">Systèmes les plus concernés par les dépannages</h2>
+    {% for r in repartition %}
+    <div class="bar-row">
+      <div class="bar-label"><span>{{ {'hydraulique':'Hydraulique','moteur':'Moteur','electrique':'Électrique','transmission':'Transmission','train_roulement':'Train roulant','climatisation':'Climatisation','autre':'Autre'}.get(r.systeme, r.systeme) }} ({{ r.nb }})</span><span>{{ r.pct }}%</span></div>
+      <div class="bar-track"><div class="bar-fill" style="width: {{ r.pct }}%;"></div></div>
+    </div>
+    {% endfor %}
+    <p class="text-xs text-on-surface-variant mt-sm">
+      <span class="material-symbols-outlined" style="font-size:14px; vertical-align:-2px;">lightbulb</span>
+      À croiser avec le planning annuel de l'Académie pour prioriser les prochaines sessions.
+    </p>
+  </div>
+  {% endif %}
+
+</section>
+{% endblock %}

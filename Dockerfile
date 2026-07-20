@@ -1,8 +1,8 @@
 # =============================================================================
-# Dockerfile pour NEMBA Report
+# Dockerfile pour LiuGong Academy
 #
-# Build :   docker build -t nemba-report:latest .
-# Run   :   docker run -d -p 8000:8000 --name nemba-report nemba-report:latest
+# Build :   docker build -t liugong-academy:latest .
+# Run   :   docker run -d -p 8000:8000 --name liugong-academy liugong-academy:latest
 # =============================================================================
 
 # ----- Stage 1 : builder (uv + dependencies) ---------------------------------
@@ -41,7 +41,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/*
 
 # Utilisateur non-root pour la sécurité
-RUN groupadd -r nemba && useradd -r -g nemba -d /app -s /sbin/nologin nemba
+RUN groupadd -r liugong && useradd -r -g liugong -d /app -s /sbin/nologin liugong
 
 WORKDIR /app
 
@@ -55,9 +55,9 @@ ENV PATH="/opt/venv/bin:$PATH" \
 
 # Dossier d'uploads (volume recommandé en production)
 RUN mkdir -p /app/app/static/uploads && \
-    chown -R nemba:nemba /app
+    chown -R liugong:liugong /app
 
-USER nemba
+USER liugong
 
 EXPOSE 8000
 

@@ -7,9 +7,15 @@ __pycache__/
 .env
 app/static/uploads/*
 !app/static/uploads/.gitkeep
+app/data/academie/*.json
+app/data/techniciens/*.json
+app/data/terrain/*.json
+app/data/ressources/*.json
+app/data/rapports/*.json
 
 # Binaire Tailwind CLI (38 MB) — récupéré via .\scripts\tailwind.ps1 install
 tools/tailwindcss.exe
+node_modules/
 
 # Si tu préfères régénérer le CSS au lieu de le versionner, décommente :
 # app/static/css/tailwind.css

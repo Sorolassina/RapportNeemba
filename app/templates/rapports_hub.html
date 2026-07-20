@@ -1,0 +1,178 @@
+{% extends "base_v2.html" %}
+{% set active_nav = "rapports" %}
+{% block title %}Rapport mensuel d'activités – LiuGong Academy{% endblock %}
+
+{% block extra_head %}
+<style>
+  .stat-kpi { background: #f3f8ff; border: 1px solid #dbeafe; border-radius: 14px; padding: 14px; text-align: center; }
+  .stat-kpi .value { font-family: "Archivo Narrow", sans-serif; font-size: 24px; font-weight: 700; color: #0b2c6e; }
+  .stat-kpi .label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.03em; color: #555; margin-top: 2px; }
+  .section-title {
+    font-family: "Archivo Narrow", sans-serif; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.04em; color: #0b2c6e; font-size: 15px; border-left: 5px solid #EC6606;
+    padding-left: 10px; margin: 0 0 10px;
+  }
+  .mini-row { display: flex; justify-content: space-between; padding: 7px 0; border-bottom: 1px solid #eceef0; font-size: 13px; }
+  .mini-row:last-child { border-bottom: none; }
+  .flag-badge { background: #fdeee1; color: #a34400; font-size: 10.5px; font-weight: 700; padding: 2px 8px; border-radius: 8px; }
+  @media print {
+    header, .mobile-tabbar, #tabbar-more-sheet, footer, .no-print { display: none !important; }
+    body { padding-bottom: 0 !important; }
+    .card { box-shadow: none !important; border: 1px solid #ddd !important; break-inside: avoid; }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="max-w-max-width-desktop mx-auto px-gutter py-lg">
+
+  <div class="mb-lg border-b-2 border-outline-variant pb-md flex flex-wrap items-end justify-between gap-md">
+    <div>
+      <h1 class="font-headline-lg text-headline-lg uppercase text-on-surface">Rapport mensuel d'activités</h1>
+      <p class="text-on-surface-variant font-body-md">Vue consolidée de l'Académie, des Techniciens, du Terrain & SAV et des Ressources.</p>
+    </div>
+    <div class="flex items-end gap-sm no-print">
+      <form method="get" action="{{ root_path }}/rapports" class="field" style="margin:0;">
+        <label for="mois">Mois</label>
+        <input id="mois" name="mois" type="month" value="{{ mois }}" onchange="this.form.submit()">
+      </form>
+      <button type="button" onclick="window.print()" class="btn primary">
+        <span class="material-symbols-outlined" style="font-size:18px; vertical-align:-4px;">print</span>
+        Exporter / Imprimer
+      </button>
+    </div>
+  </div>
+
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-md mb-lg">
+    <div class="stat-kpi"><div class="value">{{ data.academie.sessions_realisees }}</div><div class="label">Sessions réalisées</div></div>
+    <div class="stat-kpi"><div class="value">{{ data.academie.participants_total }}</div><div class="label">Participants formés</div></div>
+    <div class="stat-kpi"><div class="value">{{ data.academie.taux_satisfaction }}%</div><div class="label">Satisfaction QR</div></div>
+    <div class="stat-kpi"><div class="value">{{ data.techniciens.nouveaux }}</div><div class="label">Nouveaux techniciens</div></div>
+    <div class="stat-kpi"><div class="value">{{ data.techniciens.suivis_realises }}</div><div class="label">Suivis réalisés</div></div>
+    <div class="stat-kpi"><div class="value">{{ data.terrain.depannages }}</div><div class="label">Dépannages traités</div></div>
+    <div class="stat-kpi"><div class="value">{{ data.terrain.audits }}</div><div class="label">Audits trimestriels</div></div>
+    <div class="stat-kpi"><div class="value">{{ data.ressources.ajoutees }}</div><div class="label">Nouveaux supports</div></div>
+  </div>
+
+  <div class="grid grid-cols-1 md:grid-cols-2 gap-md mb-lg">
+
+    <div class="card">
+      <h2 class="section-title">Sessions de formation du mois</h2>
+      {% if not data.academie.sessions %}
+      <p class="text-sm text-on-surface-variant">Aucune session enregistrée ce mois-ci.</p>
+      {% else %}
+      {% for s in data.academie.sessions %}
+      <div class="mini-row">
+        <span>{{ s.titre }} <span class="text-xs text-on-surface-variant">({{ 'Client' if s.type_session == 'client' else 'Interne' }})</span></span>
+        <span class="text-xs text-on-surface-variant">{{ s.date_debut }}</span>
+      </div>
+      {% endfor %}
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">Dépannages signalant un besoin de formation</h2>
+      {% if not data.terrain.liste_depannages or data.terrain.depannages_formation == 0 %}
+      <p class="text-sm text-on-surface-variant">Aucun signalement ce mois-ci.</p>
+      {% else %}
+      {% for d in data.terrain.liste_depannages %}
+        {% if d.necessite_formation %}
+        <div class="mini-row">
+          <span>{{ d.concessionnaire }} — {{ {'hydraulique':'Hydraulique','moteur':'Moteur','electrique':'Électrique','transmission':'Transmission','train_roulement':'Train roulant','climatisation':'Climatisation','autre':'Autre'}.get(d.systeme_concerne, d.systeme_concerne) }}</span>
+          <span class="flag-badge">{{ d.date }}</span>
+        </div>
+        {% endif %}
+      {% endfor %}
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">Besoins identifiés lors des audits</h2>
+      {% if not data.terrain.liste_audits %}
+      <p class="text-sm text-on-surface-variant">Aucun audit ce mois-ci.</p>
+      {% else %}
+      {% for a in data.terrain.liste_audits %}
+      <div class="mini-row" style="display:block;">
+        <div class="flex justify-between"><strong>{{ a.concessionnaire }}</strong><span class="text-xs text-on-surface-variant">{{ a.date_appel }}</span></div>
+        {% if a.besoins_formation_identifies %}<p class="text-xs text-on-surface-variant m-0 mt-1">{{ a.besoins_formation_identifies }}</p>{% endif %}
+      </div>
+      {% endfor %}
+      {% endif %}
+    </div>
+
+    <div class="card">
+      <h2 class="section-title">Nouveaux techniciens & supports</h2>
+      {% if not data.techniciens.liste_nouveaux and not data.ressources.liste %}
+      <p class="text-sm text-on-surface-variant">Rien à signaler ce mois-ci.</p>
+      {% else %}
+      {% for t in data.techniciens.liste_nouveaux %}
+      <div class="mini-row"><span>{{ t.nom }} {{ t.prenom }}</span><span class="text-xs text-on-surface-variant">{{ t.concessionnaire or 'Interne' }}</span></div>
+      {% endfor %}
+      {% for r in data.ressources.liste %}
+      <div class="mini-row"><span><span class="material-symbols-outlined" style="font-size:14px; vertical-align:-2px;">{{ r.icon if r.icon else 'attach_file' }}</span> {{ r.titre }}</span><span class="text-xs text-on-surface-variant">Support</span></div>
+      {% endfor %}
+      {% endif %}
+    </div>
+
+  </div>
+
+  <div class="card mb-lg">
+    <div class="flex items-center justify-between flex-wrap gap-sm">
+      <h2 class="section-title m-0">Synthèse du mois</h2>
+      <button type="button" class="btn small ghost no-print" onclick="openModal('modal-synthese')">
+        <span class="material-symbols-outlined" style="font-size:16px;">edit</span>
+        {% if synthese %}Modifier{% else %}Rédiger{% endif %} la synthèse
+      </button>
+    </div>
+    {% if synthese and synthese.faits_marquants %}
+    <p class="text-sm mb-md mt-sm">{{ synthese.faits_marquants }}</p>
+    {% endif %}
+    {% if synthese and synthese.actions_prochain_mois %}
+    <p class="text-sm font-label-bold text-on-surface mb-1">Actions prioritaires du mois suivant :</p>
+    <p class="text-sm">{{ synthese.actions_prochain_mois }}</p>
+    {% endif %}
+    {% if not synthese %}
+    <p class="text-sm text-on-surface-variant mt-sm">Aucune synthèse rédigée pour ce mois.</p>
+    {% endif %}
+  </div>
+
+  <!-- Modale : synthèse du mois -->
+  <dialog id="modal-synthese" class="modal-dialog">
+    <div class="modal-header">
+      <h3>{% if synthese %}Modifier{% else %}Rédiger{% endif %} la synthèse — {{ mois }}</h3>
+      <button type="button" class="modal-close" onclick="closeModal('modal-synthese')" aria-label="Fermer">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form method="post" action="{{ root_path }}/rapports/synthese" class="grid grid-cols-1 gap-md">
+        <input type="hidden" name="mois" value="{{ mois }}">
+        <div class="field">
+          <label for="faits_marquants">Faits marquants du mois</label>
+          <textarea id="faits_marquants" name="faits_marquants" rows="3">{{ synthese.faits_marquants if synthese else '' }}</textarea>
+        </div>
+        <div class="field">
+          <label for="actions_prochain_mois">Actions prioritaires du mois suivant</label>
+          <textarea id="actions_prochain_mois" name="actions_prochain_mois" rows="3">{{ synthese.actions_prochain_mois if synthese else '' }}</textarea>
+        </div>
+        <div class="flex gap-sm items-center">
+          <button type="submit" class="btn primary">Enregistrer la synthèse</button>
+          <button type="button" class="btn ghost" onclick="closeModal('modal-synthese')">Annuler</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  {% if historique %}
+  <div class="card no-print">
+    <h2 class="section-title">Mois précédents avec synthèse</h2>
+    <div class="flex flex-wrap gap-xs">
+      {% for h in historique %}
+      <a href="{{ root_path }}/rapports?mois={{ h.mois }}" class="btn small ghost">{{ h.mois }}</a>
+      {% endfor %}
+    </div>
+  </div>
+  {% endif %}
+
+</section>
+{% endblock %}

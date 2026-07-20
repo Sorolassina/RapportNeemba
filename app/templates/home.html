@@ -1,6 +1,6 @@
 {% extends "base_v2.html" %}
 {% set active_nav = "home" %}
-{% block title %}Accueil – Neemba Academy{% endblock %}
+{% block title %}Accueil – LiuGong Academy{% endblock %}
 
 {% block content %}
 
@@ -12,16 +12,16 @@
 </div>
 <div class="relative z-10 max-w-max-width-desktop mx-auto px-gutter w-full">
 <div class="max-w-2xl border-l-4 md:border-l-8 border-primary-container pl-md">
-<span class="bg-primary-container text-on-primary-container font-label-bold text-label-bold px-sm py-xs uppercase tracking-widest mb-md inline-block">Excellence Technique</span>
+<span class="bg-primary-container text-on-primary-container font-label-bold text-label-bold px-md py-xs uppercase tracking-widest mb-md inline-block rounded-full shadow-soft">Excellence Technique</span>
 <h1 class="font-headline-xl text-3xl sm:text-4xl md:text-headline-xl text-white mb-md uppercase leading-tight">
-    Neemba Academy : <br/><span class="text-primary-container">Façonner l'Excellence</span> Technique en Afrique
+    LiuGong Academy : <br/><span class="text-primary-container">Façonner l'Excellence</span> Technique en Afrique
 </h1>
 <p class="text-white/90 text-base md:text-body-lg font-body-lg mb-lg">
-    Préparez-vous aux métiers de demain avec des formations certifiantes sur les technologies Caterpillar. Alliez théorie et pratique intensive.
+    Préparez-vous aux métiers de demain avec des formations certifiantes sur les technologies LiuGong. Alliez théorie et pratique intensive.
 </p>
 <div class="flex flex-wrap gap-base">
 <a href="{{ root_path }}/rapport"
-   class="w-full sm:w-auto bg-primary-container text-on-primary-container font-label-bold px-md sm:px-lg py-md rounded uppercase tracking-wider sm:tracking-widest text-sm sm:text-base flex items-center justify-center sm:justify-start gap-sm hover:opacity-90 transition-opacity">
+   class="w-full sm:w-auto bg-primary-container text-on-primary-container font-label-bold px-md sm:px-lg py-md rounded-xl uppercase tracking-wider sm:tracking-widest text-sm sm:text-base flex items-center justify-center sm:justify-start gap-sm shadow-soft hover:shadow-lift hover:-translate-y-0.5 active:translate-y-0 active:scale-95 transition-all duration-300 ease-smooth">
     <span>Générer un rapport</span>
     <span class="material-symbols-outlined" aria-hidden="true">arrow_forward</span>
 </a>
@@ -38,133 +38,73 @@
 <h2 class="font-headline-lg text-headline-lg uppercase text-on-surface">Modules de la plateforme</h2>
 <p class="text-on-surface-variant font-body-md max-w-xl">Pilotez l'ensemble du cycle de formation : de la planification jusqu'à l'analyse des résultats.</p>
 </div>
-<span class="hidden md:inline-flex items-center gap-xs bg-inverse-surface text-primary-container font-label-bold text-label-bold uppercase px-md py-sm tracking-widest">
-  <span class="material-symbols-outlined" style="font-size: 18px;">construction</span>
-  Roadmap 2026
-</span>
 </div>
-
-<style>
-  /* Module non disponible : grisé, non cliquable, badge "BIENTÔT" */
-  .module-card.coming-soon {
-    position: relative;
-    cursor: not-allowed;
-    opacity: 0.65;
-    filter: grayscale(0.4);
-  }
-  .module-card.coming-soon:hover {
-    border-color: #d1c5ab !important;
-  }
-  .module-card .badge-soon {
-    position: absolute;
-    top: 12px;
-    right: 12px;
-    background: #000000;
-    color: #ffcd00;
-    font-family: "IBM Plex Sans", sans-serif;
-    font-weight: 700;
-    font-size: 10px;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    padding: 4px 10px;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    z-index: 2;
-  }
-  .module-card .badge-soon .material-symbols-outlined {
-    font-size: 14px !important;
-  }
-</style>
 
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-md">
 
-  <!-- Formations (À VENIR) -->
-  <div class="module-card coming-soon relative bg-surface-container-lowest border-2 border-outline-variant p-md flex flex-col h-full" aria-disabled="true" role="link">
-    <span class="badge-soon">
-      <span class="material-symbols-outlined">schedule</span>
-      Bientôt
-    </span>
-    <div class="bg-inverse-surface text-white p-base mb-md w-fit">
+  <!-- Académie (disponible) -->
+  <a href="{{ root_path }}/academie" class="module-card relative bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-soft hover:shadow-lift hover:-translate-y-1 transition-all duration-300 p-lg flex flex-col h-full">
+    <div class="bg-inverse-surface text-white p-base mb-md w-fit rounded-xl">
       <span class="material-symbols-outlined text-4xl">school</span>
     </div>
-    <h3 class="font-headline-md text-headline-md uppercase mb-sm">Formations</h3>
-    <p class="text-on-surface-variant mb-lg flex-grow">Saisie, suivi et génération des rapports de formation. Wizard guidé en 6 étapes avec export PDF.</p>
-    <span class="text-on-surface-variant font-label-bold flex items-center gap-xs">
-      EN DÉVELOPPEMENT <span class="material-symbols-outlined">construction</span>
+    <h3 class="font-headline-md text-headline-md uppercase mb-sm">Académie</h3>
+    <p class="text-on-surface-variant mb-lg flex-grow">Planning annuel, rapports de formation, évaluations et questionnaires QR de satisfaction.</p>
+    <span class="text-primary font-label-bold flex items-center gap-xs">
+      Ouvrir <span class="material-symbols-outlined">arrow_forward</span>
     </span>
-  </div>
+  </a>
 
-  <!-- Budgets (À VENIR) -->
-  <div class="module-card coming-soon relative bg-surface-container-lowest border-2 border-outline-variant p-md flex flex-col h-full" aria-disabled="true" role="link">
-    <span class="badge-soon">
-      <span class="material-symbols-outlined">schedule</span>
-      Bientôt
-    </span>
-    <div class="bg-inverse-surface text-white p-base mb-md w-fit">
-      <span class="material-symbols-outlined text-4xl">account_balance_wallet</span>
+  <!-- Techniciens (disponible) -->
+  <a href="{{ root_path }}/techniciens" class="module-card relative bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-soft hover:shadow-lift hover:-translate-y-1 transition-all duration-300 p-lg flex flex-col h-full">
+    <div class="bg-inverse-surface text-white p-base mb-md w-fit rounded-xl">
+      <span class="material-symbols-outlined text-4xl">engineering</span>
     </div>
-    <h3 class="font-headline-md text-headline-md uppercase mb-sm">Budgets</h3>
-    <p class="text-on-surface-variant mb-lg flex-grow">Pilotage des enveloppes budgétaires, suivi des dépenses et consolidation par centre de coût.</p>
-    <span class="text-on-surface-variant font-label-bold flex items-center gap-xs">
-      EN DÉVELOPPEMENT <span class="material-symbols-outlined">construction</span>
+    <h3 class="font-headline-md text-headline-md uppercase mb-sm">Techniciens</h3>
+    <p class="text-on-surface-variant mb-lg flex-grow">Recrutement, intégration des 6 premiers mois et suivi dans la durée, en un profil unique par technicien.</p>
+    <span class="text-primary font-label-bold flex items-center gap-xs">
+      Ouvrir <span class="material-symbols-outlined">arrow_forward</span>
     </span>
-  </div>
+  </a>
 
-  <!-- Référentiels (À VENIR) -->
-  <div class="module-card coming-soon relative bg-surface-container-lowest border-2 border-outline-variant p-md flex flex-col h-full" aria-disabled="true" role="link">
-    <span class="badge-soon">
-      <span class="material-symbols-outlined">schedule</span>
-      Bientôt
-    </span>
-    <div class="bg-inverse-surface text-white p-base mb-md w-fit">
-      <span class="material-symbols-outlined text-4xl">menu_book</span>
+  <!-- Terrain & SAV (disponible) -->
+  <a href="{{ root_path }}/terrain" class="module-card relative bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-soft hover:shadow-lift hover:-translate-y-1 transition-all duration-300 p-lg flex flex-col h-full">
+    <div class="bg-inverse-surface text-white p-base mb-md w-fit rounded-xl">
+      <span class="material-symbols-outlined text-4xl">build</span>
     </div>
-    <h3 class="font-headline-md text-headline-md uppercase mb-sm">Référentiels</h3>
-    <p class="text-on-surface-variant mb-lg flex-grow">Gestion des catalogues de formations, des compétences cibles et des référentiels d'évaluation.</p>
-    <span class="text-on-surface-variant font-label-bold flex items-center gap-xs">
-      EN DÉVELOPPEMENT <span class="material-symbols-outlined">construction</span>
+    <h3 class="font-headline-md text-headline-md uppercase mb-sm">Terrain & SAV</h3>
+    <p class="text-on-surface-variant mb-lg flex-grow">Rapports de dépannage et audit des besoins trimestriel auprès des concessionnaires.</p>
+    <span class="text-primary font-label-bold flex items-center gap-xs">
+      Ouvrir <span class="material-symbols-outlined">arrow_forward</span>
     </span>
-  </div>
+  </a>
 
-  <!-- Import / Export (À VENIR) -->
-  <div class="module-card coming-soon relative bg-surface-container-lowest border-2 border-outline-variant p-md flex flex-col h-full" aria-disabled="true" role="link">
-    <span class="badge-soon">
-      <span class="material-symbols-outlined">schedule</span>
-      Bientôt
-    </span>
-    <div class="bg-inverse-surface text-white p-base mb-md w-fit">
-      <span class="material-symbols-outlined text-4xl">sync_alt</span>
+  <!-- Ressources (disponible) -->
+  <a href="{{ root_path }}/ressources" class="module-card relative bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-soft hover:shadow-lift hover:-translate-y-1 transition-all duration-300 p-lg flex flex-col h-full">
+    <div class="bg-inverse-surface text-white p-base mb-md w-fit rounded-xl">
+      <span class="material-symbols-outlined text-4xl">folder</span>
     </div>
-    <h3 class="font-headline-md text-headline-md uppercase mb-sm">Import / Export</h3>
-    <p class="text-on-surface-variant mb-lg flex-grow">Échanges de données : import des fichiers Excel/CSV et export des rapports vers les systèmes tiers.</p>
-    <span class="text-on-surface-variant font-label-bold flex items-center gap-xs">
-      EN DÉVELOPPEMENT <span class="material-symbols-outlined">construction</span>
+    <h3 class="font-headline-md text-headline-md uppercase mb-sm">Ressources</h3>
+    <p class="text-on-surface-variant mb-lg flex-grow">Médiathèque de vos supports de formation, classés par thème technique et niveau.</p>
+    <span class="text-primary font-label-bold flex items-center gap-xs">
+      Ouvrir <span class="material-symbols-outlined">arrow_forward</span>
     </span>
-  </div>
+  </a>
 
-  <!-- Administration (À VENIR) -->
-  <div class="module-card coming-soon relative bg-surface-container-lowest border-2 border-outline-variant p-md flex flex-col h-full" aria-disabled="true" role="link">
-    <span class="badge-soon">
-      <span class="material-symbols-outlined">schedule</span>
-      Bientôt
-    </span>
-    <div class="bg-inverse-surface text-white p-base mb-md w-fit">
-      <span class="material-symbols-outlined text-4xl">admin_panel_settings</span>
+  <!-- Rapports & Pilotage (disponible) -->
+  <a href="{{ root_path }}/rapports" class="module-card relative bg-surface-container-lowest border border-outline-variant rounded-2xl shadow-soft hover:shadow-lift hover:-translate-y-1 transition-all duration-300 p-lg flex flex-col h-full">
+    <div class="bg-inverse-surface text-white p-base mb-md w-fit rounded-xl">
+      <span class="material-symbols-outlined text-4xl">summarize</span>
     </div>
-    <h3 class="font-headline-md text-headline-md uppercase mb-sm">Administration</h3>
-    <p class="text-on-surface-variant mb-lg flex-grow">Comptes utilisateurs, droits d'accès, paramétrage de la plateforme et journalisation des activités.</p>
-    <span class="text-on-surface-variant font-label-bold flex items-center gap-xs">
-      EN DÉVELOPPEMENT <span class="material-symbols-outlined">construction</span>
+    <h3 class="font-headline-md text-headline-md uppercase mb-sm">Rapports & Pilotage</h3>
+    <p class="text-on-surface-variant mb-lg flex-grow">Rapport mensuel d'activités consolidé, avec export à imprimer, et synthèse éditable.</p>
+    <span class="text-primary font-label-bold flex items-center gap-xs">
+      Ouvrir <span class="material-symbols-outlined">arrow_forward</span>
     </span>
-  </div>
+  </a>
+
 
 </div>
 
-<p class="mt-md text-on-surface-variant text-sm flex items-center gap-xs">
-  <span class="material-symbols-outlined" style="font-size: 16px;">info</span>
-  L'ensemble des modules est en cours de développement et sera déployé progressivement selon la roadmap 2026.
-</p>
 </div>
 </section>
 
@@ -173,10 +113,10 @@
 <div class="max-w-max-width-desktop mx-auto px-gutter">
 <div class="grid grid-cols-1 lg:grid-cols-2 gap-lg items-center">
 <div class="relative">
-<img alt="Innovation Smart Mining" class="w-full h-[500px] object-cover border-4 border-primary" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSrebB_gu9AMwHlhD9fpxk9p9yaA6f2kzYLnHrZ4A0H9wY6syKkNvHcu3m_DK46KrpTyHDqawKTWH_p-h2l4bF00SlkJIPsgrlVnTy0zT1oZUvoHxAa2nQCG8Pk_x7NyfBPpbP-CGrmU9WwkgTSVXwaI_oXmyV3qvZg5NNk5fIpH192RffvOuvhXT2zVAoAqHkSIHMXMSRIaQtCZlfF2amHIKoFN73S4LyJ0QRFD1X8iAClcFsnU9FeVepMsEO0oy7fVW6DbNlSfs"/>
-<div class="absolute -bottom-base -right-base bg-primary text-on-primary font-label-bold p-md uppercase text-center">
+<img alt="Innovation Smart Mining" class="w-full h-[500px] object-cover rounded-2xl shadow-lift" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCSrebB_gu9AMwHlhD9fpxk9p9yaA6f2kzYLnHrZ4A0H9wY6syKkNvHcu3m_DK46KrpTyHDqawKTWH_p-h2l4bF00SlkJIPsgrlVnTy0zT1oZUvoHxAa2nQCG8Pk_x7NyfBPpbP-CGrmU9WwkgTSVXwaI_oXmyV3qvZg5NNk5fIpH192RffvOuvhXT2zVAoAqHkSIHMXMSRIaQtCZlfF2amHIKoFN73S4LyJ0QRFD1X8iAClcFsnU9FeVepMsEO0oy7fVW6DbNlSfs"/>
+<div class="absolute -bottom-base -right-base bg-primary text-on-primary font-label-bold p-md uppercase text-center rounded-2xl shadow-lift">
 <span class="text-4xl block font-bold">100%</span>
-<span class="text-xs">Technologie CAT</span>
+<span class="text-xs">Technologie LiuGong</span>
 </div>
 </div>
 <div class="lg:pl-lg">
@@ -196,7 +136,7 @@
 <li class="flex items-start gap-md">
 <span class="material-symbols-outlined text-primary-container">sensors</span>
 <div>
-<h4 class="font-label-bold uppercase text-primary-container">Connectivité CAT</h4>
+<h4 class="font-label-bold uppercase text-primary-container">Connectivité LiuGong</h4>
 <p class="text-sm opacity-80">Analyse de données en temps réel pour optimiser la productivité.</p>
 </div>
 </li>

@@ -1,83 +1,54 @@
 {% extends "base_v2.html" %}
 {% set active_nav = "dashboard" %}
-{% block title %}Tableaux de bord – Neemba Academy{% endblock %}
+{% block title %}Tableau de bord – LiuGong Academy{% endblock %}
 
 {% block extra_head %}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.4/chart.umd.min.js"></script>
 <style>
-  /* Wrapper responsive 16:10 (ratio natif Power BI) — look industriel CAT */
-  .pbi-wrapper {
-    position: relative;
-    width: 100%;
-    padding-bottom: 62.5%; /* 5/8 = 62.5% → ratio 16:10 */
-    height: 0;
-    overflow: hidden;
-    border-radius: 0;
-    border: 2px solid #000000;
-    background: #f7f9fb;
-  }
-  /* Sur mobile : ratio 3:4 (vertical) pour mieux exploiter l'écran */
-  @media (max-width: 640px) {
-    .pbi-wrapper {
-      padding-bottom: 130%;
-    }
-  }
-  .pbi-wrapper iframe {
-    position: absolute;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    border: 0;
-  }
-
-  /* Carte Power BI : barre supérieure jaune CAT */
-  .pbi-card {
-    position: relative;
-    border-top: 6px solid #ffcd00;
-  }
-
-  /* Tag "PILOTAGE & ANALYSE" : style CAT yellow + noir pour matcher l'identité */
   .dashboard-eyebrow {
     background: #000000;
-    color: #ffcd00;
-    padding: 4px 12px;
+    color: #EC6606;
+    padding: 5px 14px;
     display: inline-block;
     font-family: "IBM Plex Sans", sans-serif;
     font-weight: 600;
     font-size: 12px;
     letter-spacing: 0.12em;
     text-transform: uppercase;
+    border-radius: 9999px;
   }
-
-  /* Cartes de KPI rapides */
   .kpi-card {
     background: #ffffff;
-    border: 2px solid #000000;
-    padding: 20px;
+    border: 1px solid #d8dadc;
+    border-radius: 16px;
+    padding: 18px 20px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
+    box-shadow: 0 2px 10px rgba(11, 44, 110, 0.06);
+    transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), box-shadow 0.3s cubic-bezier(0.4, 0, 0.2, 1);
   }
+  .kpi-card:hover { transform: translateY(-3px); box-shadow: 0 6px 20px rgba(11, 44, 110, 0.10); }
+  .kpi-card .kpi-top { display: flex; align-items: center; justify-content: space-between; }
   .kpi-card .kpi-label {
-    font-family: "IBM Plex Sans", sans-serif;
-    font-weight: 600;
-    font-size: 11px;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    color: #000000;
+    font-family: "IBM Plex Sans", sans-serif; font-weight: 600; font-size: 11px;
+    letter-spacing: 0.08em; text-transform: uppercase; color: #555555;
   }
-  .kpi-card .kpi-value {
-    font-family: "Archivo Narrow", sans-serif;
-    font-weight: 700;
-    font-size: 32px;
-    color: #000000;
-    line-height: 1;
+  .kpi-card .kpi-value { font-family: "Archivo Narrow", sans-serif; font-weight: 700; font-size: 30px; color: #0b2c6e; line-height: 1; }
+  .kpi-card .kpi-sub { font-size: 12px; color: #777; }
+  .kpi-card .kpi-icon { color: #EC6606; font-size: 26px !important; }
+  .chart-card {
+    background: #ffffff; border: 1px solid #d8dadc; border-radius: 18px; padding: 18px 20px;
+    box-shadow: 0 2px 10px rgba(11, 44, 110, 0.06);
   }
-  .kpi-card .kpi-icon {
-    align-self: flex-end;
-    color: #ffcd00;
-    font-size: 32px !important;
+  .chart-card h3 {
+    font-family: "Archivo Narrow", sans-serif; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.03em; color: #0b2c6e; font-size: 15px; margin: 0 0 12px;
+    border-left: 5px solid #EC6606; padding-left: 10px;
   }
+  .chart-wrap { position: relative; height: 260px; }
+  .chart-wrap.small { height: 220px; }
+  .empty-note { font-size: 13px; color: #888; text-align: center; padding: 40px 10px; }
 </style>
 {% endblock %}
 
@@ -85,47 +56,203 @@
 <section class="py-xl bg-surface">
   <div class="max-w-max-width-desktop mx-auto px-gutter">
 
-    {# Header de section #}
-    <div class="border-b-4 border-on-surface pb-md mb-lg">
-      <span class="dashboard-eyebrow mb-base">Pilotage &amp; Analyse</span>
-      <h1 class="font-headline-xl text-headline-xl uppercase text-on-surface leading-tight mt-sm">
-        Tableau de bord <span class="bg-primary-container text-on-primary-container px-sm">Formation</span>
-      </h1>
-      <p class="text-on-surface-variant font-body-md max-w-2xl mt-sm">
-        Indicateurs clés de performance, suivi des sessions et analyses des résultats des formations Neemba Academy.
-      </p>
+    <div class="border-b-4 border-on-surface pb-md mb-lg flex flex-wrap items-end justify-between gap-md">
+      <div>
+        <span class="dashboard-eyebrow mb-base">Pilotage &amp; Analyse</span>
+        <h1 class="font-headline-xl text-headline-xl uppercase text-on-surface leading-tight mt-sm">
+          Tableau de bord <span class="bg-primary-container text-on-primary-container px-sm rounded-md">Formation</span>
+        </h1>
+        <p class="text-on-surface-variant font-body-md max-w-2xl mt-sm">
+          Indicateurs clés et graphiques calculés en direct à partir de l'Académie, des Techniciens, du Terrain & SAV et des Ressources.
+        </p>
+      </div>
     </div>
 
-    {# Power BI #}
-    <div class="pbi-card bg-surface-container-lowest border-2 border-on-surface p-md">
-      <div class="flex items-center justify-between mb-md flex-wrap gap-sm">
-        <div class="flex items-center gap-sm">
-          <span class="material-symbols-outlined bg-primary-container text-on-primary-container p-xs" style="font-size: 28px;">analytics</span>
-          <h2 class="font-headline-md text-headline-md uppercase">Neemba Formation TB</h2>
-        </div>
-        <a class="bg-inverse-surface text-white font-label-bold px-md py-sm uppercase tracking-widest text-label-bold inline-flex items-center gap-xs hover:bg-primary-container hover:text-on-primary-container active:scale-95 transition-all no-underline"
-           href="https://app.powerbi.com/view?r=eyJrIjoiNzk3NDhhZDMtMzI4OC00Y2QzLWFhZGUtNDRhNmUzMDIwZjY3IiwidCI6IjgxMzg2OTIwLTdiMTItNDVkNi1hMTA4LTZlYWZkMzRkYjY3NSJ9&pageName=1c193ad9147e525b8c1d"
-           target="_blank" rel="noopener">
-          Plein écran
-          <span class="material-symbols-outlined">open_in_new</span>
-        </a>
+    {# ---- Cartes KPI ---- #}
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-md mb-lg">
+      <div class="kpi-card">
+        <div class="kpi-top"><span class="kpi-label">Sessions réalisées</span><span class="material-symbols-outlined kpi-icon">event_available</span></div>
+        <span class="kpi-value">{{ data.kpi.sessions_realisees }}</span>
+        <span class="kpi-sub">{{ data.kpi.sessions_a_venir }} à venir</span>
       </div>
-
-      <div class="pbi-wrapper">
-        <iframe
-          title="Neemba Formation TB"
-          src="https://app.powerbi.com/view?r=eyJrIjoiNzk3NDhhZDMtMzI4OC00Y2QzLWFhZGUtNDRhNmUzMDIwZjY3IiwidCI6IjgxMzg2OTIwLTdiMTItNDVkNi1hMTA4LTZlYWZkMzRkYjY3NSJ9&embedImagePlaceholder=true&pageName=1c193ad9147e525b8c1d"
-          allowFullScreen="true"
-          loading="lazy"
-          referrerpolicy="no-referrer-when-downgrade"></iframe>
+      <div class="kpi-card">
+        <div class="kpi-top"><span class="kpi-label">Participants formés</span><span class="material-symbols-outlined kpi-icon">groups</span></div>
+        <span class="kpi-value">{{ data.kpi.participants_total }}</span>
+        <span class="kpi-sub">{{ data.kpi.sessions_client }} client · {{ data.kpi.sessions_interne }} interne</span>
       </div>
-
-      <p class="text-on-surface-variant text-sm mt-sm opacity-80 flex items-center gap-xs">
-        <span class="material-symbols-outlined" style="font-size: 16px;">info</span>
-        Source : Microsoft Power BI · Mise à jour automatique selon les paramètres du rapport.
-      </p>
+      <div class="kpi-card">
+        <div class="kpi-top"><span class="kpi-label">Satisfaction QR</span><span class="material-symbols-outlined kpi-icon">sentiment_satisfied</span></div>
+        <span class="kpi-value">{{ data.kpi.taux_satisfaction }}%</span>
+        <span class="kpi-sub">Toutes sessions confondues</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-top"><span class="kpi-label">Techniciens actifs</span><span class="material-symbols-outlined kpi-icon">engineering</span></div>
+        <span class="kpi-value">{{ data.kpi.techniciens_actifs }}</span>
+        <span class="kpi-sub">{{ data.kpi.techniciens_total }} au total</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-top"><span class="kpi-label">Nouveaux techniciens</span><span class="material-symbols-outlined kpi-icon">person_add</span></div>
+        <span class="kpi-value">{{ data.kpi.techniciens_nouveaux_mois }}</span>
+        <span class="kpi-sub">Ce mois-ci</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-top"><span class="kpi-label">Dépannages traités</span><span class="material-symbols-outlined kpi-icon">build</span></div>
+        <span class="kpi-value">{{ data.kpi.depannages_total }}</span>
+        <span class="kpi-sub">{{ data.kpi.depannages_formation }} avec besoin formation</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-top"><span class="kpi-label">Audits trimestriels</span><span class="material-symbols-outlined kpi-icon">call</span></div>
+        <span class="kpi-value">{{ data.kpi.audits_total }}</span>
+        <span class="kpi-sub">Concessionnaires appelés</span>
+      </div>
+      <div class="kpi-card">
+        <div class="kpi-top"><span class="kpi-label">Ressources disponibles</span><span class="material-symbols-outlined kpi-icon">folder</span></div>
+        <span class="kpi-value">{{ data.kpi.ressources_total }}</span>
+        <span class="kpi-sub">Supports de formation</span>
+      </div>
     </div>
+
+    {# ---- Graphiques principaux ---- #}
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-md mb-md">
+      <div class="chart-card">
+        <h3>Évolution mensuelle (sessions & participants)</h3>
+        <div class="chart-wrap"><canvas id="chartEvolution"></canvas></div>
+      </div>
+      <div class="chart-card">
+        <h3>Taux de satisfaction (tendance)</h3>
+        <div class="chart-wrap"><canvas id="chartSatisfaction"></canvas></div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-md mb-md">
+      <div class="chart-card">
+        <h3>Techniciens par statut</h3>
+        {% if data.kpi.techniciens_total == 0 %}
+        <p class="empty-note">Aucun technicien enregistré pour le moment.</p>
+        {% else %}
+        <div class="chart-wrap small"><canvas id="chartTechStatut"></canvas></div>
+        {% endif %}
+      </div>
+      <div class="chart-card">
+        <h3>Dépannages par système</h3>
+        {% if not data.repartition_pannes %}
+        <p class="empty-note">Aucun dépannage enregistré pour le moment.</p>
+        {% else %}
+        <div class="chart-wrap small"><canvas id="chartPannes"></canvas></div>
+        {% endif %}
+      </div>
+      <div class="chart-card">
+        <h3>Ressources par catégorie</h3>
+        {% if not data.repartition_ressources %}
+        <p class="empty-note">Aucune ressource enregistrée pour le moment.</p>
+        {% else %}
+        <div class="chart-wrap small"><canvas id="chartRessources"></canvas></div>
+        {% endif %}
+      </div>
+    </div>
+
+    <p class="text-on-surface-variant text-sm mt-sm opacity-80 flex items-center gap-xs">
+      <span class="material-symbols-outlined" style="font-size: 16px;">info</span>
+      Données calculées en direct — dernière actualisation à {{ data.generated_at[11:16] }}.
+    </p>
 
   </div>
 </section>
+{% endblock %}
+
+{% block scripts %}
+<script>
+(function () {
+  var NAVY = '#0b2c6e', ORANGE = '#EC6606', TEAL = '#2C8C99', GREEN = '#146c3a', GRAY = '#8891A0', RED = '#93000a', DARK = '#2c2c2a';
+
+  Chart.defaults.font.family = "'IBM Plex Sans', sans-serif";
+  Chart.defaults.color = '#555555';
+
+  var trend = {{ data.trend | tojson }};
+  var trendLabels = trend.map(function (t) { return t.label; });
+
+  new Chart(document.getElementById('chartEvolution'), {
+    type: 'bar',
+    data: {
+      labels: trendLabels,
+      datasets: [
+        { label: 'Sessions', data: trend.map(function (t) { return t.sessions; }), backgroundColor: NAVY, borderRadius: 6, yAxisID: 'y' },
+        { label: 'Participants', data: trend.map(function (t) { return t.participants; }), backgroundColor: ORANGE, borderRadius: 6, yAxisID: 'y1' }
+      ]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { position: 'bottom' } },
+      scales: {
+        y: { beginAtZero: true, position: 'left', ticks: { precision: 0 }, grid: { color: '#eceef0' } },
+        y1: { beginAtZero: true, position: 'right', ticks: { precision: 0 }, grid: { display: false } }
+      }
+    }
+  });
+
+  new Chart(document.getElementById('chartSatisfaction'), {
+    type: 'line',
+    data: {
+      labels: trendLabels,
+      datasets: [{
+        label: 'Satisfaction (%)',
+        data: trend.map(function (t) { return t.satisfaction; }),
+        borderColor: ORANGE, backgroundColor: 'rgba(236,102,6,0.12)',
+        fill: true, tension: 0.35, pointBackgroundColor: ORANGE, pointRadius: 4
+      }]
+    },
+    options: {
+      responsive: true, maintainAspectRatio: false,
+      plugins: { legend: { display: false } },
+      scales: { y: { beginAtZero: true, max: 100, grid: { color: '#eceef0' } } }
+    }
+  });
+
+  var techStatut = {{ data.tech_par_statut | tojson }};
+  if (document.getElementById('chartTechStatut')) {
+    new Chart(document.getElementById('chartTechStatut'), {
+      type: 'doughnut',
+      data: {
+        labels: techStatut.map(function (t) { return t.label; }),
+        datasets: [{
+          data: techStatut.map(function (t) { return t.nb; }),
+          backgroundColor: [GRAY, ORANGE, GREEN, RED, DARK]
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } } }
+    });
+  }
+
+  var pannes = {{ data.repartition_pannes | tojson }};
+  if (document.getElementById('chartPannes')) {
+    new Chart(document.getElementById('chartPannes'), {
+      type: 'doughnut',
+      data: {
+        labels: pannes.map(function (p) { return p.label; }),
+        datasets: [{
+          data: pannes.map(function (p) { return p.nb; }),
+          backgroundColor: [NAVY, ORANGE, TEAL, GREEN, GRAY, DARK]
+        }]
+      },
+      options: { responsive: true, maintainAspectRatio: false, plugins: { legend: { position: 'bottom', labels: { boxWidth: 12, font: { size: 11 } } } } }
+    });
+  }
+
+  var ressources = {{ data.repartition_ressources | tojson }};
+  if (document.getElementById('chartRessources')) {
+    new Chart(document.getElementById('chartRessources'), {
+      type: 'bar',
+      data: {
+        labels: ressources.map(function (r) { return r.label; }),
+        datasets: [{ data: ressources.map(function (r) { return r.nb; }), backgroundColor: NAVY, borderRadius: 6 }]
+      },
+      options: {
+        indexAxis: 'y', responsive: true, maintainAspectRatio: false,
+        plugins: { legend: { display: false } },
+        scales: { x: { beginAtZero: true, ticks: { precision: 0 }, grid: { color: '#eceef0' } } }
+      }
+    });
+  }
+})();
+</script>
 {% endblock %}

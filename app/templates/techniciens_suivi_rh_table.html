@@ -1,0 +1,103 @@
+{% extends "base_v2.html" %}
+{% set active_nav = "techniciens" %}
+{% block title %}{{ title }} – Suivi du personnel – LiuGong Academy{% endblock %}
+
+{% block extra_head %}
+<style>
+  .data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; white-space: nowrap; }
+  .data-table th, .data-table td { border-bottom: 1px solid #eceef0; padding: 6px 10px; text-align: left; }
+  .data-table thead th { text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.03em; color: #555; background: #f7f8f9; position: sticky; top: 0; }
+  .data-wrap { overflow: auto; max-height: 65vh; border-radius: 12px; border: 1px solid #eceef0; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="max-w-max-width-desktop mx-auto px-gutter py-lg">
+
+  <div class="mb-md border-b-2 border-outline-variant pb-md">
+    <p class="text-on-surface-variant font-label-bold text-xs uppercase tracking-widest mb-1">
+      <a href="{{ root_path }}/techniciens" class="hover:text-primary-container transition-colors">Techniciens</a>
+      <span class="mx-1">/</span> Suivi du personnel / {{ title }}
+    </p>
+    <div class="flex items-center justify-between flex-wrap gap-sm">
+      <h1 class="font-headline-lg text-headline-lg uppercase text-on-surface">{{ title }}</h1>
+      <button type="button" class="btn primary" onclick="openModal('modal-row')">
+        <span class="material-symbols-outlined" style="font-size:18px; vertical-align:-4px;">add</span>
+        Ajouter une ligne
+      </button>
+    </div>
+    <p class="text-on-surface-variant font-body-md">{{ total }} ligne(s)</p>
+  </div>
+
+  {% include "_techniciens_tabs.html" %}
+
+  <!-- Modale : ajouter / modifier une ligne -->
+  <dialog id="modal-row" class="modal-dialog modal-wide" {% if edit_row %}data-autoopen="1"{% endif %}>
+    <div class="modal-header">
+      <h3>{% if edit_row %}Modifier la ligne{% else %}Ajouter une ligne{% endif %}</h3>
+      <button type="button" class="modal-close" onclick="closeModal('modal-row')" aria-label="Fermer"><span class="material-symbols-outlined">close</span></button>
+    </div>
+    <div class="modal-body">
+      <form method="post" action="{{ root_path }}/techniciens/suivi-personnel/{{ url_slug }}/save">
+        <input type="hidden" name="id" value="{{ edit_row.id if edit_row else '' }}">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+          {% for f in fields %}
+          <div class="field">
+            <label for="f-{{ loop.index }}">{{ f }}</label>
+            <input id="f-{{ loop.index }}" name="{{ f }}" type="text" value="{{ edit_row[f] if edit_row and edit_row[f] is not none else '' }}">
+          </div>
+          {% endfor %}
+        </div>
+        <div class="modal-actions">
+          <button type="submit" class="btn primary">Enregistrer</button>
+          <button type="button" class="btn ghost" onclick="closeModal('modal-row')">Annuler</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  {% if total_pages > 1 %}
+  <div class="flex items-center justify-between gap-sm mb-sm">
+    <span class="text-xs text-on-surface-variant">Lignes {{ row_start }}–{{ row_start + records|length - 1 }} sur {{ total }} — page {{ page }}/{{ total_pages }}</span>
+    <div class="flex gap-xs">
+      {% if page > 1 %}<a href="?page={{ page - 1 }}" class="btn small ghost">← Précédent</a>{% endif %}
+      {% if page < total_pages %}<a href="?page={{ page + 1 }}" class="btn small ghost">Suivant →</a>{% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if not records %}
+  <div class="card text-center py-xl">
+    <span class="material-symbols-outlined text-4xl text-on-surface-variant">table_rows</span>
+    <p class="text-on-surface-variant mt-sm">Aucune ligne pour le moment.</p>
+  </div>
+  {% else %}
+  <div class="data-wrap card" style="padding:0;">
+    <table class="data-table">
+      <thead><tr>{% for f in fields %}<th>{{ f }}</th>{% endfor %}<th></th></tr></thead>
+      <tbody>
+        {% for row in records %}
+        <tr>
+          {% for f in fields %}<td>{{ row[f] if row[f] is not none else '—' }}</td>{% endfor %}
+          <td class="whitespace-nowrap">
+            <a href="?edit={{ row.id }}&page={{ page }}" class="btn small ghost" aria-label="Modifier"><span class="material-symbols-outlined" style="font-size:14px;">edit</span></a>
+            <form method="post" action="{{ root_path }}/techniciens/suivi-personnel/{{ url_slug }}/{{ row.id }}/delete" style="display:inline;" onsubmit="return confirmDelete(this, 'Supprimer cette ligne ?')">
+              <button type="submit" class="btn small ghost" aria-label="Supprimer"><span class="material-symbols-outlined" style="font-size:14px;">delete</span></button>
+            </form>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if total_pages > 1 %}
+  <div class="flex items-center justify-end gap-xs mt-sm">
+    {% if page > 1 %}<a href="?page={{ page - 1 }}" class="btn small ghost">← Précédent</a>{% endif %}
+    {% if page < total_pages %}<a href="?page={{ page + 1 }}" class="btn small ghost">Suivant →</a>{% endif %}
+  </div>
+  {% endif %}
+  {% endif %}
+
+</section>
+{% endblock %}

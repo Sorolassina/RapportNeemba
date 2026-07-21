@@ -1,0 +1,245 @@
+{
+  "headers": [
+    "40",
+    "Total",
+    "ILP",
+    "ILP (1)",
+    "Heures de formation",
+    "Nb sem / tech",
+    "Etat"
+  ],
+  "header_detecte": true,
+  "header_row": 5,
+  "records": [
+    {
+      "40": "NEBF",
+      "Total": 214,
+      "ILP": 195,
+      "ILP (1)": 0.9112149532710281,
+      "Heures de formation": 23800,
+      "Nb sem / tech": 2.7803738317757007,
+      "Etat": null,
+      "id": "9a63c5e0b9"
+    },
+    {
+      "40": "NEBN",
+      "Total": 37,
+      "ILP": 33,
+      "ILP (1)": 0.8918918918918919,
+      "Heures de formation": 4400,
+      "Nb sem / tech": 2.972972972972973,
+      "Etat": null,
+      "id": "ed08613836"
+    },
+    {
+      "40": "NECI",
+      "Total": 137,
+      "ILP": 134,
+      "ILP (1)": 0.9781021897810219,
+      "Heures de formation": 22040,
+      "Nb sem / tech": 4.021897810218978,
+      "Etat": null,
+      "id": "d140fe77b9"
+    },
+    {
+      "40": "NEGN",
+      "Total": 90,
+      "ILP": 85,
+      "ILP (1)": 0.9444444444444444,
+      "Heures de formation": 14560,
+      "Nb sem / tech": 4.044444444444444,
+      "Etat": null,
+      "id": "a5253797a4"
+    },
+    {
+      "40": "NEML",
+      "Total": 146,
+      "ILP": 130,
+      "ILP (1)": 0.8904109589041096,
+      "Heures de formation": 16480,
+      "Nb sem / tech": 2.8219178082191783,
+      "Etat": null,
+      "id": "3fc3e04a91"
+    },
+    {
+      "40": "NEMR",
+      "Total": 23,
+      "ILP": 21,
+      "ILP (1)": 0.9130434782608695,
+      "Heures de formation": 3080,
+      "Nb sem / tech": 3.347826086956522,
+      "Etat": null,
+      "id": "551d2d8066"
+    },
+    {
+      "40": "NENG",
+      "Total": 55,
+      "ILP": 49,
+      "ILP (1)": 0.8909090909090909,
+      "Heures de formation": 4040,
+      "Nb sem / tech": 1.8363636363636364,
+      "Etat": null,
+      "id": "b4d14aea69"
+    },
+    {
+      "40": "NESN",
+      "Total": 85,
+      "ILP": 81,
+      "ILP (1)": 0.9529411764705882,
+      "Heures de formation": 14800,
+      "Nb sem / tech": 4.352941176470588,
+      "Etat": null,
+      "id": "5fae1e68c4"
+    },
+    {
+      "40": "NETG",
+      "Total": 24,
+      "ILP": 24,
+      "ILP (1)": 1,
+      "Heures de formation": 3280,
+      "Nb sem / tech": 3.4166666666666665,
+      "Etat": null,
+      "id": "e3f5e270fb"
+    },
+    {
+      "40": null,
+      "Total": 811,
+      "ILP": 752,
+      "ILP (1)": 0.9272503082614056,
+      "Heures de formation": 106480,
+      "Nb sem / tech": 3.2823674475955613,
+      "Etat": null,
+      "id": "a2ac641899"
+    },
+    {
+      "40": "Calcul du nombre de semaines de formation par formateur",
+      "Total": null,
+      "ILP": null,
+      "ILP (1)": null,
+      "Heures de formation": null,
+      "Nb sem / tech": null,
+      "Etat": null,
+      "id": "c770a3f97e"
+    },
+    {
+      "40": 40,
+      "Total": "Total",
+      "ILP": "ILP",
+      "ILP (1)": "ILP",
+      "Heures de formation": "Heures de formation",
+      "Nb sem / tech": "Nb sem / tech",
+      "Etat": "Etat",
+      "id": "c362737b1b"
+    },
+    {
+      "40": "Tout pays",
+      "Total": 35,
+      "ILP": 35,
+      "ILP (1)": 1,
+      "Heures de formation": 10080,
+      "Nb sem / tech": 7.2,
+      "Etat": "Fait",
+      "id": "59ce834082"
+    },
+    {
+      "40": "Ratio stagiaires / formateurs",
+      "Total": null,
+      "ILP": null,
+      "ILP (1)": null,
+      "Heures de formation": null,
+      "Nb sem / tech": null,
+      "Etat": null,
+      "id": "15b0cb7537"
+    },
+    {
+      "40": null,
+      "Total": "Total",
+      "ILP": "Found",
+      "ILP (1)": "Adv",
+      "Heures de formation": "Nb Form",
+      "Nb sem / tech": "ratio",
+      "Etat": "Nb Form",
+      "id": "d8b34e6791"
+    },
+    {
+      "40": "NEBF",
+      "Total": 205,
+      "ILP": 165,
+      "ILP (1)": 40,
+      "Heures de formation": 5,
+      "Nb sem / tech": 33,
+      "Etat": 7,
+      "id": "c9c145e7c4"
+    },
+    {
+      "40": "NEBN / NETG",
+      "Total": 57,
+      "ILP": 45,
+      "ILP (1)": 12,
+      "Heures de formation": 1,
+      "Nb sem / tech": 45,
+      "Etat": 1,
+      "id": "cd6aaabf51"
+    },
+    {
+      "40": "NECI",
+      "Total": 134,
+      "ILP": 92,
+      "ILP (1)": 42,
+      "Heures de formation": 8,
+      "Nb sem / tech": 33.25,
+      "Etat": 11,
+      "id": "e7b2ceef69"
+    },
+    {
+      "40": "NEGN",
+      "Total": 88,
+      "ILP": 78,
+      "ILP (1)": 10,
+      "Heures de formation": 4,
+      "Nb sem / tech": 19.5,
+      "Etat": 4,
+      "id": "f0b83fa58b"
+    },
+    {
+      "40": "NEML",
+      "Total": 141,
+      "ILP": 103,
+      "ILP (1)": 38,
+      "Heures de formation": 5,
+      "Nb sem / tech": 20.6,
+      "Etat": 5,
+      "id": "a4cbfb5ac3"
+    },
+    {
+      "40": "NEMR",
+      "Total": 19,
+      "ILP": 15,
+      "ILP (1)": 4,
+      "Heures de formation": 2,
+      "Nb sem / tech": 7.5,
+      "Etat": 2,
+      "id": "db50460239"
+    },
+    {
+      "40": "NENG",
+      "Total": 45,
+      "ILP": 33,
+      "ILP (1)": 12,
+      "Heures de formation": 1,
+      "Nb sem / tech": 33,
+      "Etat": 1,
+      "id": "a8531e315e"
+    },
+    {
+      "40": "NESN",
+      "Total": 77,
+      "ILP": 61,
+      "ILP (1)": 16,
+      "Heures de formation": 3,
+      "Nb sem / tech": 20.333333333333332,
+      "Etat": 3,
+      "id": "89faa41fd4"
+    }
+  ]
+}

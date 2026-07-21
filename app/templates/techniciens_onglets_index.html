@@ -1,0 +1,61 @@
+{% extends "base_v2.html" %}
+{% set active_nav = "techniciens" %}
+{% block title %}Autres onglets – LiuGong Academy{% endblock %}
+
+{% block extra_head %}
+<style>
+  .onglet-table { width: 100%; border-collapse: separate; border-spacing: 0 6px; }
+  .onglet-table thead th { text-align: left; font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #555; padding: 0 12px 4px; }
+  .onglet-table tbody tr { background: #fff; box-shadow: 0 2px 8px rgba(11,44,110,0.06); cursor: pointer; }
+  .onglet-table tbody tr:hover { box-shadow: 0 8px 18px rgba(11,44,110,0.10); }
+  .onglet-table td { padding: 10px 12px; font-size: 13px; vertical-align: middle; }
+  .onglet-table td:first-child { border-radius: 10px 0 0 10px; }
+  .onglet-table td:last-child { border-radius: 0 10px 10px 0; }
+  .badge-generic { font-size: 10px; text-transform: uppercase; background: #e0e3e5; color: #454f59; padding: 2px 8px; border-radius: 9999px; margin-left: 6px; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="max-w-max-width-desktop mx-auto px-gutter py-lg">
+
+  <div class="mb-lg border-b-2 border-outline-variant pb-md">
+    <p class="text-on-surface-variant font-label-bold text-xs uppercase tracking-widest mb-1">
+      <a href="{{ root_path }}/techniciens" class="hover:text-primary-container transition-colors">Techniciens</a>
+      <span class="mx-1">/</span> Autres onglets
+    </p>
+    <h1 class="font-headline-lg text-headline-lg uppercase text-on-surface">Autres onglets (CRUD)</h1>
+    <p class="text-on-surface-variant font-body-md max-w-2xl">
+      Tous les onglets des deux classeurs Excel qui ne sont pas déjà gérés ailleurs dans le volet Techniciens
+      (fiche technicien, avancement, référentiel de compétences, synthèse RH) — chaque ligne est ici
+      ajoutable, modifiable et supprimable directement dans l'application, comme le reste des données.
+    </p>
+  </div>
+
+  {% for f in fichiers %}
+  <div class="card mt-lg">
+    <h2 class="font-headline-md text-headline-md uppercase text-on-surface m-0 mb-md">{{ f.label }}</h2>
+    {% if not f.index or not f.index.sheets %}
+    <p class="text-on-surface-variant text-sm">Aucun onglet supplémentaire pour ce fichier.</p>
+    {% else %}
+    <table class="onglet-table">
+      <thead><tr><th>Onglet</th><th>Lignes</th><th>Champs</th><th></th></tr></thead>
+      <tbody>
+        {% for s in f.index.sheets %}
+        <tr onclick="window.location='{{ root_path }}/techniciens/onglets/{{ f.cle }}/{{ s.fichier | urlencode }}'">
+          <td>
+            <span class="font-label-bold">{{ s.nom }}</span>
+            {% if not s.header_detecte %}<span class="badge-generic">colonnes génériques</span>{% endif %}
+          </td>
+          <td>{{ s.nb_lignes }}</td>
+          <td>{{ s.nb_champs }}</td>
+          <td><a href="{{ root_path }}/techniciens/onglets/{{ f.cle }}/{{ s.fichier | urlencode }}" class="btn small ghost" onclick="event.stopPropagation();">Gérer</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% endif %}
+  </div>
+  {% endfor %}
+
+</section>
+{% endblock %}

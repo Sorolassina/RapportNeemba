@@ -1,0 +1,76 @@
+{% extends "base_v2.html" %}
+{% set active_nav = "techniciens" %}
+{% block title %}Base 2 – Suivi du personnel – LiuGong Academy{% endblock %}
+
+{% block extra_head %}
+<style>
+  .data-table { width: 100%; border-collapse: collapse; font-size: 12.5px; white-space: nowrap; }
+  .data-table th, .data-table td { border-bottom: 1px solid #eceef0; padding: 6px 10px; text-align: left; }
+  .data-table thead th { text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.03em; color: #555; background: #f7f8f9; position: sticky; top: 0; }
+  .data-wrap { overflow: auto; max-height: 65vh; border-radius: 12px; border: 1px solid #eceef0; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="max-w-max-width-desktop mx-auto px-gutter py-lg">
+
+  <div class="mb-md border-b-2 border-outline-variant pb-md">
+    <p class="text-on-surface-variant font-label-bold text-xs uppercase tracking-widest mb-1">
+      <a href="{{ root_path }}/techniciens" class="hover:text-primary-container transition-colors">Techniciens</a>
+      <span class="mx-1">/</span> Suivi du personnel / Base 2
+    </p>
+    <h1 class="font-headline-lg text-headline-lg uppercase text-on-surface">Base 2 — Avancement formations / DPC</h1>
+    <p class="text-on-surface-variant font-body-md">
+      {{ total }} ligne(s) d'avancement, tous techniciens confondus. Pour ajouter ou modifier un avancement,
+      ouvrez la fiche du technicien concerné depuis l'onglet "Techniciens".
+    </p>
+  </div>
+
+  {% include "_techniciens_tabs.html" %}
+
+  {% if total_pages > 1 %}
+  <div class="flex items-center justify-between gap-sm mb-sm">
+    <span class="text-xs text-on-surface-variant">Lignes {{ row_start }}–{{ row_start + records|length - 1 }} sur {{ total }} — page {{ page }}/{{ total_pages }}</span>
+    <div class="flex gap-xs">
+      {% if page > 1 %}<a href="?page={{ page - 1 }}" class="btn small ghost">← Précédent</a>{% endif %}
+      {% if page < total_pages %}<a href="?page={{ page + 1 }}" class="btn small ghost">Suivant →</a>{% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if not records %}
+  <div class="card text-center py-xl">
+    <span class="material-symbols-outlined text-4xl text-on-surface-variant">table_rows</span>
+    <p class="text-on-surface-variant mt-sm">Aucun avancement pour le moment.</p>
+  </div>
+  {% else %}
+  <div class="data-wrap card" style="padding:0;">
+    <table class="data-table">
+      <thead>
+        <tr><th>Nom / Prénom</th><th>Mtle</th>{% for h in headers %}<th>{{ h }}</th>{% endfor %}<th></th></tr>
+      </thead>
+      <tbody>
+        {% for row in records %}
+        <tr>
+          <td class="font-label-bold">{{ row['Nom / Prénom'] or '—' }}</td>
+          <td>{{ row['Mtle'] or '—' }}</td>
+          {% for h in headers %}<td>{{ row[h] if row[h] is not none else '—' }}</td>{% endfor %}
+          <td class="whitespace-nowrap">
+            <a href="{{ root_path }}/techniciens/{{ row.technicien_id }}#avancement" class="btn small ghost">Ouvrir</a>
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if total_pages > 1 %}
+  <div class="flex items-center justify-end gap-xs mt-sm">
+    {% if page > 1 %}<a href="?page={{ page - 1 }}" class="btn small ghost">← Précédent</a>{% endif %}
+    {% if page < total_pages %}<a href="?page={{ page + 1 }}" class="btn small ghost">Suivant →</a>{% endif %}
+  </div>
+  {% endif %}
+  {% endif %}
+
+</section>
+{% endblock %}

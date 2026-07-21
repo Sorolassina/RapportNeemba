@@ -1,0 +1,91 @@
+{% extends "base_v2.html" %}
+{% set active_nav = "techniciens" %}
+{% block title %}Tutorat (OJT) – LiuGong Academy{% endblock %}
+
+{% block extra_head %}
+<style>
+  .stat-kpi { background: #f3f8ff; border: 1px solid #dbeafe; border-radius: 14px; padding: 16px; text-align: center; }
+  .stat-kpi .value { font-family: "Archivo Narrow", sans-serif; font-size: 26px; font-weight: 700; color: #0b2c6e; }
+  .stat-kpi .label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: #555; margin-top: 2px; }
+  .data-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .data-table th, .data-table td { border-bottom: 1px solid #eceef0; padding: 8px 10px; text-align: left; }
+  .data-table thead th { text-transform: uppercase; font-size: 10.5px; letter-spacing: 0.03em; color: #555; }
+  .bar-track { background: #eceef0; border-radius: 8px; height: 8px; overflow: hidden; width: 120px; }
+  .bar-fill { height: 100%; border-radius: 8px; background: #1D9E75; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="max-w-max-width-desktop mx-auto px-gutter py-lg">
+
+  <div class="mb-md border-b-2 border-outline-variant pb-md">
+    <p class="text-on-surface-variant font-label-bold text-xs uppercase tracking-widest mb-1">
+      <a href="{{ root_path }}/techniciens" class="hover:text-primary-container transition-colors">Techniciens</a>
+      <span class="mx-1">/</span> Tutorat
+    </p>
+    <h1 class="font-headline-lg text-headline-lg uppercase text-on-surface">Tutorat — Progression OJT</h1>
+    <p class="text-on-surface-variant font-body-md max-w-2xl">
+      Progression des compétences OJT (On the Job Training) par technicien, calculée par rapport au
+      référentiel de compétences. Pour ajouter ou modifier une compétence, ouvrez la fiche du technicien.
+    </p>
+  </div>
+
+  {% include "_techniciens_tabs.html" %}
+
+  <div class="grid grid-cols-2 md:grid-cols-3 gap-md mb-lg">
+    <div class="stat-kpi"><div class="value">{{ nb_techniciens_avec_progression }}</div><div class="label">Techniciens avec progression</div></div>
+    <div class="stat-kpi"><div class="value">{{ total_competences_referentiel }}</div><div class="label">Compétences au référentiel</div></div>
+  </div>
+
+  {% if total_pages > 1 %}
+  <div class="flex items-center justify-between gap-sm mb-sm">
+    <span class="text-xs text-on-surface-variant">Lignes {{ row_start }}–{{ row_start + techniciens|length - 1 }} sur {{ total }} — page {{ page }}/{{ total_pages }}</span>
+    <div class="flex gap-xs">
+      {% if page > 1 %}<a href="?page={{ page - 1 }}" class="btn small ghost">← Précédent</a>{% endif %}
+      {% if page < total_pages %}<a href="?page={{ page + 1 }}" class="btn small ghost">Suivant →</a>{% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  {% if not techniciens %}
+  <div class="card text-center py-xl">
+    <span class="material-symbols-outlined text-4xl text-on-surface-variant">school</span>
+    <p class="text-on-surface-variant mt-sm">Aucune progression OJT renseignée pour le moment.</p>
+  </div>
+  {% else %}
+  <div class="card" style="padding:0;">
+    <table class="data-table">
+      <thead>
+        <tr><th>Technicien</th><th>Mtle</th><th>Niveau atelier actuel</th><th>Niveau atelier cible</th><th>Compétences validées</th><th>Progression</th><th></th></tr>
+      </thead>
+      <tbody>
+        {% for t in techniciens %}
+        <tr>
+          <td class="font-label-bold">{{ t.nom or '—' }}</td>
+          <td>{{ t.mtle or '—' }}</td>
+          <td>{{ t.niveau_atelier_actuel or '—' }}</td>
+          <td>{{ t.niveau_atelier_cible or '—' }}</td>
+          <td>{{ t.nb_competences_validees }} / {{ t.total_competences_referentiel }}</td>
+          <td>
+            <div class="flex items-center gap-sm">
+              <div class="bar-track"><div class="bar-fill" style="width: {{ t.taux_progression }}%;"></div></div>
+              <span class="text-xs">{{ t.taux_progression }}%</span>
+            </div>
+          </td>
+          <td><a href="{{ root_path }}/techniciens/{{ t.id }}#ojt" class="btn small ghost">Ouvrir</a></td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  {% if total_pages > 1 %}
+  <div class="flex items-center justify-end gap-xs mt-sm">
+    {% if page > 1 %}<a href="?page={{ page - 1 }}" class="btn small ghost">← Précédent</a>{% endif %}
+    {% if page < total_pages %}<a href="?page={{ page + 1 }}" class="btn small ghost">Suivant →</a>{% endif %}
+  </div>
+  {% endif %}
+  {% endif %}
+
+</section>
+{% endblock %}

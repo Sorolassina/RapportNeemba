@@ -23,14 +23,6 @@ SYSTEME_LABELS = {
     "Non renseigné": "Non renseigné",
 }
 
-STATUT_TECH_LABELS = [
-    ("candidat", "Candidat"),
-    ("en_integration", "En intégration"),
-    ("actif", "Actif"),
-    ("inactif", "Inactif"),
-    ("sorti", "Sorti"),
-]
-
 NOTE_FIELDS = ("note_contenu", "note_pedagogie", "note_logistique")
 
 
@@ -86,12 +78,20 @@ def get_dashboard_data() -> dict:
     reponses = academie_store.list_reponses()
     taux_satisfaction = _taux_satisfaction(reponses)
 
-    # ---------------- Techniciens ----------------
+    # ---------------- Techniciens (fiche RH = fichier "Suivi du personnel") ----------------
     techniciens = techniciens_store.list_techniciens()
     tech_par_statut: dict = defaultdict(int)
     for t in techniciens:
-        tech_par_statut[t.get("statut") or "candidat"] += 1
+        tech_par_statut[t.get("Statut") or "Non renseigné"] += 1
     tech_nouveaux_mois = len([t for t in techniciens if (t.get("created_at") or "")[:7] == now_mois])
+    techniciens_actifs = len([
+        t for t in techniciens
+        if "désactivé" not in (t.get("Statut") or "").lower()
+    ])
+    techniciens_en_integration = len([
+        t for t in techniciens
+        if "non productif" in (t.get("Statut") or "").lower()
+    ])
 
     # ---------------- Terrain & SAV ----------------
     depannages = terrain_store.list_depannages()
@@ -137,8 +137,8 @@ def get_dashboard_data() -> dict:
             "sessions_interne": sessions_interne,
             "taux_satisfaction": taux_satisfaction,
             "techniciens_total": len(techniciens),
-            "techniciens_actifs": tech_par_statut.get("actif", 0),
-            "techniciens_en_integration": tech_par_statut.get("en_integration", 0),
+            "techniciens_actifs": techniciens_actifs,
+            "techniciens_en_integration": techniciens_en_integration,
             "techniciens_nouveaux_mois": tech_nouveaux_mois,
             "depannages_total": len(depannages),
             "depannages_formation": depannages_formation,
@@ -146,7 +146,8 @@ def get_dashboard_data() -> dict:
             "ressources_total": len(ressources),
         },
         "tech_par_statut": [
-            {"label": label, "nb": tech_par_statut.get(s, 0)} for s, label in STATUT_TECH_LABELS
+            {"label": s, "nb": nb}
+            for s, nb in sorted(tech_par_statut.items(), key=lambda kv: -kv[1])[:8]
         ],
         "repartition_pannes": repartition_pannes,
         "repartition_ressources": repartition_ressources,

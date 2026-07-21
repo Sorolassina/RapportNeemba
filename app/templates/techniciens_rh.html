@@ -1,0 +1,222 @@
+{% extends "base_v2.html" %}
+{% set active_nav = "techniciens" %}
+{% block title %}Synthèse RH – LiuGong Academy{% endblock %}
+
+{% block extra_head %}
+<style>
+  .stat-kpi { background: #f3f8ff; border: 1px solid #dbeafe; border-radius: 14px; padding: 16px; text-align: center; }
+  .stat-kpi .value { font-family: "Archivo Narrow", sans-serif; font-size: 26px; font-weight: 700; color: #0b2c6e; }
+  .stat-kpi .label { font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; color: #555; margin-top: 2px; }
+  .rh-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .rh-table th, .rh-table td { padding: 6px 10px; border-bottom: 1px solid #eceef0; text-align: left; }
+  .rh-table th { text-transform: uppercase; font-size: 11px; letter-spacing: 0.04em; color: #555; }
+  .week-heading {
+    font-family: "Archivo Narrow", sans-serif; font-weight: 700; text-transform: uppercase;
+    letter-spacing: 0.05em; color: #0b2c6e; font-size: 13px; margin: 24px 0 8px;
+    border-left: 4px solid #EC6606; padding-left: 10px;
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="max-w-max-width-desktop mx-auto px-gutter py-lg">
+
+  <div class="mb-lg border-b-2 border-outline-variant pb-md">
+    <h1 class="font-headline-lg text-headline-lg uppercase text-on-surface">Synthèse RH</h1>
+    <p class="text-on-surface-variant font-body-md max-w-2xl">
+      Tableau de bord — effectif, objectifs de certification, Cap&amp;Cap, recrutement, départs et évolution
+      du niveau atelier, recalculés en direct à partir des données du volet Techniciens.
+      Pour modifier les données sources, voir l'onglet "Suivi du personnel".
+    </p>
+  </div>
+
+  {% include "_techniciens_tabs.html" %}
+
+  {% if not has_personnel_data %}
+  <div class="card text-center py-xl">
+    <span class="material-symbols-outlined text-4xl text-on-surface-variant">table_chart</span>
+    <p class="text-on-surface-variant mt-sm">Aucune donnée technicien pour le moment.</p>
+  </div>
+  {% else %}
+
+  <!-- Effectif -->
+  <div class="card">
+    <h2 class="font-headline-md text-headline-md uppercase text-on-surface m-0 mb-md">Effectif (Base 1)</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+      <div>
+        <div class="week-heading" style="margin-top:0;">Par statut</div>
+        <table class="rh-table">
+          {% for k, v in effectif_par_statut.items() %}
+          <tr><td>{{ k }}</td><td>{{ v }}</td></tr>
+          {% endfor %}
+        </table>
+      </div>
+      <div>
+        <div class="week-heading" style="margin-top:0;">Par service</div>
+        <table class="rh-table">
+          {% for k, v in effectif_par_service.items() %}
+          <tr><td>{{ k }}</td><td>{{ v }}</td></tr>
+          {% endfor %}
+        </table>
+      </div>
+      <div>
+        <div class="week-heading" style="margin-top:0;">Par niveau atelier actuel</div>
+        <table class="rh-table">
+          {% for k, v in effectif_par_niveau_atelier.items() %}
+          <tr><td>{{ k }}</td><td>{{ v }}</td></tr>
+          {% endfor %}
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Objectifs de certifiés -->
+  <div class="card mt-lg">
+    <div class="flex items-center justify-between flex-wrap gap-sm mb-md">
+      <h2 class="font-headline-md text-headline-md uppercase text-on-surface m-0">Objectifs annuels de certifiés</h2>
+      <a href="{{ root_path }}/techniciens/suivi-personnel/objectifs" class="btn small ghost">Modifier les données</a>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="rh-table">
+        <thead>
+          <tr>
+            <th>Niveau</th><th>Année en cours</th><th>2022</th><th>2023</th><th>2024</th><th>2025</th><th>2026</th>
+            <th>Mini</th><th>Maxi</th><th>Résultats 2025</th><th>Résultat 2026</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for niveau, vals in objectifs_par_niveau.items() %}
+          <tr>
+            <td class="font-label-bold">{{ niveau }}</td>
+            <td>{{ vals['Année en cours']|round(1) }}</td>
+            <td>{{ vals['2022']|round(1) }}</td>
+            <td>{{ vals['2023']|round(1) }}</td>
+            <td>{{ vals['2024']|round(1) }}</td>
+            <td>{{ vals['2025']|round(1) }}</td>
+            <td>{{ vals['2026']|round(1) }}</td>
+            <td>{{ vals['Mini']|round(1) }}</td>
+            <td>{{ vals['Maxi']|round(1) }}</td>
+            <td>{{ vals['Résultats 2025']|round(1) }}</td>
+            <td>{{ vals['Résultat 2026']|round(1) }}</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Cap&Cap -->
+  <div class="card mt-lg">
+    <div class="flex items-center justify-between flex-wrap gap-sm mb-md">
+      <h2 class="font-headline-md text-headline-md uppercase text-on-surface m-0">Cap&amp;Cap par niveau</h2>
+      <a href="{{ root_path }}/techniciens/suivi-personnel/cap-and-cap" class="btn small ghost">Modifier les données</a>
+    </div>
+    <div class="overflow-x-auto">
+      <table class="rh-table">
+        <thead>
+          <tr><th>Niveau</th><th>2022</th><th>2023</th><th>2024</th><th>2025</th><th>2026</th><th>2027</th><th>2028</th></tr>
+        </thead>
+        <tbody>
+          {% for niveau, vals in cap_and_cap_par_niveau.items() %}
+          <tr>
+            <td class="font-label-bold">{{ niveau }}</td>
+            {% for a in ['2022','2023','2024','2025','2026','2027','2028'] %}
+            <td>{{ vals[a]|round(1) }}</td>
+            {% endfor %}
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Recrutement -->
+  <div class="card mt-lg">
+    <div class="flex items-center justify-between flex-wrap gap-sm mb-md">
+      <h2 class="font-headline-md text-headline-md uppercase text-on-surface m-0">Recrutement annuel</h2>
+      <a href="{{ root_path }}/techniciens/suivi-personnel/recrutement" class="btn small ghost">Modifier les données</a>
+    </div>
+    <div class="grid grid-cols-3 gap-md mb-md">
+      <div class="stat-kpi"><div class="value">{{ recrutement.total_effectue_2025|round(0) }}</div><div class="label">Effectué 2025</div></div>
+      <div class="stat-kpi"><div class="value">{{ recrutement.total_prevision_2026|round(0) }}</div><div class="label">Prévision 2026</div></div>
+      <div class="stat-kpi"><div class="value">{{ recrutement.total_valide_2026|round(0) }}</div><div class="label">Validé 2026</div></div>
+    </div>
+    <table class="rh-table">
+      <thead><tr><th>Code société</th><th>Effectué 2025</th><th>Prévision 2026</th><th>Validé 2026</th></tr></thead>
+      <tbody>
+        {% for r in recrutement.par_societe %}
+        <tr><td>{{ r.code_societe }}</td><td>{{ r.effectue_2025|round(0) }}</td><td>{{ r.prevision_2026|round(0) }}</td><td>{{ r.valide_2026|round(0) }}</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Départs -->
+  <div class="card mt-lg">
+    <div class="flex items-center justify-between flex-wrap gap-sm mb-md">
+      <h2 class="font-headline-md text-headline-md uppercase text-on-surface m-0">Départs ({{ departs.total }} au total)</h2>
+      <a href="{{ root_path }}/techniciens/suivi-personnel/departs" class="btn small ghost">Modifier les données</a>
+    </div>
+    {% if departs.lignes_invalides_ref %}
+    <p class="text-xs text-on-surface-variant mb-md">
+      {{ departs.lignes_invalides_ref }} ligne(s) ignorée(s) : l'onglet "Départ1" du classeur source pointait vers un fichier externe
+      ("Tableau d'analyse_Tech_Année") non fourni, ces lignes remontaient en erreur (#REF!) dans le fichier Excel lui-même.
+    </p>
+    {% endif %}
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+      <div>
+        <div class="week-heading" style="margin-top:0;">Par année de sortie</div>
+        <table class="rh-table">
+          {% for k, v in departs.par_annee.items() %}
+          <tr><td>{{ k }}</td><td>{{ v }}</td></tr>
+          {% endfor %}
+        </table>
+      </div>
+      <div>
+        <div class="week-heading" style="margin-top:0;">Par raison</div>
+        <table class="rh-table">
+          {% for k, v in departs.par_raison.items() %}
+          <tr><td>{{ k }}</td><td>{{ v }}</td></tr>
+          {% endfor %}
+        </table>
+      </div>
+      <div>
+        <div class="week-heading" style="margin-top:0;">Par service</div>
+        <table class="rh-table">
+          {% for k, v in departs.par_service.items() %}
+          <tr><td>{{ k }}</td><td>{{ v }}</td></tr>
+          {% endfor %}
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Évolution niveau atelier -->
+  <div class="card mt-lg">
+    <h2 class="font-headline-md text-headline-md uppercase text-on-surface m-0 mb-md">Évolution du niveau atelier (2021-2026)</h2>
+    <div class="overflow-x-auto">
+      <table class="rh-table">
+        <thead><tr><th>Année</th><th>Répartition par niveau</th></tr></thead>
+        <tbody>
+          {% for annee, repartition in niveau_atelier_evolution.items() %}
+          <tr>
+            <td class="font-label-bold">{{ annee }}</td>
+            <td>
+              {% for niveau, n in repartition.items() %}
+              <span class="eval-badge" style="background:#e6eefc;color:#0b2c6e;margin-right:6px;">{{ niveau }} : {{ n }}</span>
+              {% endfor %}
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  {% if not has_tutorat_data %}
+  <p class="text-on-surface-variant text-sm mt-md">Aucune donnée de tutorat (OJT) importée pour le moment.</p>
+  {% endif %}
+
+  {% endif %}
+</section>
+{% endblock %}

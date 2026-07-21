@@ -1,0 +1,53 @@
+{
+  "headers": [
+    "A"
+  ],
+  "header_detecte": false,
+  "header_row": 1,
+  "records": [
+    {
+      "A": "Les codes pays",
+      "id": "a8af56c449"
+    },
+    {
+      "A": "Code Société",
+      "id": "ada8f8bbf0"
+    },
+    {
+      "A": "NEBF",
+      "id": "cc7e3ffcb8"
+    },
+    {
+      "A": "NEBN",
+      "id": "269747227e"
+    },
+    {
+      "A": "NECI",
+      "id": "1727a4c066"
+    },
+    {
+      "A": "NEMR",
+      "id": "75ce2e2d8e"
+    },
+    {
+      "A": "NEGN",
+      "id": "6379fe5c23"
+    },
+    {
+      "A": "NENG",
+      "id": "9fa95021a1"
+    },
+    {
+      "A": "NESN",
+      "id": "0fb59d46c3"
+    },
+    {
+      "A": "NETG",
+      "id": "f2429ffc40"
+    },
+    {
+      "A": "NEML",
+      "id": "834f1d1d03"
+    }
+  ]
+}

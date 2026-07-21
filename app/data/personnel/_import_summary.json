@@ -1,0 +1,38 @@
+{
+  "Base 1": {
+    "fichier": "base1_personnel.json",
+    "header_row": 3,
+    "nb_champs": 131,
+    "nb_lignes": 1352
+  },
+  "Base 2": {
+    "fichier": "base2_avancement.json",
+    "header_row": 3,
+    "nb_champs": 19,
+    "nb_lignes": 1282
+  },
+  "Recrutement": {
+    "fichier": "recrutement.json",
+    "header_row": 6,
+    "nb_champs": 3,
+    "nb_lignes": 9
+  },
+  "Départ1": {
+    "fichier": "departs.json",
+    "header_row": 4,
+    "nb_champs": 21,
+    "nb_lignes": 486
+  },
+  "Objectif": {
+    "fichier": "objectifs.json",
+    "header_row": 7,
+    "nb_champs": 14,
+    "nb_lignes": 27
+  },
+  "Cap&Cap": {
+    "fichier": "cap_and_cap.json",
+    "header_row": 3,
+    "nb_champs": 11,
+    "nb_lignes": 81
+  }
+}

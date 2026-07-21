@@ -1,26 +1,14 @@
 {% extends "base_v2.html" %}
 {% set active_nav = "techniciens" %}
-{% block title %}{{ tech.nom }} {{ tech.prenom }} – LiuGong Academy{% endblock %}
+{% block title %}{{ tech['Nom / Prénom'] }} – LiuGong Academy{% endblock %}
 
 {% block extra_head %}
 <style>
   .status-pill {
     display: inline-flex; align-items: center; gap: 4px; padding: 4px 10px; border-radius: 9999px;
     font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.04em;
+    background: #e0e3e5; color: #454f59;
   }
-  .status-candidat { background: #e0e3e5; color: #454f59; }
-  .status-en_integration { background: #fdeee1; color: #a34400; }
-  .status-actif { background: #dcf5e6; color: #146c3a; }
-  .status-inactif { background: #ffdad6; color: #93000a; }
-  .status-sorti { background: #e0e3e5; color: #2c2c2a; }
-  .eval-badge {
-    font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;
-    padding: 4px 10px; border-radius: 9999px; display: inline-block;
-  }
-  .note-passable, .decision-recale { background: #ffdad6; color: #93000a; }
-  .note-assez-bien, .decision-en_attente { background: #fdeee1; color: #a34400; }
-  .note-bien { background: #d6e2f5; color: #0b2c6e; }
-  .note-tres-bien, .decision-admis { background: #dcf5e6; color: #146c3a; }
   .log-item {
     background: #fff; border-left: 4px solid #EC6606; border-radius: 0 12px 12px 0;
     padding: 10px 14px; margin-bottom: 8px; box-shadow: 0 2px 8px rgba(11,44,110,0.05);
@@ -31,58 +19,63 @@
     border-left: 4px solid #EC6606; padding-left: 10px;
   }
   .info-field-label { font-size: 11px; text-transform: uppercase; letter-spacing: 0.05em; color: #777; }
+  .modal-fieldset-scroll { max-height: 60vh; overflow-y: auto; padding-right: 4px; }
+  .comp-row { display: flex; justify-content: space-between; gap: 8px; padding: 6px 0; border-bottom: 1px solid #eceef0; font-size: 13px; }
 </style>
 {% endblock %}
 
 {% block content %}
 <section class="max-w-max-width-desktop mx-auto px-gutter py-lg">
 
+  {% include "_techniciens_tabs.html" %}
+
   <div class="mb-lg border-b-2 border-outline-variant pb-md">
     <p class="text-on-surface-variant font-label-bold text-xs uppercase tracking-widest mb-1">
       <a href="{{ root_path }}/techniciens" class="hover:text-primary-container transition-colors">Techniciens</a>
-      <span class="mx-1">/</span> {{ tech.nom }} {{ tech.prenom }}
+      <span class="mx-1">/</span> {{ tech['Nom / Prénom'] }}
     </p>
     <div class="flex flex-wrap items-center gap-sm">
-      <h1 class="font-headline-lg text-headline-lg uppercase text-on-surface m-0">{{ tech.nom }} {{ tech.prenom }}</h1>
-      <span class="status-pill status-{{ tech.statut }}">
-        {{ {'candidat':'Candidat','en_integration':'En intégration','actif':'Actif','inactif':'Inactif','sorti':'Sorti'}.get(tech.statut, tech.statut) }}
-      </span>
+      <h1 class="font-headline-lg text-headline-lg uppercase text-on-surface m-0">{{ tech['Nom / Prénom'] }}</h1>
+      <span class="status-pill">{{ tech['Statut'] or 'Statut non renseigné' }}</span>
     </div>
     <p class="text-on-surface-variant font-body-md">
-      {{ tech.poste or 'Poste non renseigné' }}
-      {% if tech.concessionnaire %} — {{ tech.concessionnaire }}{% endif %}
-      {% if tech.date_embauche %} — entré le {{ tech.date_embauche }}{% endif %}
+      {{ tech['Poste harmonisé Actuel'] or 'Poste non renseigné' }}
+      {% if tech['Service'] %} — {{ tech['Service'] }}{% endif %}
+      {% if tech['Mtle'] %} — Mtle {{ tech['Mtle'] }}{% endif %}
+      {% if tech['Date entrée'] %} — entré le {{ tech['Date entrée'] }}{% endif %}
     </p>
   </div>
 
-  <!-- Informations (résumé + actions) -->
+  <!-- Fiche RH complète -->
   <div class="card">
     <div class="flex items-center justify-between flex-wrap gap-sm">
-      <h2 class="font-headline-md text-headline-md uppercase text-on-surface m-0">Informations</h2>
+      <h2 class="font-headline-md text-headline-md uppercase text-on-surface m-0">Fiche RH</h2>
       <div class="flex gap-xs">
         <button type="button" class="btn small ghost" onclick="openModal('modal-info')">
           <span class="material-symbols-outlined" style="font-size:16px;">edit</span> Modifier
         </button>
-        <form method="post" action="{{ root_path }}/techniciens/{{ tech.id }}/delete" onsubmit="return confirmDelete(this, 'Supprimer ce technicien et toutes ses fiches (test, tâches, suivi) ?')">
+        <form method="post" action="{{ root_path }}/techniciens/{{ tech.id }}/delete" onsubmit="return confirmDelete(this, 'Supprimer ce technicien et toutes ses données (avancement, compétences) ?')">
           <button type="submit" class="btn small ghost" aria-label="Supprimer le technicien">
             <span class="material-symbols-outlined" style="font-size:16px;">delete</span> Supprimer
           </button>
         </form>
       </div>
     </div>
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-md mt-md">
-      <div><span class="info-field-label">Téléphone</span><br><span class="text-sm">{{ tech.telephone or '—' }}</span></div>
-      <div><span class="info-field-label">Concessionnaire</span><br><span class="text-sm">{{ tech.concessionnaire or '—' }}</span></div>
-      <div><span class="info-field-label">Poste</span><br><span class="text-sm">{{ tech.poste or '—' }}</span></div>
-      <div><span class="info-field-label">Entrée</span><br><span class="text-sm">{{ tech.date_embauche or '—' }}</span></div>
+
+    {% for group_name, fields in field_groups %}
+    <div class="week-heading">{{ group_name }}</div>
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-md mb-md">
+      {% for field in fields %}
+      <div><span class="info-field-label">{{ field }}</span><br><span class="text-sm">{{ tech[field] or '—' }}</span></div>
+      {% endfor %}
     </div>
-    {% if tech.notes %}<p class="text-sm text-on-surface-variant mt-md mb-0">{{ tech.notes }}</p>{% endif %}
+    {% endfor %}
   </div>
 
-  <!-- Modale : modifier les informations -->
+  <!-- Modale : modifier la fiche RH -->
   <dialog id="modal-info" class="modal-dialog modal-wide">
     <div class="modal-header">
-      <h3>Modifier les informations</h3>
+      <h3>Modifier la fiche RH</h3>
       <button type="button" class="modal-close" onclick="closeModal('modal-info')" aria-label="Fermer">
         <span class="material-symbols-outlined">close</span>
       </button>
@@ -90,40 +83,22 @@
     <div class="modal-body">
       <form method="post" action="{{ root_path }}/techniciens/save">
         <input type="hidden" name="id" value="{{ tech.id }}">
-
-        <div class="modal-fieldset">
-          <div class="modal-fieldset-title"><span class="material-symbols-outlined">badge</span>Identité</div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
-            <div class="field"><label for="nom">Nom</label><input id="nom" name="nom" type="text" required value="{{ tech.nom }}"></div>
-            <div class="field"><label for="prenom">Prénom</label><input id="prenom" name="prenom" type="text" required value="{{ tech.prenom }}"></div>
-          </div>
-        </div>
-
-        <div class="modal-fieldset">
-          <div class="modal-fieldset-title"><span class="material-symbols-outlined">work</span>Poste & contact</div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
-            <div class="field"><label for="concessionnaire">Concessionnaire / structure</label><input id="concessionnaire" name="concessionnaire" type="text" value="{{ tech.concessionnaire or '' }}"></div>
-            <div class="field"><label for="poste">Poste</label><input id="poste" name="poste" type="text" value="{{ tech.poste or '' }}"></div>
-            <div class="field"><label for="telephone">Téléphone</label><input id="telephone" name="telephone" type="text" value="{{ tech.telephone or '' }}"></div>
-            <div class="field"><label for="date_embauche">Date d'embauche / d'entrée</label><input id="date_embauche" name="date_embauche" type="date" value="{{ tech.date_embauche or '' }}"></div>
-          </div>
-        </div>
-
-        <div class="modal-fieldset">
-          <div class="modal-fieldset-title"><span class="material-symbols-outlined">assignment_ind</span>Statut & notes</div>
-          <div class="field">
-            <label for="statut">Statut</label>
-            <select id="statut" name="statut" style="padding:10px 12px; border:1.5px solid #d4d4d4; border-radius:12px; font-size:14px; max-width:280px;">
-              {% for s in ['candidat','en_integration','actif','inactif','sorti'] %}
-              <option value="{{ s }}" {% if tech.statut == s %}selected{% endif %}>
-                {{ {'candidat':'Candidat','en_integration':'En intégration','actif':'Actif','inactif':'Inactif','sorti':'Sorti'}[s] }}
-              </option>
+        <div class="modal-fieldset-scroll">
+          {% for group_name, fields in field_groups %}
+          {% set outer = loop %}
+          <div class="modal-fieldset">
+            <div class="modal-fieldset-title"><span class="material-symbols-outlined">badge</span>{{ group_name }}</div>
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-md">
+              {% for field in fields %}
+              <div class="field">
+                <label for="edit-f-{{ outer.index }}-{{ loop.index }}">{{ field }}</label>
+                <input id="edit-f-{{ outer.index }}-{{ loop.index }}" name="{{ field }}" type="text" value="{{ tech[field] or '' }}">
+              </div>
               {% endfor %}
-            </select>
+            </div>
           </div>
-          <div class="field"><label for="notes">Notes</label><textarea id="notes" name="notes" rows="2">{{ tech.notes or '' }}</textarea></div>
+          {% endfor %}
         </div>
-
         <div class="modal-actions">
           <button type="submit" class="btn primary">Enregistrer</button>
           <button type="button" class="btn ghost" onclick="closeModal('modal-info')">Annuler</button>
@@ -132,262 +107,130 @@
     </div>
   </dialog>
 
-  <!-- Test de recrutement -->
-  <div class="card mt-lg" id="test">
+  <!-- Avancement formations / DPC (ex Base 2) -->
+  <div class="card mt-lg" id="avancement">
     <div class="flex items-center justify-between flex-wrap gap-sm">
-      <h2 class="font-headline-md text-headline-md uppercase text-on-surface m-0">Test de recrutement</h2>
-      <button type="button" class="btn small primary" onclick="openModal('modal-test')">
-        <span class="material-symbols-outlined" style="font-size:16px;">add</span> Ajouter un test
-      </button>
+      <h2 class="font-headline-md text-headline-md uppercase text-on-surface m-0">Avancement formations / DPC</h2>
+      <div class="flex gap-xs">
+        <button type="button" class="btn small primary" onclick="openModal('modal-avancement')">
+          <span class="material-symbols-outlined" style="font-size:16px;">add</span> Ajouter un programme
+        </button>
+      </div>
     </div>
 
-    {% if tests %}
+    {% if tech.avancement %}
     <div class="mt-md">
-      {% for t in tests %}
+      {% for a in tech.avancement %}
       <div class="log-item">
         <div class="flex justify-between items-start gap-sm">
           <div>
-            <span class="text-xs text-on-surface-variant">{{ t.date }}</span>
-            <span class="eval-badge decision-{{ t.decision }}">{{ {'admis':'Admis','recale':'Recalé','en_attente':'En attente'}.get(t.decision, t.decision) }}</span>
+            <span class="font-label-bold">{{ a['Programme'] or 'Programme' }}</span>
+            <span class="text-xs text-on-surface-variant"> — Niveau : {{ a['Niveau'] or '—' }}</span>
           </div>
           <div class="flex gap-xs">
-            <a href="{{ root_path }}/techniciens/{{ tech.id }}?edit_test={{ t.id }}#test" class="btn small ghost" aria-label="Modifier"><span class="material-symbols-outlined" style="font-size:16px;">edit</span></a>
-            <form method="post" action="{{ root_path }}/techniciens/{{ tech.id }}/test/{{ t.id }}/delete" onsubmit="return confirmDelete(this, 'Supprimer ce test ?')">
+            <a href="{{ root_path }}/techniciens/{{ tech.id }}?edit_avancement={{ a.id }}#avancement" class="btn small ghost" aria-label="Modifier"><span class="material-symbols-outlined" style="font-size:16px;">edit</span></a>
+            <form method="post" action="{{ root_path }}/techniciens/{{ tech.id }}/avancement/{{ a.id }}/delete" onsubmit="return confirmDelete(this, 'Supprimer cet avancement ?')">
               <button type="submit" class="btn small ghost" aria-label="Supprimer"><span class="material-symbols-outlined" style="font-size:16px;">delete</span></button>
             </form>
           </div>
         </div>
-        <div class="flex flex-wrap gap-xs mt-1">
-          {% if t.note_theorique %}<span class="eval-badge note-{{ t.note_theorique }}">Théorie : {{ t.note_theorique|replace('-', ' ') }}</span>{% endif %}
-          {% if t.note_pratique %}<span class="eval-badge note-{{ t.note_pratique }}">Pratique : {{ t.note_pratique|replace('-', ' ') }}</span>{% endif %}
-          {% if t.note_comportementale %}<span class="eval-badge note-{{ t.note_comportementale }}">Savoir-être : {{ t.note_comportementale|replace('-', ' ') }}</span>{% endif %}
-        </div>
-        {% if t.commentaire %}<p class="text-sm mt-1 m-0">{{ t.commentaire }}</p>{% endif %}
+        <p class="text-sm mt-1 mb-0">Avancement curriculum : {{ a['Avancement Curriculum'] or '—' }}</p>
+        {% if a['Commentaire'] %}<p class="text-sm mt-1 mb-0 text-on-surface-variant">{{ a['Commentaire'] }}</p>{% endif %}
       </div>
       {% endfor %}
     </div>
     {% else %}
-    <p class="text-on-surface-variant text-sm mt-md">Aucun test enregistré pour le moment.</p>
+    <p class="text-on-surface-variant text-sm mt-md">Aucun avancement enregistré pour le moment.</p>
     {% endif %}
   </div>
 
-  <!-- Modale : test de recrutement -->
-  <dialog id="modal-test" class="modal-dialog modal-wide" {% if edit_test %}data-autoopen="1"{% endif %}>
+  <!-- Modale : avancement -->
+  <dialog id="modal-avancement" class="modal-dialog modal-wide" {% if edit_avancement %}data-autoopen="1"{% endif %}>
     <div class="modal-header">
-      <h3>{% if edit_test %}Modifier le test{% else %}Ajouter un test{% endif %}</h3>
-      <button type="button" class="modal-close" onclick="closeModal('modal-test')" aria-label="Fermer">
+      <h3>{% if edit_avancement %}Modifier l'avancement{% else %}Ajouter un programme{% endif %}</h3>
+      <button type="button" class="modal-close" onclick="closeModal('modal-avancement')" aria-label="Fermer">
         <span class="material-symbols-outlined">close</span>
       </button>
     </div>
     <div class="modal-body">
-      <form method="post" action="{{ root_path }}/techniciens/{{ tech.id }}/test/save">
-        {% if edit_test %}<input type="hidden" name="id" value="{{ edit_test.id }}">{% endif %}
-
-        <div class="modal-fieldset">
-          <div class="modal-fieldset-title"><span class="material-symbols-outlined">fact_check</span>Test</div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
-            <div class="field"><label for="test_date">Date du test</label><input id="test_date" name="date" type="date" required value="{{ edit_test.date if edit_test else '' }}"></div>
-            <div class="field">
-              <label for="decision">Décision</label>
-              <select id="decision" name="decision" style="padding:10px 12px; border:1.5px solid #d4d4d4; border-radius:12px; font-size:14px;">
-                {% for d in ['en_attente','admis','recale'] %}
-                <option value="{{ d }}" {% if edit_test and edit_test.decision == d %}selected{% endif %}>
-                  {{ {'en_attente':'En attente','admis':'Admis','recale':'Recalé'}[d] }}
-                </option>
-                {% endfor %}
-              </select>
-            </div>
+      <form method="post" action="{{ root_path }}/techniciens/{{ tech.id }}/avancement/save">
+        {% if edit_avancement %}<input type="hidden" name="id" value="{{ edit_avancement.id }}">{% endif %}
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+          {% for field in avancement_fields %}
+          <div class="field">
+            <label for="av-{{ loop.index }}">{{ field }}</label>
+            {% if field == 'Commentaire' %}
+            <textarea id="av-{{ loop.index }}" name="{{ field }}" rows="2">{{ edit_avancement[field] if edit_avancement else '' }}</textarea>
+            {% else %}
+            <input id="av-{{ loop.index }}" name="{{ field }}" type="text" value="{{ edit_avancement[field] if edit_avancement else '' }}">
+            {% endif %}
           </div>
+          {% endfor %}
         </div>
-
-        <div class="modal-fieldset">
-          <div class="modal-fieldset-title"><span class="material-symbols-outlined">star</span>Évaluation</div>
-          <div class="evaluation-sections" style="margin-bottom:0;">
-            {% for key, lbl in [('note_theorique','Connaissances théoriques'), ('note_pratique','Test pratique / mécanique'), ('note_comportementale','Savoir-être & motivation')] %}
-            <div class="evaluation-section">
-              <h3>{{ lbl }}</h3>
-              <div class="rating-selector">
-                <label>Note :</label>
-                <select name="{{ key }}" class="rating-select">
-                  <option value="">Sélectionner une note</option>
-                  {% for v, l in [('passable','Passable'),('assez-bien','Assez bien'),('bien','Bien'),('tres-bien','Très bien')] %}
-                  <option value="{{ v }}" {% if edit_test and edit_test[key] == v %}selected{% endif %}>{{ l }}</option>
-                  {% endfor %}
-                </select>
-              </div>
-            </div>
-            {% endfor %}
-          </div>
-        </div>
-
-        <div class="modal-fieldset">
-          <div class="modal-fieldset-title"><span class="material-symbols-outlined">edit_note</span>Commentaire</div>
-          <div class="field"><textarea id="commentaire" name="commentaire" rows="2">{{ edit_test.commentaire if edit_test else '' }}</textarea></div>
-        </div>
-
         <div class="modal-actions">
-          <button type="submit" class="btn primary">{% if edit_test %}Enregistrer les modifications{% else %}Enregistrer le test{% endif %}</button>
-          <button type="button" class="btn ghost" onclick="closeModal('modal-test')">Annuler</button>
+          <button type="submit" class="btn primary">Enregistrer</button>
+          <button type="button" class="btn ghost" onclick="closeModal('modal-avancement')">Annuler</button>
         </div>
       </form>
     </div>
   </dialog>
 
-  <!-- Intégration 6 premiers mois -->
-  <div class="card mt-lg" id="integration">
+  <!-- Compétences OJT -->
+  <div class="card mt-lg" id="ojt">
     <div class="flex items-center justify-between flex-wrap gap-sm">
-      <h2 class="font-headline-md text-headline-md uppercase text-on-surface m-0">Intégration — 6 premiers mois</h2>
-      <button type="button" class="btn small primary" onclick="openModal('modal-tache')">
-        <span class="material-symbols-outlined" style="font-size:16px;">add</span> Ajouter une tâche
-      </button>
+      <h2 class="font-headline-md text-headline-md uppercase text-on-surface m-0">Progression OJT (compétences)</h2>
+      <div class="flex gap-xs">
+        <button type="button" class="btn small primary" onclick="openModal('modal-competence')">
+          <span class="material-symbols-outlined" style="font-size:16px;">add</span> Ajouter une compétence
+        </button>
+      </div>
     </div>
-    <p class="text-xs text-on-surface-variant mt-sm mb-0">Journal des tâches réalisées, semaine par semaine, à partir de la date d'entrée{% if not tech.date_embauche %} (renseignez la date d'embauche ci-dessus pour activer le calcul par semaine){% endif %}.</p>
-
-    {% if not taches_par_semaine %}
-    <p class="text-on-surface-variant text-sm mt-md">Aucune entrée pour le moment.</p>
-    {% else %}
-    {% for sem in semaines_triees %}
-    <div class="week-heading">{% if sem == '?' %}Sans date{% else %}Semaine {{ sem }} / 26{% endif %}</div>
-    {% for t in taches_par_semaine[sem] %}
-    <div class="log-item">
-      <div class="flex justify-between items-start gap-sm">
-        <div>
-          <span class="text-xs text-on-surface-variant">{{ t.date }}</span>
-          <span class="eval-badge {% if t.statut == 'fait' %}note-tres-bien{% elif t.statut == 'en_cours' %}note-assez-bien{% else %}note-passable{% endif %}">
-            {{ {'fait':'Fait','en_cours':'En cours','a_faire':'À faire'}.get(t.statut, t.statut) }}
-          </span>
-        </div>
-        <form method="post" action="{{ root_path }}/techniciens/{{ tech.id }}/tache/{{ t.id }}/delete" onsubmit="return confirmDelete(this, 'Supprimer cette entrée ?')">
-          <button type="submit" class="btn small ghost" aria-label="Supprimer"><span class="material-symbols-outlined" style="font-size:16px;">delete</span></button>
+    <p class="text-sm text-on-surface-variant mt-xs mb-md">
+      {{ tech.competences|length }} compétence(s) renseignée(s) sur {{ referentiel|length }} au référentiel.
+    </p>
+    {% if tech.competences %}
+    {% for code, valeur in tech.competences.items() %}
+    <div class="comp-row">
+      <span>{{ code }}{% if referentiel_par_code.get(code) %} — {{ referentiel_par_code[code]['Description de la compétence'] }}{% endif %}</span>
+      <span class="flex items-center gap-sm">
+        <span class="font-label-bold">{{ valeur }}</span>
+        <form method="post" action="{{ root_path }}/techniciens/{{ tech.id }}/competence/{{ code }}/delete" onsubmit="return confirmDelete(this, 'Supprimer cette compétence ?')">
+          <button type="submit" class="btn small ghost" aria-label="Supprimer"><span class="material-symbols-outlined" style="font-size:14px;">delete</span></button>
         </form>
-      </div>
-      <p class="text-sm mt-1 m-0"><strong>{{ t.tache }}</strong></p>
-      {% if t.commentaire %}<p class="text-sm text-on-surface-variant m-0">{{ t.commentaire }}</p>{% endif %}
+      </span>
     </div>
     {% endfor %}
-    {% endfor %}
-    {% endif %}
-  </div>
-
-  <!-- Modale : nouvelle tâche -->
-  <dialog id="modal-tache" class="modal-dialog">
-    <div class="modal-header">
-      <h3>Ajouter une tâche</h3>
-      <button type="button" class="modal-close" onclick="closeModal('modal-tache')" aria-label="Fermer">
-        <span class="material-symbols-outlined">close</span>
-      </button>
-    </div>
-    <div class="modal-body">
-      <form method="post" action="{{ root_path }}/techniciens/{{ tech.id }}/tache/save">
-        <div class="modal-fieldset">
-          <div class="modal-fieldset-title"><span class="material-symbols-outlined">event</span>Quand</div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
-            <div class="field"><label for="tache_date">Date</label><input id="tache_date" name="date" type="date" required></div>
-            <div class="field">
-              <label for="tache_statut">Statut</label>
-              <select id="tache_statut" name="statut" style="padding:10px 12px; border:1.5px solid #d4d4d4; border-radius:12px; font-size:14px;">
-                <option value="fait">Fait</option>
-                <option value="en_cours">En cours</option>
-                <option value="a_faire">À faire</option>
-              </select>
-            </div>
-          </div>
-        </div>
-
-        <div class="modal-fieldset">
-          <div class="modal-fieldset-title"><span class="material-symbols-outlined">construction</span>Détails</div>
-          <div class="field"><label for="tache">Tâche réalisée</label><input id="tache" name="tache" type="text" required placeholder="Ex : Démontage pompe hydraulique sous supervision"></div>
-          <div class="field"><label for="tache_commentaire">Commentaire</label><input id="tache_commentaire" name="commentaire" type="text"></div>
-        </div>
-
-        <div class="modal-actions">
-          <button type="submit" class="btn primary">Ajouter au journal</button>
-          <button type="button" class="btn ghost" onclick="closeModal('modal-tache')">Annuler</button>
-        </div>
-      </form>
-    </div>
-  </dialog>
-
-  <!-- Suivi -->
-  <div class="card mt-lg" id="suivi">
-    <div class="flex items-center justify-between flex-wrap gap-sm">
-      <h2 class="font-headline-md text-headline-md uppercase text-on-surface m-0">Suivi périodique</h2>
-      <button type="button" class="btn small primary" onclick="openModal('modal-suivi')">
-        <span class="material-symbols-outlined" style="font-size:16px;">add</span> Nouveau suivi
-      </button>
-    </div>
-
-    {% if suivis %}
-    <div class="mt-md">
-      {% for s in suivis %}
-      <div class="log-item">
-        <div class="flex justify-between items-start gap-sm">
-          <div>
-            <span class="text-xs text-on-surface-variant">{{ s.date }}</span>
-            {% if s.evaluation %}<span class="eval-badge note-{{ s.evaluation }}">{{ s.evaluation|replace('-', ' ') }}</span>{% endif %}
-            {% if s.prochain_rdv %}<span class="text-xs text-on-surface-variant">Prochain RDV : {{ s.prochain_rdv }}</span>{% endif %}
-          </div>
-          <div class="flex gap-xs">
-            <a href="{{ root_path }}/techniciens/{{ tech.id }}?edit_suivi={{ s.id }}#suivi" class="btn small ghost" aria-label="Modifier"><span class="material-symbols-outlined" style="font-size:16px;">edit</span></a>
-            <form method="post" action="{{ root_path }}/techniciens/{{ tech.id }}/suivi/{{ s.id }}/delete" onsubmit="return confirmDelete(this, 'Supprimer ce suivi ?')">
-              <button type="submit" class="btn small ghost" aria-label="Supprimer"><span class="material-symbols-outlined" style="font-size:16px;">delete</span></button>
-            </form>
-          </div>
-        </div>
-        {% if s.points_forts %}<p class="text-sm mt-1 m-0"><strong>Points forts :</strong> {{ s.points_forts }}</p>{% endif %}
-        {% if s.axes_progres %}<p class="text-sm m-0"><strong>À progresser :</strong> {{ s.axes_progres }}</p>{% endif %}
-        {% if s.actions %}<p class="text-sm m-0"><strong>Actions :</strong> {{ s.actions }}</p>{% endif %}
-      </div>
-      {% endfor %}
-    </div>
     {% else %}
-    <p class="text-on-surface-variant text-sm mt-md">Aucun suivi enregistré pour le moment.</p>
+    <p class="text-on-surface-variant text-sm">Aucune compétence renseignée pour le moment.</p>
     {% endif %}
   </div>
 
-  <!-- Modale : nouveau suivi -->
-  <dialog id="modal-suivi" class="modal-dialog modal-wide" {% if edit_suivi %}data-autoopen="1"{% endif %}>
+  <!-- Modale : compétence -->
+  <dialog id="modal-competence" class="modal-dialog">
     <div class="modal-header">
-      <h3>{% if edit_suivi %}Modifier le suivi{% else %}Nouveau suivi{% endif %}</h3>
-      <button type="button" class="modal-close" onclick="closeModal('modal-suivi')" aria-label="Fermer">
+      <h3>Ajouter / mettre à jour une compétence</h3>
+      <button type="button" class="modal-close" onclick="closeModal('modal-competence')" aria-label="Fermer">
         <span class="material-symbols-outlined">close</span>
       </button>
     </div>
     <div class="modal-body">
-      <form method="post" action="{{ root_path }}/techniciens/{{ tech.id }}/suivi/save">
-        {% if edit_suivi %}<input type="hidden" name="id" value="{{ edit_suivi.id }}">{% endif %}
-
-        <div class="modal-fieldset">
-          <div class="modal-fieldset-title"><span class="material-symbols-outlined">event</span>Suivi</div>
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
-            <div class="field"><label for="suivi_date">Date du suivi</label><input id="suivi_date" name="date" type="date" required value="{{ edit_suivi.date if edit_suivi else '' }}"></div>
-            <div class="field"><label for="prochain_rdv">Prochain rendez-vous</label><input id="prochain_rdv" name="prochain_rdv" type="date" value="{{ edit_suivi.prochain_rdv if edit_suivi else '' }}"></div>
-          </div>
+      <form method="post" action="{{ root_path }}/techniciens/{{ tech.id }}/competence/save">
+        <div class="field">
+          <label for="comp-code">Code compétence</label>
+          <input id="comp-code" name="code" list="referentiel-codes" type="text" required placeholder="Ex : NEE/07/041">
+          <datalist id="referentiel-codes">
+            {% for r in referentiel %}
+            <option value="{{ r['Code compétence'] }}">{{ r['Description de la compétence'] }}</option>
+            {% endfor %}
+          </datalist>
         </div>
-
-        <div class="modal-fieldset">
-          <div class="modal-fieldset-title"><span class="material-symbols-outlined">star</span>Évaluation globale</div>
-          <div class="rating-selector">
-            <label>Note :</label>
-            <select name="evaluation" class="rating-select">
-              <option value="">Sélectionner une note</option>
-              {% for v, l in [('passable','Passable'),('assez-bien','Assez bien'),('bien','Bien'),('tres-bien','Très bien')] %}
-              <option value="{{ v }}" {% if edit_suivi and edit_suivi.evaluation == v %}selected{% endif %}>{{ l }}</option>
-              {% endfor %}
-            </select>
-          </div>
+        <div class="field mt-sm">
+          <label for="comp-valeur">Niveau atteint / valeur</label>
+          <input id="comp-valeur" name="valeur" type="text" placeholder="Ex : N2A">
         </div>
-
-        <div class="modal-fieldset">
-          <div class="modal-fieldset-title"><span class="material-symbols-outlined">edit_note</span>Bilan</div>
-          <div class="field"><label for="points_forts_suivi">Points forts</label><textarea id="points_forts_suivi" name="points_forts" rows="2">{{ edit_suivi.points_forts if edit_suivi else '' }}</textarea></div>
-          <div class="field"><label for="axes_progres">Axes de progrès</label><textarea id="axes_progres" name="axes_progres" rows="2">{{ edit_suivi.axes_progres if edit_suivi else '' }}</textarea></div>
-          <div class="field"><label for="actions">Actions décidées</label><textarea id="actions" name="actions" rows="2">{{ edit_suivi.actions if edit_suivi else '' }}</textarea></div>
-        </div>
-
         <div class="modal-actions">
-          <button type="submit" class="btn primary">{% if edit_suivi %}Enregistrer les modifications{% else %}Enregistrer le suivi{% endif %}</button>
-          <button type="button" class="btn ghost" onclick="closeModal('modal-suivi')">Annuler</button>
+          <button type="submit" class="btn primary">Enregistrer</button>
+          <button type="button" class="btn ghost" onclick="closeModal('modal-competence')">Annuler</button>
         </div>
       </form>
     </div>

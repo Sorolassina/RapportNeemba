@@ -1,0 +1,26 @@
+{
+  "headers": [
+    "User Id",
+    "Code société",
+    "Mtle",
+    "Nom / Prénom",
+    "Statut",
+    "Age",
+    "Niveau  d'étude",
+    "Sta9",
+    "Métier Technique",
+    "Poste harmonisé TCDP",
+    "Service",
+    "Type Contrat",
+    "Ancienneté",
+    "Année entrée",
+    "Raison 1",
+    "Raison 2",
+    "Date de sortie",
+    "Niveau Atelier actuel",
+    "Niveau Atelier Cible",
+    "Niveau CDF validé",
+    "Niveau CDF en cours"
+  ],
+  "records": []
+}

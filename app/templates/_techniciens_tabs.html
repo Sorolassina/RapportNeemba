@@ -1,0 +1,32 @@
+{# Barre d'onglets partagée par toutes les pages du volet Techniciens.
+   Variables attendues : active_tab ("rh" | "techniciens" | "referentiel" | "suivi_personnel" | "tutorat")
+   et, si active_tab == "suivi_personnel", active_subtab (clé du sous-onglet). #}
+<style>
+  .tt-tabs { display: flex; gap: 4px; flex-wrap: wrap; border-bottom: 2px solid #e6e6e6; margin-bottom: 20px; }
+  .tt-tab {
+    padding: 10px 18px; font-size: 13px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.03em;
+    color: #6b6b6b; text-decoration: none; border-bottom: 3px solid transparent; margin-bottom: -2px;
+  }
+  .tt-tab:hover { color: #0b2c6e; }
+  .tt-tab.active { color: #0b2c6e; border-bottom-color: #EC6606; }
+  .tt-subtabs { display: flex; gap: 4px; flex-wrap: wrap; margin-bottom: 20px; }
+  .tt-subtab { font-size: 11px; padding: 5px 12px; border-radius: 9999px; background: #e0e3e5; color: #454f59; text-decoration: none; }
+  .tt-subtab.active { background: #0b2c6e; color: #fff; }
+  .tt-subtab-generic { opacity: 0.85; }
+</style>
+
+<div class="tt-tabs">
+  <a href="{{ root_path }}/techniciens/rh" class="tt-tab {% if active_tab == 'rh' %}active{% endif %}">Synthèse RH</a>
+  <a href="{{ root_path }}/techniciens" class="tt-tab {% if active_tab == 'techniciens' %}active{% endif %}">Techniciens</a>
+  <a href="{{ root_path }}/techniciens/referentiel" class="tt-tab {% if active_tab == 'referentiel' %}active{% endif %}">Référentiel de compétences</a>
+  <a href="{{ root_path }}/techniciens/suivi-personnel" class="tt-tab {% if active_tab == 'suivi_personnel' %}active{% endif %}">Suivi du personnel</a>
+  <a href="{{ root_path }}/techniciens/tutorat" class="tt-tab {% if active_tab == 'tutorat' %}active{% endif %}">Tutorat</a>
+</div>
+
+{% if active_tab == 'suivi_personnel' and suivi_personnel_subtabs is defined %}
+<div class="tt-subtabs">
+  {% for st in suivi_personnel_subtabs %}
+  <a href="{{ st.url }}" class="tt-subtab {% if st.key == active_subtab %}active{% endif %} {% if st.generic %}tt-subtab-generic{% endif %}">{{ st.label }}</a>
+  {% endfor %}
+</div>
+{% endif %}

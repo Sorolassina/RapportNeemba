@@ -1,0 +1,112 @@
+{% extends "base_v2.html" %}
+{% set active_nav = "techniciens" %}
+{% block title %}Référentiel de compétences – LiuGong Academy{% endblock %}
+
+{% block extra_head %}
+<style>
+  .rh-table { width: 100%; border-collapse: collapse; font-size: 13px; }
+  .rh-table th, .rh-table td { padding: 8px 10px; border-bottom: 1px solid #eceef0; text-align: left; }
+  .rh-table th { text-transform: uppercase; font-size: 11px; letter-spacing: 0.04em; color: #555; }
+</style>
+{% endblock %}
+
+{% block content %}
+<section class="max-w-max-width-desktop mx-auto px-gutter py-lg">
+
+  <div class="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-sm mb-lg border-b-2 border-outline-variant pb-md">
+    <div>
+      <p class="text-on-surface-variant font-label-bold text-xs uppercase tracking-widest mb-1">
+        <a href="{{ root_path }}/techniciens" class="hover:text-primary-container transition-colors">Techniciens</a>
+        <span class="mx-1">/</span> Référentiel de compétences
+      </p>
+      <h1 class="font-headline-lg text-headline-lg uppercase text-on-surface">Référentiel de compétences (OJT)</h1>
+      <p class="text-on-surface-variant font-body-md max-w-2xl">Grille de référence utilisée pour la progression OJT des techniciens — {{ referentiel_total }} compétences.</p>
+    </div>
+    <div class="flex gap-sm">
+    <button type="button" class="btn primary" onclick="openModal('modal-competence-ref')">
+      <span class="material-symbols-outlined" style="font-size:18px; vertical-align:-4px;">add</span>
+      Nouvelle compétence
+    </button>
+    </div>
+  </div>
+
+  {% include "_techniciens_tabs.html" %}
+
+  <!-- Modale : nouvelle / modifier compétence -->
+  <dialog id="modal-competence-ref" class="modal-dialog modal-wide">
+    <div class="modal-header">
+      <h3>Compétence</h3>
+      <button type="button" class="modal-close" onclick="closeModal('modal-competence-ref')" aria-label="Fermer">
+        <span class="material-symbols-outlined">close</span>
+      </button>
+    </div>
+    <div class="modal-body">
+      <form method="post" action="{{ root_path }}/techniciens/referentiel/save">
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-md">
+          <div class="field"><label for="code">Code compétence</label><input id="code" name="code" type="text" required placeholder="Ex : NEE/07/041"></div>
+          <div class="field"><label for="description">Description</label><input id="description" name="description" type="text"></div>
+          <div class="field"><label for="machi">Machi</label><input id="machi" name="machi" type="text"></div>
+          <div class="field"><label for="epg">EPG</label><input id="epg" name="epg" type="text"></div>
+          <div class="field"><label for="ogm">OGM</label><input id="ogm" name="ogm" type="text"></div>
+          <div class="field"><label for="crc_moteur">CRC/Comp Moteur</label><input id="crc_moteur" name="crc_moteur" type="text"></div>
+          <div class="field"><label for="crc_hydraulique">CRC/Comp Hydraulique</label><input id="crc_hydraulique" name="crc_hydraulique" type="text"></div>
+        </div>
+        <div class="modal-actions">
+          <button type="submit" class="btn primary">Enregistrer</button>
+          <button type="button" class="btn ghost" onclick="closeModal('modal-competence-ref')">Annuler</button>
+        </div>
+      </form>
+    </div>
+  </dialog>
+
+  {% if total_pages > 1 %}
+  <div class="flex items-center justify-between gap-sm mb-sm">
+    <span class="text-xs text-on-surface-variant">Lignes {{ row_start }}–{{ row_start + referentiel|length - 1 }} sur {{ referentiel_total }} — page {{ page }}/{{ total_pages }}</span>
+    <div class="flex gap-xs">
+      {% if page > 1 %}<a href="?page={{ page - 1 }}" class="btn small ghost">← Précédent</a>{% endif %}
+      {% if page < total_pages %}<a href="?page={{ page + 1 }}" class="btn small ghost">Suivant →</a>{% endif %}
+    </div>
+  </div>
+  {% endif %}
+
+  <div class="card">
+    {% if not referentiel %}
+    <p class="text-on-surface-variant text-sm">Aucune compétence enregistrée pour le moment.</p>
+    {% else %}
+    <div class="overflow-x-auto">
+      <table class="rh-table">
+        <thead>
+          <tr><th>Code</th><th>Description</th><th>Machi</th><th>EPG</th><th>OGM</th><th>CRC/Comp Moteur</th><th>CRC/Comp Hydraulique</th><th></th></tr>
+        </thead>
+        <tbody>
+          {% for r in referentiel %}
+          <tr>
+            <td class="font-label-bold">{{ r['Code compétence'] }}</td>
+            <td>{{ r['Description de la compétence'] or '—' }}</td>
+            <td>{{ r['Machi'] or '—' }}</td>
+            <td>{{ r['EPG'] or '—' }}</td>
+            <td>{{ r['OGM'] or '—' }}</td>
+            <td>{{ r['CRC/Comp Moteur'] or '—' }}</td>
+            <td>{{ r['CRC/Comp Hydraulique'] or '—' }}</td>
+            <td>
+              <form method="post" action="{{ root_path }}/techniciens/referentiel/{{ r['Code compétence'] }}/delete" onsubmit="return confirmDelete(this, 'Supprimer cette compétence du référentiel ?')">
+                <button type="submit" class="btn small ghost" aria-label="Supprimer"><span class="material-symbols-outlined" style="font-size:16px;">delete</span></button>
+              </form>
+            </td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    {% endif %}
+  </div>
+
+  {% if total_pages > 1 %}
+  <div class="flex items-center justify-end gap-xs mt-sm">
+    {% if page > 1 %}<a href="?page={{ page - 1 }}" class="btn small ghost">← Précédent</a>{% endif %}
+    {% if page < total_pages %}<a href="?page={{ page + 1 }}" class="btn small ghost">Suivant →</a>{% endif %}
+  </div>
+  {% endif %}
+
+</section>
+{% endblock %}

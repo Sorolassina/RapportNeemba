@@ -104,8 +104,8 @@ def get_monthly_activity(mois: str) -> dict:
 
     techniciens = techniciens_store.list_techniciens()
     tech_nouveaux = [t for t in techniciens if _in_month(t.get("created_at"), mois)]
-    suivis_mois = [s for s in techniciens_store.list_suivis() if _in_month(s.get("date"), mois)]
-    tests_mois = [t for t in techniciens_store.list_tests() if _in_month(t.get("date"), mois)]
+    tech_modifies_mois = [t for t in techniciens if _in_month(t.get("updated_at"), mois)]
+    avancement_total = sum(len(t.get("avancement", [])) for t in techniciens)
 
     depannages = terrain_store.list_depannages()
     depannages_mois = [d for d in depannages if _in_month(d.get("date"), mois)]
@@ -130,8 +130,8 @@ def get_monthly_activity(mois: str) -> dict:
         },
         "techniciens": {
             "nouveaux": len(tech_nouveaux),
-            "suivis_realises": len(suivis_mois),
-            "tests_recrutement": len(tests_mois),
+            "modifies_ce_mois": len(tech_modifies_mois),
+            "avancement_total": avancement_total,
             "liste_nouveaux": tech_nouveaux,
         },
         "terrain": {

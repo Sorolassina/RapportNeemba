@@ -1,0 +1,845 @@
+{
+  "headers": [
+    "Statut",
+    "(Plusieurs éléments)"
+  ],
+  "header_detecte": true,
+  "header_row": 4,
+  "records": [
+    {
+      "Statut": "Nombre de User Id",
+      "(Plusieurs éléments)": null,
+      "id": "b5128879be"
+    },
+    {
+      "Statut": 738,
+      "(Plusieurs éléments)": null,
+      "id": "f98fddc6d2"
+    },
+    {
+      "Statut": "2. # Techniciens par pays (Productif et Non Productif)",
+      "(Plusieurs éléments)": null,
+      "id": "d0a41b78ad"
+    },
+    {
+      "Statut": "Statut",
+      "(Plusieurs éléments)": "(Plusieurs éléments)",
+      "id": "6f6de0ebc9"
+    },
+    {
+      "Statut": "Nombre de User Id",
+      "(Plusieurs éléments)": null,
+      "id": "2ece4c3c8e"
+    },
+    {
+      "Statut": 87,
+      "(Plusieurs éléments)": null,
+      "id": "1f04dad523"
+    },
+    {
+      "Statut": "3. Age Moyen techniciens",
+      "(Plusieurs éléments)": null,
+      "id": "ce5ca8d5a5"
+    },
+    {
+      "Statut": "Statut",
+      "(Plusieurs éléments)": "(Plusieurs éléments)",
+      "id": "83f675a896"
+    },
+    {
+      "Statut": "Moyenne de Age",
+      "(Plusieurs éléments)": null,
+      "id": "04762114ed"
+    },
+    {
+      "Statut": 35.49322493224932,
+      "(Plusieurs éléments)": null,
+      "id": "35c0fb6e9e"
+    },
+    {
+      "Statut": "4. Age Moyen techniciens par pays",
+      "(Plusieurs éléments)": null,
+      "id": "08110866cc"
+    },
+    {
+      "Statut": "Statut",
+      "(Plusieurs éléments)": "(Plusieurs éléments)",
+      "id": "c7a14ac794"
+    },
+    {
+      "Statut": "Moyenne de Age",
+      "(Plusieurs éléments)": null,
+      "id": "16cb70f161"
+    },
+    {
+      "Statut": 34.5632183908046,
+      "(Plusieurs éléments)": null,
+      "id": "4ec5b2df73"
+    },
+    {
+      "Statut": "5. Ancienneté Moyenne Techniciens",
+      "(Plusieurs éléments)": null,
+      "id": "695b0a2188"
+    },
+    {
+      "Statut": "Statut",
+      "(Plusieurs éléments)": "(Plusieurs éléments)",
+      "id": "8fde06d47f"
+    },
+    {
+      "Statut": "Moyenne de Ancienneté",
+      "(Plusieurs éléments)": null,
+      "id": "c79fdcb851"
+    },
+    {
+      "Statut": 9.296747967479675,
+      "(Plusieurs éléments)": null,
+      "id": "db70c334e6"
+    },
+    {
+      "Statut": "6. Ancienneté Moyenne Techniciens par pays",
+      "(Plusieurs éléments)": null,
+      "id": "f69c6e8f37"
+    },
+    {
+      "Statut": "Statut",
+      "(Plusieurs éléments)": "(Plusieurs éléments)",
+      "id": "96746f51a1"
+    },
+    {
+      "Statut": "Moyenne de Ancienneté",
+      "(Plusieurs éléments)": null,
+      "id": "bf13b40865"
+    },
+    {
+      "Statut": 7.103448275862069,
+      "(Plusieurs éléments)": null,
+      "id": "07f4d5f673"
+    },
+    {
+      "Statut": "7. Moyenne stanine des techniciens",
+      "(Plusieurs éléments)": null,
+      "id": "cf791fe0f4"
+    },
+    {
+      "Statut": "Statut",
+      "(Plusieurs éléments)": "(Plusieurs éléments)",
+      "id": "b622361021"
+    },
+    {
+      "Statut": "Moyenne de Sta9",
+      "(Plusieurs éléments)": null,
+      "id": "1ad2eba343"
+    },
+    {
+      "Statut": 4.937714285714279,
+      "(Plusieurs éléments)": null,
+      "id": "0882451449"
+    },
+    {
+      "Statut": "8. Moyenne stanine des techniciens par pays",
+      "(Plusieurs éléments)": null,
+      "id": "f9ce7ad66a"
+    },
+    {
+      "Statut": "Statut",
+      "(Plusieurs éléments)": "(Plusieurs éléments)",
+      "id": "21cbb0e39d"
+    },
+    {
+      "Statut": "Moyenne de Sta9",
+      "(Plusieurs éléments)": null,
+      "id": "9476e4e0ea"
+    },
+    {
+      "Statut": 4.70705882352941,
+      "(Plusieurs éléments)": null,
+      "id": "5910b104f6"
+    },
+    {
+      "Statut": "9. Renouvellement du personnel par pays (Entrées) dans l'année en cours",
+      "(Plusieurs éléments)": null,
+      "id": "1ea22d8fed"
+    },
+    {
+      "Statut": "Statut",
+      "(Plusieurs éléments)": "(Plusieurs éléments)",
+      "id": "9f63ba51a8"
+    },
+    {
+      "Statut": "Année entrée",
+      "(Plusieurs éléments)": "2026",
+      "id": "3bef297c87"
+    },
+    {
+      "Statut": "Nombre de User Id",
+      "(Plusieurs éléments)": null,
+      "id": "a96fffb9ba"
+    },
+    {
+      "Statut": 0,
+      "(Plusieurs éléments)": null,
+      "id": "52b12c177d"
+    },
+    {
+      "Statut": "10. Renouvellement du personnel Total (Entrées) dans l'année en cours",
+      "(Plusieurs éléments)": null,
+      "id": "4387cd60c9"
+    },
+    {
+      "Statut": "Statut",
+      "(Plusieurs éléments)": "(Plusieurs éléments)",
+      "id": "1a27f915fa"
+    },
+    {
+      "Statut": "Année entrée",
+      "(Plusieurs éléments)": "2026",
+      "id": "11f288160d"
+    },
+    {
+      "Statut": "Nombre de User Id",
+      "(Plusieurs éléments)": null,
+      "id": "9237776a0a"
+    },
+    {
+      "Statut": 1,
+      "(Plusieurs éléments)": null,
+      "id": "40df47a3d8"
+    },
+    {
+      "Statut": "11. Renouvellement du personnel par pays (sorties) dans l'année en cours",
+      "(Plusieurs éléments)": null,
+      "id": "da3e5f7cf3"
+    },
+    {
+      "Statut": "Statut",
+      "(Plusieurs éléments)": "Désactivé",
+      "id": "0d3fcb734a"
+    },
+    {
+      "Statut": "Date de sortie",
+      "(Plusieurs éléments)": "2026",
+      "id": "3807d1951c"
+    },
+    {
+      "Statut": "Nombre de User Id",
+      "(Plusieurs éléments)": null,
+      "id": "3578de403b"
+    },
+    {
+      "Statut": 0,
+      "(Plusieurs éléments)": null,
+      "id": "8da5cd873d"
+    },
+    {
+      "Statut": "12. Renouvellement du personnel Total (sorties) dans l'année en cours",
+      "(Plusieurs éléments)": null,
+      "id": "c1a65b02cc"
+    },
+    {
+      "Statut": "Statut",
+      "(Plusieurs éléments)": "Désactivé",
+      "id": "a91e3f578b"
+    },
+    {
+      "Statut": "Date de sortie",
+      "(Plusieurs éléments)": "2026",
+      "id": "fd8554428e"
+    },
+    {
+      "Statut": "Nombre de User Id",
+      "(Plusieurs éléments)": null,
+      "id": "f045097125"
+    },
+    {
+      "Statut": 15,
+      "(Plusieurs éléments)": null,
+      "id": "e64187cb44"
+    },
+    {
+      "Statut": "13. Répartition des stanines par pays",
+      "(Plusieurs éléments)": null,
+      "id": "0437e136da"
+    },
+    {
+      "Statut": "Statut",
+      "(Plusieurs éléments)": "(Plusieurs éléments)",
+      "id": "3bf1e91f6a"
+    },
+    {
+      "Statut": "Étiquettes de lignes",
+      "(Plusieurs éléments)": "Nombre de User Id",
+      "id": "dceab10ba9"
+    },
+    {
+      "Statut": "0-2,9",
+      "(Plusieurs éléments)": 0.14942528735632185,
+      "id": "6ee82c5ef1"
+    },
+    {
+      "Statut": "3,0-3,9",
+      "(Plusieurs éléments)": 0.10344827586206896,
+      "id": "6154536d2c"
+    },
+    {
+      "Statut": "4,0-4,9",
+      "(Plusieurs éléments)": 0.22988505747126436,
+      "id": "30a90459cd"
+    },
+    {
+      "Statut": "5,0-5,9",
+      "(Plusieurs éléments)": 0.25287356321839083,
+      "id": "6f5b9caea4"
+    },
+    {
+      "Statut": "6,0-6,9",
+      "(Plusieurs éléments)": 0.1839080459770115,
+      "id": "5f1b7b0ced"
+    },
+    {
+      "Statut": "7,0-9,0",
+      "(Plusieurs éléments)": 0.05747126436781609,
+      "id": "0e351d0ad5"
+    },
+    {
+      "Statut": "NR",
+      "(Plusieurs éléments)": 0.022988505747126436,
+      "id": "8b782f64a2"
+    },
+    {
+      "Statut": "Total général",
+      "(Plusieurs éléments)": 1,
+      "id": "70db18e1b3"
+    },
+    {
+      "Statut": "14. # Techniciens ayant un PDI dans l'année en cours",
+      "(Plusieurs éléments)": null,
+      "id": "dd631a100d"
+    },
+    {
+      "Statut": "Statut",
+      "(Plusieurs éléments)": "(Plusieurs éléments)",
+      "id": "ea4cd48f0b"
+    },
+    {
+      "Statut": null,
+      "(Plusieurs éléments)": "Étiquettes de colonnes",
+      "id": "b1c6996296"
+    },
+    {
+      "Statut": null,
+      "(Plusieurs éléments)": "1",
+      "id": "2fb0cbb311"
+    },
+    {
+      "Statut": "Nombre de User Id",
+      "(Plusieurs éléments)": 87,
+      "id": "9fbde30e20"
+    },
+    {
+      "Statut": "15. % de réalisation : # Sem de formation réalisées VS # Sem de formation prévues dans l'année en cours",
+      "(Plusieurs éléments)": null,
+      "id": "ce22963a18"
+    },
+    {
+      "Statut": "Statut",
+      "(Plusieurs éléments)": "(Plusieurs éléments)",
+      "id": "b62aa31917"
+    },
+    {
+      "Statut": "Somme de Form Prévue (Nb Sem)",
+      "(Plusieurs éléments)": "Somme de Form Réalisée (Nb Sem)",
+      "id": "20d9644e1d"
+    },
+    {
+      "Statut": 415,
+      "(Plusieurs éléments)": 0,
+      "id": "959e9531f9"
+    },
+    {
+      "Statut": "% de réalisation",
+      "(Plusieurs éléments)": 0,
+      "id": "cf853d2903"
+    },
+    {
+      "Statut": "Reste",
+      "(Plusieurs éléments)": 1,
+      "id": "13bd36c11b"
+    },
+    {
+      "Statut": "16. # Techniciens suivent Curriculum Foundational",
+      "(Plusieurs éléments)": null,
+      "id": "d116f4746a"
+    },
+    {
+      "Statut": "Statut",
+      "(Plusieurs éléments)": "(Plusieurs éléments)",
+      "id": "cd19b17fcc"
+    },
+    {
+      "Statut": "Certification en cours",
+      "(Plusieurs éléments)": "(Plusieurs éléments)",
+      "id": "d9258e9797"
+    },
+    {
+      "Statut": "Nombre de User Id",
+      "(Plusieurs éléments)": null,
+      "id": "5e8b9654e7"
+    },
+    {
+      "Statut": 70,
+      "(Plusieurs éléments)": null,
+      "id": "1356169d7e"
+    },
+    {
+      "Statut": "17. # Techniciens suivent Curriculum Advanced",
+      "(Plusieurs éléments)": null,
+      "id": "74579ab5e7"
+    },
+    {
+      "Statut": "Statut",
+      "(Plusieurs éléments)": "(Plusieurs éléments)",
+      "id": "2cb168a98e"
+    },
+    {
+      "Statut": "Certification en cours",
+      "(Plusieurs éléments)": "(Plusieurs éléments)",
+      "id": "660c1acf08"
+    },
+    {
+      "Statut": "Nombre de User Id",
+      "(Plusieurs éléments)": null,
+      "id": "543bf06fb0"
+    },
+    {
+      "Statut": 10,
+      "(Plusieurs éléments)": null,
+      "id": "50f349f287"
+    },
+    {
+      "Statut": "18. Répartition des Curriculum par service",
+      "(Plusieurs éléments)": null,
+      "id": "e51d0f3ac4"
+    },
+    {
+      "Statut": "Statut",
+      "(Plusieurs éléments)": "(Plusieurs éléments)",
+      "id": "4376e9ab80"
+    },
+    {
+      "Statut": null,
+      "(Plusieurs éléments)": "Étiquettes de colonnes",
+      "id": "65d2f7f88d"
+    },
+    {
+      "Statut": null,
+      "(Plusieurs éléments)": "Heavy_Fond",
+      "id": "3148e59d28"
+    },
+    {
+      "Statut": "Nombre de User Id",
+      "(Plusieurs éléments)": 60,
+      "id": "cffdc21d1d"
+    },
+    {
+      "Statut": "Heavy Fond",
+      "(Plusieurs éléments)": 60,
+      "id": "d8bba4c690"
+    },
+    {
+      "Statut": "Heavy Adv",
+      "(Plusieurs éléments)": 10,
+      "id": "0230f0632f"
+    },
+    {
+      "Statut": "EPG fond",
+      "(Plusieurs éléments)": 10,
+      "id": "f4c4258c33"
+    },
+    {
+      "Statut": "EPG Adv",
+      "(Plusieurs éléments)": 0,
+      "id": "427380ee91"
+    },
+    {
+      "Statut": "Marine Fond",
+      "(Plusieurs éléments)": "0",
+      "id": "a7e292d16a"
+    },
+    {
+      "Statut": "Marine Adv",
+      "(Plusieurs éléments)": 0,
+      "id": "9bfe36a77a"
+    },
+    {
+      "Statut": "19. Niveau CDF validé des formateurs",
+      "(Plusieurs éléments)": null,
+      "id": "85a54dab49"
+    },
+    {
+      "Statut": "Statut",
+      "(Plusieurs éléments)": "Formateur",
+      "id": "4e43417d14"
+    },
+    {
+      "Statut": null,
+      "(Plusieurs éléments)": "Étiquettes de colonnes",
+      "id": "441b625734"
+    },
+    {
+      "Statut": null,
+      "(Plusieurs éléments)": "Apprentice",
+      "id": "8006dbdc19"
+    },
+    {
+      "Statut": "Nombre de User Id",
+      "(Plusieurs éléments)": 0,
+      "id": "8898117e89"
+    },
+    {
+      "Statut": "Apprentice",
+      "(Plusieurs éléments)": 0,
+      "id": "3a22be2b9b"
+    },
+    {
+      "Statut": "Level1",
+      "(Plusieurs éléments)": 1,
+      "id": "04a14c6157"
+    },
+    {
+      "Statut": "Level2",
+      "(Plusieurs éléments)": 2,
+      "id": "fade6bafd2"
+    },
+    {
+      "Statut": "Level3",
+      "(Plusieurs éléments)": 1,
+      "id": "fe1271861b"
+    },
+    {
+      "Statut": "Level4",
+      "(Plusieurs éléments)": 0,
+      "id": "faec2af3fd"
+    },
+    {
+      "Statut": "20. % Progression des techniciens sur leur curriculum par niveau technique par pays",
+      "(Plusieurs éléments)": null,
+      "id": "647791b6fb"
+    },
+    {
+      "Statut": "Statut",
+      "(Plusieurs éléments)": "(Plusieurs éléments)",
+      "id": "60d6c64c51"
+    },
+    {
+      "Statut": "A prendre en compte",
+      "(Plusieurs éléments)": "Oui",
+      "id": "61a27d9645"
+    },
+    {
+      "Statut": null,
+      "(Plusieurs éléments)": "Étiquettes de colonnes",
+      "id": "5a2059fef6"
+    },
+    {
+      "Statut": null,
+      "(Plusieurs éléments)": "Fond",
+      "id": "871415e376"
+    },
+    {
+      "Statut": "Moyenne de Avancement Curriculum",
+      "(Plusieurs éléments)": 0.558724319727891,
+      "id": "585d87cf5f"
+    },
+    {
+      "Statut": "% Restant",
+      "(Plusieurs éléments)": 0.25,
+      "id": "8eacc9e2cb"
+    },
+    {
+      "Statut": "21. % Progression des techniciens sur leur curriculum par niveau technique",
+      "(Plusieurs éléments)": null,
+      "id": "f8ed46aabe"
+    },
+    {
+      "Statut": "Statut",
+      "(Plusieurs éléments)": "(Plusieurs éléments)",
+      "id": "df080fb535"
+    },
+    {
+      "Statut": "A prendre en compte",
+      "(Plusieurs éléments)": "Oui",
+      "id": "5b6cce6ee6"
+    },
+    {
+      "Statut": null,
+      "(Plusieurs éléments)": "Étiquettes de colonnes",
+      "id": "48b4b97f51"
+    },
+    {
+      "Statut": null,
+      "(Plusieurs éléments)": "Fond",
+      "id": "51efb6c675"
+    },
+    {
+      "Statut": "Moyenne de Avancement Curriculum",
+      "(Plusieurs éléments)": 0.6526256273919309,
+      "id": "922ea5db04"
+    },
+    {
+      "Statut": "22. # Techniciens certifiés sur un Curriculum Foundational",
+      "(Plusieurs éléments)": null,
+      "id": "db8dc5d2ac"
+    },
+    {
+      "Statut": "Statut",
+      "(Plusieurs éléments)": "(Plusieurs éléments)",
+      "id": "fbafdd1c09"
+    },
+    {
+      "Statut": null,
+      "(Plusieurs éléments)": "Étiquettes de colonnes",
+      "id": "21b5891ba1"
+    },
+    {
+      "Statut": null,
+      "(Plusieurs éléments)": "(vide)",
+      "id": "bec5fb77c2"
+    },
+    {
+      "Statut": "Nombre de User Id",
+      "(Plusieurs éléments)": 56,
+      "id": "1bfc41896a"
+    },
+    {
+      "Statut": "Certifiés Foundational",
+      "(Plusieurs éléments)": null,
+      "id": "3ad0057e56"
+    },
+    {
+      "Statut": "Certifiés Found et Adv",
+      "(Plusieurs éléments)": null,
+      "id": "9109b7abc1"
+    },
+    {
+      "Statut": "Certifiés Foundational uniquement",
+      "(Plusieurs éléments)": null,
+      "id": "ae0ea5655f"
+    },
+    {
+      "Statut": "23. # Techniciens certifiés sur un Curriculum Foundational dans l'année en cours",
+      "(Plusieurs éléments)": null,
+      "id": "e52d83db20"
+    },
+    {
+      "Statut": "Statut",
+      "(Plusieurs éléments)": "(Plusieurs éléments)",
+      "id": "39a548f93a"
+    },
+    {
+      "Statut": null,
+      "(Plusieurs éléments)": "Étiquettes de colonnes",
+      "id": "bce9e9dc82"
+    },
+    {
+      "Statut": null,
+      "(Plusieurs éléments)": "(vide)",
+      "id": "9e52240881"
+    },
+    {
+      "Statut": "Nombre de User Id",
+      "(Plusieurs éléments)": 56,
+      "id": "1a4c504698"
+    },
+    {
+      "Statut": "Certifiés durant année en cours",
+      "(Plusieurs éléments)": null,
+      "id": "4ac1352d83"
+    },
+    {
+      "Statut": "24. # Techniciens certifiés sur un Curriculum Advanced",
+      "(Plusieurs éléments)": null,
+      "id": "e4c41d112e"
+    },
+    {
+      "Statut": "Statut",
+      "(Plusieurs éléments)": "(Plusieurs éléments)",
+      "id": "12bc8825f2"
+    },
+    {
+      "Statut": null,
+      "(Plusieurs éléments)": "Étiquettes de colonnes",
+      "id": "b4fd5df43f"
+    },
+    {
+      "Statut": null,
+      "(Plusieurs éléments)": "(vide)",
+      "id": "187b993c63"
+    },
+    {
+      "Statut": "Nombre de User Id",
+      "(Plusieurs éléments)": 86,
+      "id": "a4fdd1065d"
+    },
+    {
+      "Statut": "Certifiés Advanced",
+      "(Plusieurs éléments)": null,
+      "id": "a1b2dfa764"
+    },
+    {
+      "Statut": "25. # Techniciens certifiés sur un Curriculum Advanced dans l'année en cours",
+      "(Plusieurs éléments)": null,
+      "id": "8d5dd86541"
+    },
+    {
+      "Statut": "Statut",
+      "(Plusieurs éléments)": "(Plusieurs éléments)",
+      "id": "13e9730414"
+    },
+    {
+      "Statut": null,
+      "(Plusieurs éléments)": "Étiquettes de colonnes",
+      "id": "efd6ab3b8f"
+    },
+    {
+      "Statut": null,
+      "(Plusieurs éléments)": "(vide)",
+      "id": "76c565e17a"
+    },
+    {
+      "Statut": "Nombre de User Id",
+      "(Plusieurs éléments)": 86,
+      "id": "7ad8b18daa"
+    },
+    {
+      "Statut": "Certifiés durant année en cours",
+      "(Plusieurs éléments)": null,
+      "id": "58f99b6972"
+    },
+    {
+      "Statut": "26. Objectif de techniciens certifiés pour l'année en cours",
+      "(Plusieurs éléments)": null,
+      "id": "f103302721"
+    },
+    {
+      "Statut": "Étiquettes de lignes",
+      "(Plusieurs éléments)": "Somme de Année en cours",
+      "id": "228fd9bc11"
+    },
+    {
+      "Statut": "Expert",
+      "(Plusieurs éléments)": 0,
+      "id": "dab814f5ff"
+    },
+    {
+      "Statut": "Advanced",
+      "(Plusieurs éléments)": 1,
+      "id": "8af2cb6f95"
+    },
+    {
+      "Statut": "Foundational",
+      "(Plusieurs éléments)": 11,
+      "id": "f3204a84ac"
+    },
+    {
+      "Statut": "Total général",
+      "(Plusieurs éléments)": 12,
+      "id": "48ca08e8d5"
+    },
+    {
+      "Statut": "27. Niveau Atelier validé par pays",
+      "(Plusieurs éléments)": null,
+      "id": "09e76a36a1"
+    },
+    {
+      "Statut": "Statut",
+      "(Plusieurs éléments)": "(Plusieurs éléments)",
+      "id": "29c63587ab"
+    },
+    {
+      "Statut": null,
+      "(Plusieurs éléments)": "Étiquettes de colonnes",
+      "id": "6f41680522"
+    },
+    {
+      "Statut": null,
+      "(Plusieurs éléments)": "N1 App",
+      "id": "42c98d6def"
+    },
+    {
+      "Statut": "Nombre de User Id",
+      "(Plusieurs éléments)": 23,
+      "id": "c61f9af50e"
+    },
+    {
+      "Statut": "Advanced",
+      "(Plusieurs éléments)": 3,
+      "id": "f4b39f0507"
+    },
+    {
+      "Statut": "Pré-Advanced",
+      "(Plusieurs éléments)": 7,
+      "id": "5908744160"
+    },
+    {
+      "Statut": "Foundational",
+      "(Plusieurs éléments)": 43,
+      "id": "84bad1411d"
+    },
+    {
+      "Statut": "Pré-foundational",
+      "(Plusieurs éléments)": 11,
+      "id": "726f1a5c34"
+    },
+    {
+      "Statut": "Apprenti",
+      "(Plusieurs éléments)": 23,
+      "id": "bfc5272425"
+    },
+    {
+      "Statut": "NC",
+      "(Plusieurs éléments)": 87,
+      "id": "d2516cbbc0"
+    },
+    {
+      "Statut": "28. Répartition du niveau technique suivant résultat du Cap&Cap",
+      "(Plusieurs éléments)": null,
+      "id": "8f13ad0f25"
+    },
+    {
+      "Statut": "Étiquettes de lignes",
+      "(Plusieurs éléments)": "Somme de Année en cours",
+      "id": "f923fa658c"
+    },
+    {
+      "Statut": "Expert",
+      "(Plusieurs éléments)": 0,
+      "id": "b9c1b72eb7"
+    },
+    {
+      "Statut": "Advanced",
+      "(Plusieurs éléments)": 7,
+      "id": "7f8b493aa8"
+    },
+    {
+      "Statut": "Foundational",
+      "(Plusieurs éléments)": 74,
+      "id": "67bff36a01"
+    },
+    {
+      "Statut": "Total général",
+      "(Plusieurs éléments)": 81,
+      "id": "395eeda9ef"
+    },
+    {
+      "Statut": "Advanced",
+      "(Plusieurs éléments)": 0.08641975308641975,
+      "id": "d789a89c68"
+    },
+    {
+      "Statut": "Foundational",
+      "(Plusieurs éléments)": 0.9135802469135802,
+      "id": "036b750c72"
+    }
+  ]
+}

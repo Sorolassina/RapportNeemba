@@ -20,6 +20,9 @@ from reportlab_report import generate_reportlab
 from app.versionning import get_app_version, asset_v
 from app import academie_store
 from app import techniciens_store
+from app import personnel_store
+from app import personnel_analysis
+from app import onglets_store
 from app import terrain_store
 from app import ressources_store
 from app import rapports_store
@@ -410,26 +413,67 @@ async def terrain_audit_delete(item_id: str):
     terrain_store.delete_audit(item_id)
     return _toast_redirect(f"{ROOT_PATH}/terrain/audit-besoins", "Audit supprimé", "info")
 
-# ------------------ Techniciens : Hub ------------------
+# ------------------ Techniciens : navigation par onglets ------------------
+# Le module Techniciens reprend intégralement la logique et les champs du
+# fichier Excel "Suivi du personnel" / "Suivi du tutorat" (fichier abandonné :
+# toute gestion se fait maintenant ici). Cf. app/techniciens_store.py.
+#
+# Organisation en onglets (barre partagée : app/templates/_techniciens_tabs.html) :
+#   Synthèse RH | Techniciens | Référentiel de compétences | Suivi du personnel
+#   (sous-onglets : Base 1, Base 2, Recrutement, Objectif, Cap&Cap, Départ1,
+#   puis tous les autres onglets du classeur) | Tutorat (OJT).
+
+_PAGE_SIZE = 100
+
+def _paginate(items: list, page: int, page_size: int = _PAGE_SIZE):
+    total = len(items)
+    total_pages = max(1, (total + page_size - 1) // page_size)
+    page = max(1, min(page, total_pages))
+    start = (page - 1) * page_size
+    return {
+        "items": items[start:start + page_size], "page": page, "total_pages": total_pages,
+        "total": total, "row_start": start + 1 if total else 0,
+    }
+
+def _suivi_personnel_subtabs() -> list:
+    subtabs = [
+        {"key": "base-1", "label": "Base 1", "url": f"{ROOT_PATH}/techniciens/suivi-personnel/base-1", "generic": False},
+        {"key": "base-2", "label": "Base 2", "url": f"{ROOT_PATH}/techniciens/suivi-personnel/base-2", "generic": False},
+        {"key": "recrutement", "label": "Recrutement", "url": f"{ROOT_PATH}/techniciens/suivi-personnel/recrutement", "generic": False},
+        {"key": "objectifs", "label": "Objectif", "url": f"{ROOT_PATH}/techniciens/suivi-personnel/objectifs", "generic": False},
+        {"key": "cap_and_cap", "label": "Cap&Cap", "url": f"{ROOT_PATH}/techniciens/suivi-personnel/cap-and-cap", "generic": False},
+        {"key": "departs", "label": "Départ1", "url": f"{ROOT_PATH}/techniciens/suivi-personnel/departs", "generic": False},
+    ]
+    index = onglets_store.get_index("personnel")
+    for s in (index["sheets"] if index else []):
+        subtabs.append({
+            "key": s["fichier"], "label": s["nom"], "generic": True,
+            "url": f"{ROOT_PATH}/techniciens/onglets/personnel/{s['fichier']}",
+        })
+    return subtabs
+
 @router.get("/techniciens", response_class=HTMLResponse)
-async def techniciens_hub(request: Request):
-    items = techniciens_store.list_techniciens()
-    return templates.TemplateResponse("techniciens_hub.html", {"request": request, "items": items})
+async def techniciens_hub(request: Request, q: str = None, page: int = 1):
+    all_items = techniciens_store.search_techniciens(q, limit=5000) if q else techniciens_store.list_techniciens()
+    pag = _paginate(all_items, page)
+    return templates.TemplateResponse(
+        "techniciens_hub.html",
+        {
+            "request": request, "items": pag["items"], "q": q or "",
+            "total": len(techniciens_store.list_techniciens()),
+            "field_groups": techniciens_store.FIELD_GROUPS,
+            "page": pag["page"], "total_pages": pag["total_pages"], "row_start": pag["row_start"],
+            "list_total": pag["total"], "active_tab": "techniciens",
+        },
+    )
 
 @router.post("/techniciens/save")
 async def techniciens_save(request: Request):
     form = await request.form()
-    data = {
-        "id": form.get("id") or None,
-        "nom": (form.get("nom") or "").strip(),
-        "prenom": (form.get("prenom") or "").strip(),
-        "concessionnaire": (form.get("concessionnaire") or "").strip(),
-        "poste": (form.get("poste") or "").strip(),
-        "telephone": (form.get("telephone") or "").strip(),
-        "date_embauche": form.get("date_embauche") or "",
-        "statut": form.get("statut") or "candidat",
-        "notes": (form.get("notes") or "").strip(),
-    }
+    data = {"id": form.get("id") or None}
+    for field in techniciens_store.ALL_FIELDS:
+        if field in form:
+            data[field] = (form.get(field) or "").strip()
     if not data["id"]:
         data.pop("id")
     tech = techniciens_store.save_technicien(data)
@@ -440,97 +484,289 @@ async def techniciens_delete(item_id: str):
     techniciens_store.delete_technicien(item_id)
     return _toast_redirect(f"{ROOT_PATH}/techniciens", "Technicien supprimé", "info")
 
+# ------------------ Référentiel de compétences (fichier tutorat) ------------------
+# NB : ces routes /techniciens/referentiel et /techniciens/rh (ci-dessous)
+# DOIVENT être déclarées avant la route générique /techniciens/{item_id},
+# sinon FastAPI les fait matcher par erreur comme un item_id="referentiel"
+# ou "rh".
+@router.get("/techniciens/referentiel", response_class=HTMLResponse)
+async def techniciens_referentiel(request: Request, page: int = 1):
+    pag = _paginate(techniciens_store.list_referentiel(), page)
+    return templates.TemplateResponse(
+        "techniciens_referentiel.html",
+        {
+            "request": request, "referentiel": pag["items"], "active_tab": "referentiel",
+            "page": pag["page"], "total_pages": pag["total_pages"],
+            "row_start": pag["row_start"], "referentiel_total": pag["total"],
+        },
+    )
+
+@router.post("/techniciens/referentiel/save")
+async def techniciens_referentiel_save(request: Request):
+    form = await request.form()
+    data = {
+        "Code compétence": (form.get("code") or "").strip(),
+        "Description de la compétence": (form.get("description") or "").strip(),
+        "Machi": (form.get("machi") or "").strip(),
+        "EPG": (form.get("epg") or "").strip(),
+        "OGM": (form.get("ogm") or "").strip(),
+        "CRC/Comp Moteur": (form.get("crc_moteur") or "").strip(),
+        "CRC/Comp Hydraulique": (form.get("crc_hydraulique") or "").strip(),
+    }
+    techniciens_store.save_competence_referentiel(data)
+    return _toast_redirect(f"{ROOT_PATH}/techniciens/referentiel", "Compétence enregistrée")
+
+@router.post("/techniciens/referentiel/{code}/delete")
+async def techniciens_referentiel_delete(code: str):
+    techniciens_store.delete_competence_referentiel(code)
+    return _toast_redirect(f"{ROOT_PATH}/techniciens/referentiel", "Compétence supprimée", "info")
+
+# ------------------ Onglet : Synthèse RH (tableau de bord) ------------------
+@router.get("/techniciens/rh", response_class=HTMLResponse)
+async def techniciens_rh(request: Request):
+    return templates.TemplateResponse(
+        "techniciens_rh.html",
+        {
+            "request": request, "active_tab": "rh",
+            "has_personnel_data": len(techniciens_store.list_techniciens()) > 0,
+            "has_tutorat_data": len(techniciens_store.list_referentiel()) > 0,
+            "objectifs_par_niveau": personnel_analysis.objectifs_par_niveau(),
+            "cap_and_cap_par_niveau": personnel_analysis.cap_and_cap_par_niveau(),
+            "recrutement": personnel_analysis.recrutement_summary(),
+            "departs": personnel_analysis.departs_summary(),
+            "niveau_atelier_evolution": personnel_analysis.niveau_atelier_evolution(),
+            "effectif_par_statut": personnel_analysis.effectif_par_statut(),
+            "effectif_par_service": personnel_analysis.effectif_par_service(),
+            "effectif_par_niveau_atelier": personnel_analysis.effectif_par_niveau_atelier_actuel(),
+        },
+    )
+
+# ------------------ Onglet : Suivi du personnel (+ sous-onglets) ------------------
+@router.get("/techniciens/suivi-personnel", response_class=HTMLResponse)
+async def techniciens_suivi_personnel(request: Request):
+    return RedirectResponse(f"{ROOT_PATH}/techniciens/suivi-personnel/base-1", status_code=303)
+
+@router.get("/techniciens/suivi-personnel/base-1", response_class=HTMLResponse)
+async def techniciens_suivi_base1(request: Request, page: int = 1):
+    pag = _paginate(techniciens_store.list_techniciens(), page)
+    return templates.TemplateResponse(
+        "techniciens_suivi_base1.html",
+        {
+            "request": request, "active_tab": "suivi_personnel", "active_subtab": "base-1",
+            "suivi_personnel_subtabs": _suivi_personnel_subtabs(),
+            "headers": techniciens_store.ALL_FIELDS, "records": pag["items"],
+            "page": pag["page"], "total_pages": pag["total_pages"],
+            "row_start": pag["row_start"], "total": pag["total"],
+        },
+    )
+
+@router.get("/techniciens/suivi-personnel/base-2", response_class=HTMLResponse)
+async def techniciens_suivi_base2(request: Request, page: int = 1):
+    rows = []
+    for t in techniciens_store.list_techniciens():
+        for a in t.get("avancement", []):
+            rows.append({
+                "technicien_id": t["id"], "Nom / Prénom": t.get("Nom / Prénom"), "Mtle": t.get("Mtle"),
+                **{f: a.get(f) for f in techniciens_store.AVANCEMENT_FIELDS},
+            })
+    pag = _paginate(rows, page)
+    return templates.TemplateResponse(
+        "techniciens_suivi_base2.html",
+        {
+            "request": request, "active_tab": "suivi_personnel", "active_subtab": "base-2",
+            "suivi_personnel_subtabs": _suivi_personnel_subtabs(),
+            "headers": techniciens_store.AVANCEMENT_FIELDS, "records": pag["items"],
+            "page": pag["page"], "total_pages": pag["total_pages"],
+            "row_start": pag["row_start"], "total": pag["total"],
+        },
+    )
+
+_RH_TABLE_META = {
+    "recrutement": {"subtab": "recrutement", "title": "Recrutement annuel", "url": "recrutement"},
+    "objectifs": {"subtab": "objectifs", "title": "Objectifs annuels de certifiés", "url": "objectifs"},
+    "cap_and_cap": {"subtab": "cap_and_cap", "title": "Cap&Cap", "url": "cap-and-cap"},
+    "departs": {"subtab": "departs", "title": "Départs", "url": "departs"},
+}
+
+@router.get("/techniciens/suivi-personnel/{url_slug}", response_class=HTMLResponse)
+async def techniciens_suivi_rh_table(request: Request, url_slug: str, edit: str = None, page: int = 1):
+    table = next((k for k, v in _RH_TABLE_META.items() if v["url"] == url_slug), None)
+    if not table:
+        return _toast_redirect(f"{ROOT_PATH}/techniciens/suivi-personnel", "Table inconnue", "error")
+    rows = personnel_store.list_table(table)
+    pag = _paginate(rows, page)
+    edit_row = next((r for r in rows if r.get("id") == edit), None) if edit else None
+    return templates.TemplateResponse(
+        "techniciens_suivi_rh_table.html",
+        {
+            "request": request, "active_tab": "suivi_personnel", "active_subtab": table,
+            "suivi_personnel_subtabs": _suivi_personnel_subtabs(),
+            "table": table, "url_slug": url_slug, "title": _RH_TABLE_META[table]["title"],
+            "fields": personnel_store.FIELDS[table], "records": pag["items"],
+            "page": pag["page"], "total_pages": pag["total_pages"],
+            "row_start": pag["row_start"], "total": pag["total"], "edit_row": edit_row,
+        },
+    )
+
+@router.post("/techniciens/suivi-personnel/{url_slug}/save")
+async def techniciens_suivi_rh_table_save(request: Request, url_slug: str):
+    table = next((k for k, v in _RH_TABLE_META.items() if v["url"] == url_slug), None)
+    if not table:
+        return _toast_redirect(f"{ROOT_PATH}/techniciens/suivi-personnel", "Table inconnue", "error")
+    form = await request.form()
+    row = {"id": form.get("id") or None}
+    for field in personnel_store.FIELDS[table]:
+        row[field] = (form.get(field) or "").strip()
+    if not row["id"]:
+        row.pop("id")
+    personnel_store.save_row(table, row)
+    return _toast_redirect(f"{ROOT_PATH}/techniciens/suivi-personnel/{url_slug}", "Ligne enregistrée")
+
+@router.post("/techniciens/suivi-personnel/{url_slug}/{row_id}/delete")
+async def techniciens_suivi_rh_table_delete(url_slug: str, row_id: str):
+    table = next((k for k, v in _RH_TABLE_META.items() if v["url"] == url_slug), None)
+    if not table:
+        return _toast_redirect(f"{ROOT_PATH}/techniciens/suivi-personnel", "Table inconnue", "error")
+    personnel_store.delete_row(table, row_id)
+    return _toast_redirect(f"{ROOT_PATH}/techniciens/suivi-personnel/{url_slug}", "Ligne supprimée", "info")
+
+# ------------------ Onglet : Tutorat (OJT) ------------------
+@router.get("/techniciens/tutorat", response_class=HTMLResponse)
+async def techniciens_tutorat(request: Request, page: int = 1):
+    progression = personnel_analysis.ojt_progression_globale()
+    techs = [t for t in progression["techniciens"] if t["nb_competences_validees"] > 0]
+    techs.sort(key=lambda t: -t["taux_progression"])
+    pag = _paginate(techs, page)
+    return templates.TemplateResponse(
+        "techniciens_tutorat.html",
+        {
+            "request": request, "active_tab": "tutorat",
+            "techniciens": pag["items"], "page": pag["page"], "total_pages": pag["total_pages"],
+            "row_start": pag["row_start"], "total": pag["total"],
+            "total_competences_referentiel": progression["total_competences_referentiel"],
+            "nb_techniciens_avec_progression": len(techs),
+        },
+    )
+
+# ------------------ Techniciens : Autres onglets (CRUD générique) ------------------
+# Tous les onglets des deux classeurs qui n'ont pas de store dédié plus riche
+# (Base 1/2, Recrutement, Objectif, Cap&Cap, Départ1, OJT, Référentiel) sont
+# gérés ici en CRUD générique — création, modification, suppression de
+# lignes. Les sous-onglets "Suivi du personnel" y renvoient directement.
+# Doivent être déclarées avant /techniciens/{item_id} (même raison que ci-dessous).
+@router.get("/techniciens/onglets", response_class=HTMLResponse)
+async def techniciens_onglets(request: Request):
+    return templates.TemplateResponse(
+        "techniciens_onglets_index.html",
+        {
+            "request": request,
+            "fichiers": [
+                {"cle": f["cle"], "label": f["label"], "index": onglets_store.get_index(f["cle"])}
+                for f in onglets_store.list_fichiers()
+            ],
+        },
+    )
+
+_ONGLET_PAGE_SIZE = 100
+
+@router.get("/techniciens/onglets/{fichier}/{sheet_file}", response_class=HTMLResponse)
+async def techniciens_onglet_detail(request: Request, fichier: str, sheet_file: str, edit: str = None, page: int = 1):
+    index = onglets_store.get_index(fichier)
+    data = onglets_store.get_sheet(fichier, sheet_file)
+    if not index or not data:
+        return _toast_redirect(f"{ROOT_PATH}/techniciens/onglets", "Onglet introuvable", "error")
+    sheet_meta = next((s for s in index["sheets"] if s["fichier"] == sheet_file), None)
+    all_records = data["records"]
+    edit_row = next((r for r in all_records if r.get("id") == edit), None) if edit else None
+
+    total_records = len(all_records)
+    total_pages = max(1, (total_records + _ONGLET_PAGE_SIZE - 1) // _ONGLET_PAGE_SIZE)
+    page = max(1, min(page, total_pages))
+    start = (page - 1) * _ONGLET_PAGE_SIZE
+    page_records = all_records[start:start + _ONGLET_PAGE_SIZE]
+
+    return templates.TemplateResponse(
+        "techniciens_onglet_detail.html",
+        {
+            "request": request, "fichier": fichier, "fichier_label": index["label"],
+            "sheets": index["sheets"], "sheet_meta": sheet_meta, "sheet_file": sheet_file,
+            "headers": data["headers"], "records": page_records, "total_records": total_records,
+            "edit_row": edit_row, "page": page, "total_pages": total_pages,
+            "row_start": start + 1,
+            "active_tab": "suivi_personnel" if fichier == "personnel" else "tutorat",
+            "active_subtab": sheet_file,
+            "suivi_personnel_subtabs": _suivi_personnel_subtabs() if fichier == "personnel" else None,
+        },
+    )
+
+@router.post("/techniciens/onglets/{fichier}/{sheet_file}/save")
+async def techniciens_onglet_save(request: Request, fichier: str, sheet_file: str):
+    headers = onglets_store.get_headers(fichier, sheet_file)
+    form = await request.form()
+    row = {"id": form.get("id") or None}
+    for field in headers:
+        row[field] = (form.get(field) or "").strip()
+    if not row["id"]:
+        row.pop("id")
+    onglets_store.save_row(fichier, sheet_file, row)
+    return _toast_redirect(f"{ROOT_PATH}/techniciens/onglets/{fichier}/{sheet_file}", "Ligne enregistrée")
+
+@router.post("/techniciens/onglets/{fichier}/{sheet_file}/{row_id}/delete")
+async def techniciens_onglet_delete(fichier: str, sheet_file: str, row_id: str):
+    onglets_store.delete_row(fichier, sheet_file, row_id)
+    return _toast_redirect(f"{ROOT_PATH}/techniciens/onglets/{fichier}/{sheet_file}", "Ligne supprimée", "info")
+
 # ------------------ Techniciens : Profil (détail) ------------------
 @router.get("/techniciens/{item_id}", response_class=HTMLResponse)
-async def techniciens_detail(request: Request, item_id: str, edit_test: str = None, edit_suivi: str = None):
+async def techniciens_detail(request: Request, item_id: str, edit_avancement: str = None):
     tech = techniciens_store.get_technicien(item_id)
     if not tech:
         return _toast_redirect(f"{ROOT_PATH}/techniciens", "Technicien introuvable", "error")
-    tests = techniciens_store.list_tests(item_id)
-    taches = techniciens_store.list_taches(item_id)
-    suivis = techniciens_store.list_suivis(item_id)
 
-    taches_par_semaine = {}
-    for t in taches:
-        sem = techniciens_store.semaine_integration(tech.get("date_embauche"), t.get("date"))
-        t["semaine"] = sem
-        key = sem if sem is not None else "?"
-        taches_par_semaine.setdefault(key, []).append(t)
-    semaines_triees = sorted(taches_par_semaine.keys(), key=lambda k: (k == "?", k), reverse=True)
+    referentiel_par_code = techniciens_store.get_referentiel_by_code()
 
     return templates.TemplateResponse(
         "technicien_detail.html",
         {
-            "request": request, "tech": tech, "tests": tests, "suivis": suivis,
-            "taches_par_semaine": taches_par_semaine, "semaines_triees": semaines_triees,
-            "edit_test": next((t for t in tests if t["id"] == edit_test), None) if edit_test else None,
-            "edit_suivi": next((s for s in suivis if s["id"] == edit_suivi), None) if edit_suivi else None,
+            "request": request, "tech": tech, "active_tab": "techniciens",
+            "field_groups": techniciens_store.FIELD_GROUPS,
+            "avancement_fields": techniciens_store.AVANCEMENT_FIELDS,
+            "referentiel": techniciens_store.list_referentiel(),
+            "referentiel_par_code": referentiel_par_code,
+            "edit_avancement": next(
+                (a for a in tech.get("avancement", []) if a.get("id") == edit_avancement), None
+            ) if edit_avancement else None,
         },
     )
 
-@router.post("/techniciens/{item_id}/test/save")
-async def techniciens_test_save(request: Request, item_id: str):
+@router.post("/techniciens/{item_id}/avancement/save")
+async def techniciens_avancement_save(request: Request, item_id: str):
     form = await request.form()
-    data = {
-        "id": form.get("id") or None,
-        "technicien_id": item_id,
-        "date": form.get("date") or "",
-        "note_theorique": form.get("note_theorique") or "",
-        "note_pratique": form.get("note_pratique") or "",
-        "note_comportementale": form.get("note_comportementale") or "",
-        "decision": form.get("decision") or "en_attente",
-        "commentaire": (form.get("commentaire") or "").strip(),
-    }
+    data = {"id": form.get("id") or None}
+    for field in techniciens_store.AVANCEMENT_FIELDS:
+        data[field] = (form.get(field) or "").strip()
     if not data["id"]:
         data.pop("id")
-    techniciens_store.save_test(data)
-    return _toast_redirect(f"{ROOT_PATH}/techniciens/{item_id}#test", "Test de recrutement enregistré")
+    techniciens_store.save_avancement(item_id, data)
+    return _toast_redirect(f"{ROOT_PATH}/techniciens/{item_id}#avancement", "Avancement enregistré")
 
-@router.post("/techniciens/{item_id}/test/{test_id}/delete")
-async def techniciens_test_delete(item_id: str, test_id: str):
-    techniciens_store.delete_test(test_id)
-    return _toast_redirect(f"{ROOT_PATH}/techniciens/{item_id}#test", "Test supprimé", "info")
+@router.post("/techniciens/{item_id}/avancement/{avancement_id}/delete")
+async def techniciens_avancement_delete(item_id: str, avancement_id: str):
+    techniciens_store.delete_avancement(item_id, avancement_id)
+    return _toast_redirect(f"{ROOT_PATH}/techniciens/{item_id}#avancement", "Avancement supprimé", "info")
 
-@router.post("/techniciens/{item_id}/tache/save")
-async def techniciens_tache_save(request: Request, item_id: str):
+@router.post("/techniciens/{item_id}/competence/save")
+async def techniciens_competence_save(request: Request, item_id: str):
     form = await request.form()
-    data = {
-        "technicien_id": item_id,
-        "date": form.get("date") or "",
-        "tache": (form.get("tache") or "").strip(),
-        "statut": form.get("statut") or "fait",
-        "commentaire": (form.get("commentaire") or "").strip(),
-    }
-    techniciens_store.save_tache(data)
-    return _toast_redirect(f"{ROOT_PATH}/techniciens/{item_id}#integration", "Tâche enregistrée")
+    code = (form.get("code") or "").strip()
+    valeur = (form.get("valeur") or "").strip()
+    techniciens_store.save_competence(item_id, code, valeur)
+    return _toast_redirect(f"{ROOT_PATH}/techniciens/{item_id}#ojt", "Compétence enregistrée")
 
-@router.post("/techniciens/{item_id}/tache/{tache_id}/delete")
-async def techniciens_tache_delete(item_id: str, tache_id: str):
-    techniciens_store.delete_tache(tache_id)
-    return _toast_redirect(f"{ROOT_PATH}/techniciens/{item_id}#integration", "Tâche supprimée", "info")
-
-@router.post("/techniciens/{item_id}/suivi/save")
-async def techniciens_suivi_save(request: Request, item_id: str):
-    form = await request.form()
-    data = {
-        "id": form.get("id") or None,
-        "technicien_id": item_id,
-        "date": form.get("date") or "",
-        "evaluation": form.get("evaluation") or "",
-        "points_forts": (form.get("points_forts") or "").strip(),
-        "axes_progres": (form.get("axes_progres") or "").strip(),
-        "actions": (form.get("actions") or "").strip(),
-        "prochain_rdv": form.get("prochain_rdv") or "",
-    }
-    if not data["id"]:
-        data.pop("id")
-    techniciens_store.save_suivi(data)
-    return _toast_redirect(f"{ROOT_PATH}/techniciens/{item_id}#suivi", "Suivi enregistré")
-
-@router.post("/techniciens/{item_id}/suivi/{suivi_id}/delete")
-async def techniciens_suivi_delete(item_id: str, suivi_id: str):
-    techniciens_store.delete_suivi(suivi_id)
-    return _toast_redirect(f"{ROOT_PATH}/techniciens/{item_id}#suivi", "Suivi supprimé", "info")
+@router.post("/techniciens/{item_id}/competence/{code}/delete")
+async def techniciens_competence_delete(item_id: str, code: str):
+    techniciens_store.delete_competence(item_id, code)
+    return _toast_redirect(f"{ROOT_PATH}/techniciens/{item_id}#ojt", "Compétence supprimée", "info")
 
 # ------------------ Académie : Hub ------------------
 @router.get("/academie", response_class=HTMLResponse)

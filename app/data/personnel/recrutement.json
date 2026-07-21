@@ -1,0 +1,73 @@
+{
+  "headers": [
+    "Code société",
+    "Effectué",
+    "Prévision",
+    "Validé"
+  ],
+  "records": [
+    {
+      "Code société": "NEBF",
+      "Effectué": 19,
+      "Prévision": 15,
+      "Validé": null,
+      "id": "86a85ff4ec"
+    },
+    {
+      "Code société": "NEBN",
+      "Effectué": 4,
+      "Prévision": 5,
+      "Validé": null,
+      "id": "e2a1df9871"
+    },
+    {
+      "Code société": "NECI",
+      "Effectué": 18,
+      "Prévision": 18,
+      "Validé": 18,
+      "id": "4095a8a39d"
+    },
+    {
+      "Code société": "NEGN",
+      "Effectué": 11,
+      "Prévision": 12,
+      "Validé": 12,
+      "id": "d5b6cb2f84"
+    },
+    {
+      "Code société": "NEML",
+      "Effectué": 12,
+      "Prévision": 10,
+      "Validé": null,
+      "id": "bc3c6400d4"
+    },
+    {
+      "Code société": "NEMR",
+      "Effectué": 8,
+      "Prévision": 5,
+      "Validé": 4,
+      "id": "f608d2a8cf"
+    },
+    {
+      "Code société": "NENG",
+      "Effectué": 0,
+      "Prévision": 4,
+      "Validé": null,
+      "id": "27b828ccfc"
+    },
+    {
+      "Code société": "NESN",
+      "Effectué": 0,
+      "Prévision": 11,
+      "Validé": 0,
+      "id": "f8cbbb2537"
+    },
+    {
+      "Code société": "NETG",
+      "Effectué": 2,
+      "Prévision": 4,
+      "Validé": null,
+      "id": "e0e548fc03"
+    }
+  ]
+}

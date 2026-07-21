@@ -1,0 +1,180 @@
+{
+  "label": "Suivi du personnel",
+  "sheets": [
+    {
+      "nom": "Sommaire",
+      "fichier": "Sommaire.json",
+      "nb_champs": 5,
+      "nb_lignes": 0,
+      "header_detecte": false
+    },
+    {
+      "nom": "Poste TCDP",
+      "fichier": "Poste TCDP.json",
+      "nb_champs": 2,
+      "nb_lignes": 51,
+      "header_detecte": true
+    },
+    {
+      "nom": "PC 2026",
+      "fichier": "PC 2026.json",
+      "nb_champs": 35,
+      "nb_lignes": 57,
+      "header_detecte": true
+    },
+    {
+      "nom": "1. F. English",
+      "fichier": "1. F. English.json",
+      "nb_champs": 38,
+      "nb_lignes": 964,
+      "header_detecte": true
+    },
+    {
+      "nom": "PC2025",
+      "fichier": "PC2025.json",
+      "nb_champs": 32,
+      "nb_lignes": 47,
+      "header_detecte": true
+    },
+    {
+      "nom": "2. DPC Ass.",
+      "fichier": "2. DPC Ass..json",
+      "nb_champs": 26,
+      "nb_lignes": 1247,
+      "header_detecte": true
+    },
+    {
+      "nom": "2. ILT Neemba",
+      "fichier": "2. ILT Neemba.json",
+      "nb_champs": 61,
+      "nb_lignes": 1251,
+      "header_detecte": true
+    },
+    {
+      "nom": "5. ILT CAT",
+      "fichier": "5. ILT CAT.json",
+      "nb_champs": 24,
+      "nb_lignes": 317,
+      "header_detecte": true
+    },
+    {
+      "nom": "TCD1",
+      "fichier": "TCD1.json",
+      "nb_champs": 2,
+      "nb_lignes": 167,
+      "header_detecte": true
+    },
+    {
+      "nom": "3. Certif.",
+      "fichier": "3. Certif..json",
+      "nb_champs": 76,
+      "nb_lignes": 1250,
+      "header_detecte": true
+    },
+    {
+      "nom": "TdB1",
+      "fichier": "TdB1.json",
+      "nb_champs": 45,
+      "nb_lignes": 1,
+      "header_detecte": false
+    },
+    {
+      "nom": "TdB2",
+      "fichier": "TdB2.json",
+      "nb_champs": 6,
+      "nb_lignes": 0,
+      "header_detecte": false
+    },
+    {
+      "nom": "Autres marques",
+      "fichier": "Autres marques.json",
+      "nb_champs": 19,
+      "nb_lignes": 77,
+      "header_detecte": true
+    },
+    {
+      "nom": "Feuil1",
+      "fichier": "Feuil1.json",
+      "nb_champs": 10,
+      "nb_lignes": 21,
+      "header_detecte": true
+    },
+    {
+      "nom": "Autres formations",
+      "fichier": "Autres formations.json",
+      "nb_champs": 8,
+      "nb_lignes": 387,
+      "header_detecte": true
+    },
+    {
+      "nom": "Form Spé",
+      "fichier": "Form Spé.json",
+      "nb_champs": 57,
+      "nb_lignes": 191,
+      "header_detecte": true
+    },
+    {
+      "nom": "Base3",
+      "fichier": "Base3.json",
+      "nb_champs": 84,
+      "nb_lignes": 45,
+      "header_detecte": true
+    },
+    {
+      "nom": "Analyse",
+      "fichier": "Analyse.json",
+      "nb_champs": 22,
+      "nb_lignes": 119,
+      "header_detecte": false
+    },
+    {
+      "nom": "TCD2",
+      "fichier": "TCD2.json",
+      "nb_champs": 9,
+      "nb_lignes": 92,
+      "header_detecte": false
+    },
+    {
+      "nom": "Analyse 2026",
+      "fichier": "Analyse 2026.json",
+      "nb_champs": 7,
+      "nb_lignes": 23,
+      "header_detecte": true
+    },
+    {
+      "nom": "Setting",
+      "fichier": "Setting.json",
+      "nb_champs": 32,
+      "nb_lignes": 1499,
+      "header_detecte": true
+    },
+    {
+      "nom": "Code Société",
+      "fichier": "Code Société.json",
+      "nb_champs": 1,
+      "nb_lignes": 11,
+      "header_detecte": false
+    },
+    {
+      "nom": "PC2023",
+      "fichier": "PC2023.json",
+      "nb_champs": 31,
+      "nb_lignes": 30,
+      "header_detecte": true
+    },
+    {
+      "nom": "PC2024",
+      "fichier": "PC2024.json",
+      "nb_champs": 32,
+      "nb_lignes": 38,
+      "header_detecte": true
+    },
+    {
+      "nom": "Grille TCDP",
+      "fichier": "Grille TCDP.json",
+      "nb_champs": 25,
+      "nb_lignes": 1325,
+      "header_detecte": true
+    }
+  ]
+}
